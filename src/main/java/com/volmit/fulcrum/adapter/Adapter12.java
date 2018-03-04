@@ -6,12 +6,14 @@ import java.util.Arrays;
 
 import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.block.Biome;
 import org.bukkit.craftbukkit.v1_12_R1.CraftChunk;
 import org.bukkit.craftbukkit.v1_12_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_12_R1.block.CraftBlock;
 import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_12_R1.util.CraftMagicNumbers;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
 import com.volmit.fulcrum.bukkit.BlockType;
@@ -26,8 +28,10 @@ import net.minecraft.server.v1_12_R1.BlockPosition;
 import net.minecraft.server.v1_12_R1.ChunkCoordIntPair;
 import net.minecraft.server.v1_12_R1.ChunkSection;
 import net.minecraft.server.v1_12_R1.IBlockData;
+import net.minecraft.server.v1_12_R1.PacketPlayOutEntity;
 import net.minecraft.server.v1_12_R1.PacketPlayOutMapChunk;
 import net.minecraft.server.v1_12_R1.PacketPlayOutMultiBlockChange;
+import net.minecraft.server.v1_12_R1.PacketPlayOutUnloadChunk;
 
 public final class Adapter12 implements IAdapter
 {
@@ -53,7 +57,7 @@ public final class Adapter12 implements IAdapter
 	{
 		for(Chunk i : update.k())
 		{
-			if(update.get(i).size() > 256)
+			if(update.get(i).size() > 24)
 			{
 				for(Location j : update.get(i))
 				{
@@ -179,12 +183,17 @@ public final class Adapter12 implements IAdapter
 	@Override
 	public void sendChunkSection(Chunk c, int bitmask)
 	{
-		PacketPlayOutMapChunk map = new PacketPlayOutMapChunk(((CraftChunk) c).getHandle(), bitmask);
-
 		for(Player i : P.getPlayersWithinViewOf(c))
 		{
-			((CraftPlayer) i).getHandle().playerConnection.sendPacket(map);
+			sendChunkSection(c, bitmask, i);
 		}
+	}
+
+	@Override
+	public void sendChunkSection(Chunk c, int bitmask, Player p)
+	{
+		PacketPlayOutMapChunk map = new PacketPlayOutMapChunk(((CraftChunk) c).getHandle(), bitmask);
+		((CraftPlayer) p).getHandle().playerConnection.sendPacket(map);
 	}
 
 	@SuppressWarnings("deprecation")
@@ -256,12 +265,85 @@ public final class Adapter12 implements IAdapter
 	public boolean[] getValidSections(Chunk c)
 	{
 		boolean[] f = new boolean[16];
+		Arrays.fill(f, false);
 
 		for(ChunkSection i : ((CraftChunk) c).getHandle().getSections())
 		{
-			f[i.getYPosition()] = i.shouldTick();
+			if(i == null)
+			{
+				continue;
+			}
+
+			System.out.println(i.getYPosition() / 16);
+			f[i.getYPosition() / 16] = true;
 		}
 
 		return f;
+	}
+
+	@Override
+	public void notifyEntity(Entity e)
+	{
+		for(Player i : P.getPlayersWithinViewOf(e.getLocation().getChunk()))
+		{
+			notifyEntity(e, i);
+		}
+	}
+
+	@Override
+	public void sendUnload(Chunk c)
+	{
+		for(Player i : P.getPlayersWithinViewOf(c))
+		{
+			sendUnload(c, i);
+		}
+	}
+
+	@Override
+	public void sendReload(Chunk c)
+	{
+		sendUnload(c);
+		boolean[] bits = new boolean[16];
+		Arrays.fill(bits, true);
+		sendChunkSection(c, getBitMask(bits));
+	}
+
+	@Override
+	public void makeFullyDirty(Chunk c)
+	{
+		for(int i = 0; i < 16; i++)
+		{
+			makeDirty(c, i);
+		}
+	}
+
+	@Override
+	public void sendReload(Chunk c, Player p)
+	{
+		sendUnload(c, p);
+		boolean[] bits = new boolean[16];
+		Arrays.fill(bits, true);
+		sendChunkSection(c, getBitMask(bits), p);
+	}
+
+	@Override
+	public void notifyEntity(Entity e, Player p)
+	{
+		PacketPlayOutEntity px = new PacketPlayOutEntity(e.getEntityId());
+		((CraftPlayer) p).getHandle().playerConnection.sendPacket(px);
+	}
+
+	@Override
+	public void sendUnload(Chunk c, Player p)
+	{
+		PacketPlayOutUnloadChunk px = new PacketPlayOutUnloadChunk(c.getX(), c.getZ());
+		((CraftPlayer) p).getHandle().playerConnection.sendPacket(px);
+	}
+
+	@Override
+	public void setBiome(World w, int x, int z, Biome b)
+	{
+		w.setBiome(x, z, b);
+		makeFullyDirty(w.getChunkAt(w.getBlockAt(x, 0, z)));
 	}
 }

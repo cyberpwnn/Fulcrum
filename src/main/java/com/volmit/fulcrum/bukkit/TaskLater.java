@@ -18,6 +18,16 @@ public abstract class TaskLater implements ITask, ICancellable
 		this(name, 0);
 	}
 
+	public TaskLater()
+	{
+		this("", 0);
+	}
+
+	public TaskLater(int d)
+	{
+		this("", d);
+	}
+
 	public TaskLater(String name, int delay)
 	{
 		setup(name, true);

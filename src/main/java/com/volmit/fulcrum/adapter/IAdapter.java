@@ -4,7 +4,9 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.block.Biome;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
 import com.volmit.fulcrum.bukkit.BlockType;
@@ -12,9 +14,25 @@ import com.volmit.fulcrum.lang.GList;
 
 public interface IAdapter
 {
+	public void sendReload(Chunk c);
+
+	public void sendReload(Chunk c, Player p);
+
+	public void notifyEntity(Entity e);
+
+	public void notifyEntity(Entity e, Player p);
+
+	public void sendChunkSection(Chunk c, int bitmask, Player p);
+
+	public void sendUnload(Chunk c);
+
+	public void sendUnload(Chunk c, Player p);
+
 	public int getBiomeId(Biome biome);
 
 	public Biome getBiome(int id);
+
+	public void setBiome(World world, int x, int z, Biome b);
 
 	public BlockType getBlock(Location location);
 
@@ -23,6 +41,8 @@ public interface IAdapter
 	public void makeDirty(Chunk c, int section);
 
 	public void makeDirty(Chunk c);
+
+	public void makeFullyDirty(Chunk c);
 
 	public int getBitmask(Chunk c);
 
