@@ -2,6 +2,7 @@ package com.volmit.fulcrum.lang;
 
 import java.io.Serializable;
 
+@SuppressWarnings("hiding")
 public class GTriset<A, B, C> implements Serializable
 {
 	private static final long serialVersionUID = 1912465707826963942L;

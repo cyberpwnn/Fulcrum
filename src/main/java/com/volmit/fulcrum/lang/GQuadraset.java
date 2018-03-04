@@ -1,5 +1,6 @@
 package com.volmit.fulcrum.lang;
 
+@SuppressWarnings("hiding")
 public class GQuadraset<A, B, C, D>
 {
 	private A a;
