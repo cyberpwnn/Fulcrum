@@ -34,7 +34,7 @@ public class ParticleSpellMob extends ParticleBase implements ColoredEffect
 	}
 
 	@Override
-	public ColoredEffect setColor(Color color)
+	public ParticleSpellMob setColor(Color color)
 	{
 		this.color = color;
 		return this;
