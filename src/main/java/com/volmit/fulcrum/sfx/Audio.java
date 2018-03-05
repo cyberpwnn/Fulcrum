@@ -1,0 +1,275 @@
+package com.volmit.fulcrum.sfx;
+
+import org.bukkit.Location;
+import org.bukkit.Sound;
+import org.bukkit.SoundCategory;
+import org.bukkit.entity.Player;
+
+import com.volmit.fulcrum.bukkit.TaskLater;
+import com.volmit.fulcrum.lang.GList;
+
+public class Audio implements Audible
+{
+	private float v;
+	private float p;
+	private SoundCategory c;
+	private Sound s;
+	private GList<Audible> a;
+	private int delay;
+
+	public Audio()
+	{
+		a = new GList<Audible>();
+		c(SoundCategory.AMBIENT).v(1f).p(1f).s(Sound.UI_BUTTON_CLICK);
+		delay = 0;
+	}
+
+	@Override
+	public void play(Location l, float v, float p)
+	{
+		setVolume(v);
+		setPitch(p);
+		play(l);
+
+		for(Audible i : getChildren())
+		{
+			i.play(l, v, p);
+		}
+	}
+
+	@Override
+	public void play(Player l, float v, float p)
+	{
+		setVolume(v);
+		setPitch(p);
+		play(l);
+
+		for(Audible i : getChildren())
+		{
+			i.play(l, v, p);
+		}
+	}
+
+	@Override
+	public void play(Location l)
+	{
+		if(hasDelay())
+		{
+			new TaskLater(getDelay())
+			{
+				@Override
+				public void run()
+				{
+					l.getWorld().playSound(l, getSound(), getVolume(), getPitch());
+
+					for(Audible i : getChildren())
+					{
+						i.play(l);
+					}
+				}
+			};
+		}
+
+		else
+		{
+			l.getWorld().playSound(l, getSound(), getVolume(), getPitch());
+
+			for(Audible i : getChildren())
+			{
+				i.play(l);
+			}
+		}
+	}
+
+	@Override
+	public void play(Player l, Location pos)
+	{
+		if(hasDelay())
+		{
+			new TaskLater(getDelay())
+			{
+				@Override
+				public void run()
+				{
+					l.playSound(pos, getSound(), getVolume(), getPitch());
+
+					for(Audible i : getChildren())
+					{
+						i.play(l, pos);
+					}
+				}
+			};
+		}
+
+		else
+		{
+			l.playSound(pos, getSound(), getVolume(), getPitch());
+
+			for(Audible i : getChildren())
+			{
+				i.play(l, pos);
+			}
+		}
+	}
+
+	@Override
+	public void play(Player l)
+	{
+		play(l, l.getLocation());
+	}
+
+	@Override
+	public Audible setVolume(float v)
+	{
+		this.v = v;
+		return this;
+	}
+
+	@Override
+	public Audible setPitch(float p)
+	{
+		this.p = p;
+		return this;
+	}
+
+	@Override
+	public float getVolume()
+	{
+		return v;
+	}
+
+	@Override
+	public float getPitch()
+	{
+		return p;
+	}
+
+	@Override
+	public GList<Audible> getChildren()
+	{
+		return a;
+	}
+
+	@Override
+	public Audible addChild(Audible a)
+	{
+		this.a.add(a);
+		return this;
+	}
+
+	@Override
+	public SoundCategory getCategory()
+	{
+		return c;
+	}
+
+	@Override
+	public Audible setCategory(SoundCategory c)
+	{
+		this.c = c;
+		return this;
+	}
+
+	@Override
+	public Sound getSound()
+	{
+		return s;
+	}
+
+	@Override
+	public Audible setSound(Sound s)
+	{
+		this.s = s;
+		return this;
+	}
+
+	@Override
+	public Audible v(float v)
+	{
+		return setVolume(v);
+	}
+
+	@Override
+	public Audible p(float p)
+	{
+		return setPitch(p);
+	}
+
+	@Override
+	public Audible c(SoundCategory c)
+	{
+		return setCategory(c);
+	}
+
+	@Override
+	public Audible s(Sound s)
+	{
+		return setSound(s);
+	}
+
+	@Override
+	public Audible vp(float v, float p)
+	{
+		return v(v).p(p);
+	}
+
+	@Override
+	public void scalePitch(float p)
+	{
+		setPitch((getPitch() + p) / 2f);
+
+		for(Audible i : getChildren())
+		{
+			i.scalePitch(p);
+		}
+	}
+
+	@Override
+	public void scaleVolume(float p)
+	{
+		setVolume((getVolume() + p) / 2f);
+
+		for(Audible i : getChildren())
+		{
+			i.scaleVolume(p);
+		}
+	}
+
+	@Override
+	public Audio clone()
+	{
+		return (Audio) new Audio().d(this.delay).v(this.v).p(this.p).s(this.s).c(this.c).addChildren(this.getChildren());
+	}
+
+	@Override
+	public Audible addChildren(GList<Audible> a)
+	{
+		getChildren().addAll(a);
+		return this;
+	}
+
+	@Override
+	public Audible setDelay(int ticks)
+	{
+		this.delay = ticks;
+		return this;
+	}
+
+	@Override
+	public int getDelay()
+	{
+		return delay;
+	}
+
+	@Override
+	public Audible d(int ticks)
+	{
+		return setDelay(ticks);
+	}
+
+	@Override
+	public boolean hasDelay()
+	{
+		return getDelay() > 0;
+	}
+}

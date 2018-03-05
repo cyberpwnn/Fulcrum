@@ -6,6 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.command.Command;
@@ -25,6 +26,8 @@ import com.volmit.fulcrum.lang.F;
 import com.volmit.fulcrum.lang.GList;
 import com.volmit.fulcrum.lang.GMap;
 import com.volmit.fulcrum.lang.GSet;
+import com.volmit.fulcrum.sfx.Audible;
+import com.volmit.fulcrum.sfx.Audio;
 import com.volmit.fulcrum.world.FastBlock;
 import com.volmit.fulcrum.world.FastBlock12;
 import com.volmit.fulcrum.world.FastChunk;
@@ -129,6 +132,24 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor
 			if(args[0].equalsIgnoreCase("reload"))
 			{
 				adapter.sendReload(ll.getChunk());
+			}
+
+			if(args[0].equalsIgnoreCase("sound"))
+			{
+				Audible a = new Audio().s(Sound.BLOCK_BREWING_STAND_BREW).vp(1f, 0.4f);
+				Audible c = new Audio().s(Sound.BLOCK_BREWING_STAND_BREW).vp(1f, 1.1f);
+				Audible d = new Audio().s(Sound.BLOCK_BREWING_STAND_BREW).vp(1f, 1.9f);
+				Audible b = new Audio().s(Sound.BLOCK_END_PORTAL_FRAME_FILL).vp(1f, 1.4f);
+				Audible e = new Audio().s(Sound.BLOCK_BREWING_STAND_BREW).vp(1f, 1.6f);
+				Audible f = new Audio().s(Sound.BLOCK_BREWING_STAND_BREW).vp(1f, 1.8f);
+				Audible g = new Audio().s(Sound.ITEM_BUCKET_FILL_LAVA).vp(1f, 0.1f);
+				b.addChild(a);
+				b.addChild(c.d(10));
+				b.addChild(d.d(18));
+				b.addChild(e.d(19));
+				b.addChild(f.d(22));
+				b.addChild(g.d(24));
+				b.play(P.getAnyPlayer().getLocation());
 			}
 
 			if(args[0].equalsIgnoreCase("drop"))
