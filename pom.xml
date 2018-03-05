@@ -10,6 +10,8 @@
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<fulcrum.libs>${project.basedir}/lib</fulcrum.libs>
+		<faggot>Asscunt</faggot>
+		<bitch>You're a ${faggot}</bitch>
 	</properties>
 	<build>
 		<resources>
@@ -20,6 +22,13 @@
 					<include>**/*.yml</include>
 					<include>**/*.json</include>
 					<include>**/*.txt</include>
+				</includes>
+			</resource>
+			<resource>
+				<directory>src/main/java</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>**/*.java</include>
 				</includes>
 			</resource>
 		</resources>
