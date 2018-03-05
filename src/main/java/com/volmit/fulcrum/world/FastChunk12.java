@@ -2,8 +2,11 @@ package com.volmit.fulcrum.world;
 
 import org.bukkit.Chunk;
 import org.bukkit.ChunkSnapshot;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Entity;
+
+import com.volmit.fulcrum.data.cluster.DataCluster;
 
 public class FastChunk12 implements FastChunk
 {
@@ -103,5 +106,41 @@ public class FastChunk12 implements FastChunk
 	public boolean isSlimeChunk()
 	{
 		return c.isSlimeChunk();
+	}
+
+	@Override
+	public DataCluster readData(String node, Block block)
+	{
+		return getWorld().readData(node, block);
+	}
+
+	@Override
+	public DataCluster readData(String node)
+	{
+		return getWorld().readData(node, this);
+	}
+
+	@Override
+	public void writeData(String node, DataCluster cc, Block block)
+	{
+		getWorld().writeData(node, cc, block);
+	}
+
+	@Override
+	public void writeData(String node, DataCluster cc)
+	{
+		getWorld().writeData(node, cc, this);
+	}
+
+	@Override
+	public boolean hasData(String node, Block block)
+	{
+		return getWorld().hasData(node, block);
+	}
+
+	@Override
+	public boolean hasData(String node)
+	{
+		return getWorld().hasData(node, this);
 	}
 }

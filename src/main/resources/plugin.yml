@@ -1,6 +1,7 @@
 name: ${project.name}
 main: com.volmit.fulcrum.Fulcrum
 version: ${project.version}
+load: startup
 commands:
   fulcrum:
     aliases: [fu, fulc, fm]

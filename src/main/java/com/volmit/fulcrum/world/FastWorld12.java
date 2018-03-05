@@ -1,6 +1,8 @@
 package com.volmit.fulcrum.world;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -39,7 +41,10 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Consumer;
 import org.bukkit.util.Vector;
 
+import com.google.common.io.Files;
 import com.volmit.fulcrum.Fulcrum;
+import com.volmit.fulcrum.data.cluster.DataCluster;
+import com.volmit.fulcrum.data.cluster.RAWStorageMedium;
 
 @SuppressWarnings("deprecation")
 public class FastWorld12 implements FastWorld
@@ -899,5 +904,127 @@ public class FastWorld12 implements FastWorld
 	public void removeMetadata(String metadataKey, Plugin owningPlugin)
 	{
 		w.removeMetadata(metadataKey, owningPlugin);
+	}
+
+	@Override
+	public DataCluster readData(String node, Block block)
+	{
+		if(!hasData(node, block))
+		{
+			return new DataCluster();
+		}
+
+		return new RAWStorageMedium().load(read(new File(getFileData(block), node + ".dat")));
+	}
+
+	@Override
+	public DataCluster readData(String node, Chunk chunk)
+	{
+		if(!hasData(node, chunk))
+		{
+			return new DataCluster();
+		}
+
+		return new RAWStorageMedium().load(read(new File(getFileData(chunk), node + ".dat")));
+	}
+
+	@Override
+	public DataCluster readData(String node)
+	{
+		if(!hasData(node))
+		{
+			return new DataCluster();
+		}
+
+		return new RAWStorageMedium().load(read(new File(getFileData(), node + ".dat")));
+	}
+
+	@Override
+	public void writeData(String node, DataCluster cc, Block block)
+	{
+		write(new File(getFileData(block), node + ".dat"), new RAWStorageMedium().save(cc));
+	}
+
+	@Override
+	public void writeData(String node, DataCluster cc, Chunk chunk)
+	{
+		write(new File(getFileData(chunk), node + ".dat"), new RAWStorageMedium().save(cc));
+	}
+
+	@Override
+	public void writeData(String node, DataCluster cc)
+	{
+		write(new File(getFileData(), node + ".dat"), new RAWStorageMedium().save(cc));
+	}
+
+	@Override
+	public boolean hasData(String node, Block block)
+	{
+		return new File(getFileData(block), node + ".dat").exists();
+	}
+
+	@Override
+	public boolean hasData(String node, Chunk chunk)
+	{
+		return new File(getFileData(chunk), node + ".dat").exists();
+	}
+
+	@Override
+	public boolean hasData(String node)
+	{
+		return new File(getFileData(), node + ".dat").exists();
+	}
+
+	private File getFileData()
+	{
+		return new File(getWorldFolder(), "fulcrum");
+	}
+
+	private File getFileData(Chunk c)
+	{
+		return new File(new File(getFileData(), toMCATag(c)), c.getX() + "." + c.getZ());
+	}
+
+	private File getFileData(Block b)
+	{
+		return new File(getFileData(b.getChunk()), b.getX() + "." + b.getY() + "." + b.getZ());
+	}
+
+	private String toMCATag(Chunk c)
+	{
+		return (c.getX() >> 5) + "." + (c.getZ() >> 5);
+	}
+
+	private void write(File f, ByteBuffer bb)
+	{
+		try
+		{
+			Files.write(bb.array(), f);
+		}
+
+		catch(IOException e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	private ByteBuffer read(File f)
+	{
+		if(!f.exists())
+		{
+			return null;
+		}
+
+		try
+		{
+			return ByteBuffer.wrap(Files.toByteArray(f));
+		}
+
+		catch(IOException e)
+		{
+			e.printStackTrace();
+		}
+
+		return null;
 	}
 }

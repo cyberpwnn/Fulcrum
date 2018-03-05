@@ -16,6 +16,7 @@ import org.bukkit.plugin.Plugin;
 
 import com.volmit.fulcrum.Fulcrum;
 import com.volmit.fulcrum.bukkit.BlockType;
+import com.volmit.fulcrum.data.cluster.DataCluster;
 
 public class FastBlock12 implements FastBlock
 {
@@ -338,5 +339,23 @@ public class FastBlock12 implements FastBlock
 	public void removeMetadata(String metadataKey, Plugin owningPlugin)
 	{
 		b.removeMetadata(metadataKey, owningPlugin);
+	}
+
+	@Override
+	public DataCluster readData(String node)
+	{
+		return getChunk().readData(node, this);
+	}
+
+	@Override
+	public void writeData(String node, DataCluster cc)
+	{
+		getChunk().writeData(node, cc, this);
+	}
+
+	@Override
+	public boolean hasData(String node)
+	{
+		return getChunk().hasData(node, this);
 	}
 }
