@@ -999,6 +999,12 @@ public class FastWorld12 implements FastWorld
 	{
 		try
 		{
+			if(!f.exists())
+			{
+				f.getParentFile().mkdirs();
+				f.createNewFile();
+			}
+
 			Files.write(bb.array(), f);
 		}
 

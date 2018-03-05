@@ -16,10 +16,6 @@ import com.volmit.fulcrum.adapter.IAdapter;
 import com.volmit.fulcrum.bukkit.P;
 import com.volmit.fulcrum.bukkit.TICK;
 import com.volmit.fulcrum.bukkit.Task;
-import com.volmit.fulcrum.fx.EffectCauldronAcceptItem;
-import com.volmit.fulcrum.fx.EffectCauldronAcceptRecipe;
-import com.volmit.fulcrum.fx.EffectCauldronBubble;
-import com.volmit.fulcrum.fx.EffectCauldronRejectRecipe;
 import com.volmit.fulcrum.world.FastBlock;
 import com.volmit.fulcrum.world.FastBlock12;
 import com.volmit.fulcrum.world.FastChunk;
@@ -83,36 +79,9 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor
 			Player p = P.getAnyPlayer();
 			Location ll = P.targetBlock(p, 332);
 
-			if(args[0].equalsIgnoreCase("fx"))
+			if(args[0].equalsIgnoreCase("test"))
 			{
-				if(args.length == 2)
-				{
-					if(args[1].equalsIgnoreCase("brew-bubble"))
-					{
-						new Task("", 0, 200)
-						{
-							@Override
-							public void run()
-							{
-								new EffectCauldronBubble().play(ll);
-							}
-						};
-					}
-
-					if(args[1].equalsIgnoreCase("brew-accept"))
-					{
-						new EffectCauldronAcceptItem().play(ll);
-					}
-					if(args[1].equalsIgnoreCase("brew-bad"))
-					{
-						new EffectCauldronRejectRecipe().play(ll);
-					}
-
-					if(args[1].equalsIgnoreCase("brew-good"))
-					{
-						new EffectCauldronAcceptRecipe().play(ll);
-					}
-				}
+				ll.clone();
 			}
 
 			return true;

@@ -11,6 +11,11 @@ public class DataCluster
 	private static GList<ICluster> types = new GList<ICluster>();
 	private GMap<String, ICluster> clusters;
 
+	public DataCluster()
+	{
+		clusters = new GMap<String, ICluster>();
+	}
+
 	public void put(String key, ICluster c)
 	{
 		clusters.put(key, c);

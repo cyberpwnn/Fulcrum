@@ -6,8 +6,11 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.List;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
+
+import com.volmit.fulcrum.lang.GList;
 
 public class RAWStorageMedium implements IStorageMethod<ByteBuffer>
 {
@@ -48,6 +51,18 @@ public class RAWStorageMedium implements IStorageMethod<ByteBuffer>
 				else if(c.get(i) instanceof ClusterDouble)
 				{
 					dos.writeDouble(c.getDouble(i));
+				}
+
+				else if(c.get(i) instanceof ClusterStringList)
+				{
+					@SuppressWarnings("unchecked")
+					List<String> s = (List<String>) c.get(i).get();
+					dos.writeInt(s.size());
+
+					for(String j : s)
+					{
+						dos.writeUTF(j);
+					}
 				}
 
 				else
@@ -109,6 +124,19 @@ public class RAWStorageMedium implements IStorageMethod<ByteBuffer>
 				else if(cx instanceof ClusterDouble)
 				{
 					cx.set(din.readDouble());
+				}
+
+				else if(cx instanceof ClusterStringList)
+				{
+					List<String> s = new GList<String>();
+					int si = din.readInt();
+
+					for(int ix = 0; ix < si; ix++)
+					{
+						s.add(din.readUTF());
+					}
+
+					cx.set(s);
 				}
 
 				else
