@@ -10,8 +10,7 @@
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<fulcrum.libs>${project.basedir}/lib</fulcrum.libs>
-		<faggot>Asscunt</faggot>
-		<bitch>You're a ${faggot}</bitch>
+		<fulcrum.server>C:\Users\cyberpwn\Documents\development\servers\dynamic\plugins</fulcrum.server>
 	</properties>
 	<build>
 		<resources>
@@ -39,11 +38,28 @@
 				<version>2.3.1</version>
 				<configuration>
 					<finalName>${project.name}</finalName>
-					<outputDirectory>C:\Users\cyberpwn\Documents\development\servers\dynamic\plugins</outputDirectory>
 				</configuration>
 			</plugin>
 		</plugins>
 	</build>
+	<profiles>
+		<profile>
+			<id>development</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-jar-plugin</artifactId>
+						<version>2.3.1</version>
+						<configuration>
+							<finalName>${project.name}</finalName>
+							<outputDirectory>${fulcrum.server}</outputDirectory>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 	<repositories>
 		<repository>
 			<id>spigot-repo</id>
