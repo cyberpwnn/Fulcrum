@@ -28,6 +28,7 @@ import com.volmit.fulcrum.entity.pets.PetDan;
 import com.volmit.fulcrum.entity.pets.PetGay;
 import com.volmit.fulcrum.entity.pets.PetMoobark;
 import com.volmit.fulcrum.entity.pets.PetTim;
+import com.volmit.fulcrum.entity.pets.PetWither;
 import com.volmit.fulcrum.lang.F;
 import com.volmit.fulcrum.lang.Profiler;
 import com.volmit.fulcrum.world.FastBlock;
@@ -170,6 +171,19 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor
 				try
 				{
 					Pet pet = new PetTim(p, ll.clone().add(0, 1, 0), "Tim");
+				}
+
+				catch(NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e)
+				{
+					e.printStackTrace();
+				}
+			}
+
+			if(args[0].equalsIgnoreCase("petwither"))
+			{
+				try
+				{
+					Pet pet = new PetWither(p, ll.clone().add(0, 1, 0), "Wither");
 				}
 
 				catch(NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e)
