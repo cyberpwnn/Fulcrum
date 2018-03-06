@@ -26,8 +26,7 @@ public class PetWither extends FulcrumPet
 	{
 		for(int i = 0; i < 20; i++)
 		{
-			new ParticleEnchantmentTable().setSpread(3).play(p.getLocation());
-
+			new ParticleEnchantmentTable().setSpread(6f).play(p.getLocation());
 		}
 
 		new Audio().s(Sound.ENTITY_WITHER_AMBIENT).vp(1f, 1.1f).c(SoundCategory.NEUTRAL).play(p.getLocation());
@@ -36,7 +35,7 @@ public class PetWither extends FulcrumPet
 	@Override
 	protected void onTick(Pet p)
 	{
-
+		new ParticleEnchantmentTable().setSpread(6f).play(p.getLocation());
 	}
 
 	@Override
@@ -50,8 +49,7 @@ public class PetWither extends FulcrumPet
 	{
 		for(int i = 0; i < 20; i++)
 		{
-			new ParticleEnchantmentTable().setSpread(3).play(p.getLocation());
-
+			new ParticleEnchantmentTable().setSpread(6f).play(p.getLocation());
 		}
 
 		new Audio().s(Sound.ENTITY_WITHER_SKELETON_STEP).vp(1f, 1.3f).c(SoundCategory.NEUTRAL).play(p.getLocation());
