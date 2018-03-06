@@ -63,7 +63,6 @@ public class PetWither extends FulcrumPet
 			spitAt(((LivingEntity) damager));
 		}
 
-		new ParticleVillagerEmote().setAngry(true).play(p.getLocation());
 		new Audio().s(Sound.ENTITY_WITHER_HURT).vp(0.5f, 0.9f).c(SoundCategory.NEUTRAL).play(p.getLocation());
 		setTarget(damager);
 		setAttackTarget(true);
