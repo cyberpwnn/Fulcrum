@@ -5,7 +5,9 @@ import java.util.List;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
+import com.volmit.fulcrum.Fulcrum;
 import com.volmit.fulcrum.lang.GList;
 import com.volmit.fulcrum.lang.MaterialBlock;
 
@@ -438,5 +440,54 @@ public class Items
 		}
 
 		return false;
+	}
+
+	/**
+	 * Load skin into a skull item stack
+	 *
+	 * @param uri
+	 *            the url, eg:
+	 *            "http://textures.minecraft.net/texture/e58c3ff46ac3fa1a408b24e5b99913cb4c116d8ad7b259186c9fd529464a71c"
+	 * @param name
+	 *            the name of the skull
+	 * @return the item stack
+	 * @throws NoSuchFieldException
+	 *             bad version (not 1.9.2-4)
+	 * @throws SecurityException
+	 *             LET ME DO STUFF
+	 * @throws IllegalArgumentException
+	 *             shouldnt happen
+	 * @throws IllegalAccessException
+	 *             not good
+	 */
+	public static ItemStack getSkull(String uri, String name) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
+	{
+		ItemStack is = Fulcrum.adapter.getSkull(uri);
+		ItemMeta im = is.getItemMeta();
+		im.setDisplayName(name);
+		is.setItemMeta(im);
+
+		return is;
+	}
+
+	/**
+	 * Load skin into a skull item stack
+	 *
+	 * @param uri
+	 *            the url, eg:
+	 *            "http://textures.minecraft.net/texture/e58c3ff46ac3fa1a408b24e5b99913cb4c116d8ad7b259186c9fd529464a71c"
+	 * @return the item stack
+	 * @throws NoSuchFieldException
+	 *             bad version (not 1.9.2-4)
+	 * @throws SecurityException
+	 *             LET ME DO STUFF
+	 * @throws IllegalArgumentException
+	 *             shouldnt happen
+	 * @throws IllegalAccessException
+	 *             not good
+	 */
+	public static ItemStack getSkull(String uri) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
+	{
+		return getSkull(uri, "Skull");
 	}
 }

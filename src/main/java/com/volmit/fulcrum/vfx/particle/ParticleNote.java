@@ -38,7 +38,7 @@ public class ParticleNote extends ParticleBase implements ColoredEffect
 	}
 
 	@Override
-	public ColoredEffect setColor(Color color)
+	public ParticleNote setColor(Color color)
 	{
 		this.color = color;
 		return this;

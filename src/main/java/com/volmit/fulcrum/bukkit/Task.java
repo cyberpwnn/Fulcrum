@@ -11,37 +11,7 @@ public abstract class Task implements ITask, ICancellable
 	private double totalComputeTime;
 	private double activeTime;
 	private boolean completed;
-	protected int ticks;
-
-	public Task(String name)
-	{
-		setup(name, false);
-
-		id = Fulcrum.instance.startTask(0, new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				Task.this.run();
-				completed = true;
-			}
-		});
-	}
-
-	public Task(String name, int interval)
-	{
-		setup(name, true);
-
-		id = Fulcrum.instance.startRepeatingTask(0, interval, new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				Task.this.run();
-				ticks++;
-			}
-		});
-	}
+	protected int ticks = 0;
 
 	public Task(int interval)
 	{
@@ -58,9 +28,9 @@ public abstract class Task implements ITask, ICancellable
 		});
 	}
 
-	public Task(String name, int interval, int total)
+	public Task(int interval, int total)
 	{
-		setup(name, true);
+		setup("", true);
 
 		id = Fulcrum.instance.startRepeatingTask(0, interval, new Runnable()
 		{

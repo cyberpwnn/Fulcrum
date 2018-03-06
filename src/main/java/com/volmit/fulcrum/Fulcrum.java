@@ -3,19 +3,31 @@ package com.volmit.fulcrum;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Zombie;
+import org.bukkit.event.HandlerList;
+import org.bukkit.event.Listener;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.volmit.fulcrum.adapter.Adapter12;
 import com.volmit.fulcrum.adapter.IAdapter;
+import com.volmit.fulcrum.bukkit.Items;
 import com.volmit.fulcrum.bukkit.P;
 import com.volmit.fulcrum.bukkit.TICK;
 import com.volmit.fulcrum.bukkit.Task;
+import com.volmit.fulcrum.entity.Pet;
+import com.volmit.fulcrum.entity.pets.PetDan;
+import com.volmit.fulcrum.entity.pets.PetGay;
+import com.volmit.fulcrum.entity.pets.PetMoobark;
+import com.volmit.fulcrum.entity.pets.PetTim;
 import com.volmit.fulcrum.lang.F;
 import com.volmit.fulcrum.lang.Profiler;
 import com.volmit.fulcrum.world.FastBlock;
@@ -73,12 +85,13 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor
 		adapter = new Adapter12();
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args)
 	{
 		if(command.getName().equalsIgnoreCase("fulcrum"))
 		{
-			Player p = P.getAnyPlayer();
+			Player p = (Player) sender;
 			Location ll = P.targetBlock(p, 332);
 			Profiler px = new Profiler();
 			px.begin();
@@ -91,13 +104,92 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor
 
 			if(args[0].equalsIgnoreCase("slow"))
 			{
-				ll.getWorld().createExplosion(ll, 400f, true);
+				ll.getWorld().createExplosion(ll, 40f, false);
 				sender.sendMessage("Using Bukkit");
 			}
 
-			if(args[0].equalsIgnoreCase("u"))
+			if(args[0].equalsIgnoreCase("ba"))
 			{
-				adapter.applyPhysics(ll.getBlock());
+
+				try
+				{
+					ItemStack is = Items.getSkull("http://textures.minecraft.net/texture/4fc6c7ea21a7b674dcc7b9e92780ea6088d36474cc631e9aa2f1164fa565d7b");
+					Zombie z = (Zombie) ll.getWorld().spawnEntity(ll, EntityType.ZOMBIE);
+					z.setBaby(true);
+					z.getEquipment().setHelmet(is);
+					z.getEquipment().setItemInHand(new ItemStack(Material.IRON_SWORD));
+				}
+
+				catch(NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e)
+				{
+					e.printStackTrace();
+				}
+			}
+
+			if(args[0].equalsIgnoreCase("petdan"))
+			{
+				try
+				{
+					Pet pet = new PetDan(p, ll.clone().add(0, 1, 0), "Dan");
+				}
+
+				catch(NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e)
+				{
+					e.printStackTrace();
+				}
+			}
+
+			if(args[0].equalsIgnoreCase("petgay"))
+			{
+				try
+				{
+					Pet pet = new PetGay(p, ll.clone().add(0, 1, 0), "Gay");
+				}
+
+				catch(NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e)
+				{
+					e.printStackTrace();
+				}
+			}
+
+			if(args[0].equalsIgnoreCase("petmoo"))
+			{
+				try
+				{
+					Pet pet = new PetMoobark(p, ll.clone().add(0, 1, 0), "Moobark");
+				}
+
+				catch(NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e)
+				{
+					e.printStackTrace();
+				}
+			}
+
+			if(args[0].equalsIgnoreCase("pettim"))
+			{
+				try
+				{
+					Pet pet = new PetTim(p, ll.clone().add(0, 1, 0), "Tim");
+				}
+
+				catch(NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e)
+				{
+					e.printStackTrace();
+				}
+			}
+
+			if(args[0].equalsIgnoreCase("skull"))
+			{
+				try
+				{
+					ItemStack is = Items.getSkull("http://textures.minecraft.net/texture/154a93cf60e2f7ffb21750628f693d4d125c80c1f78454a562bee20254cac90");
+					p.getInventory().addItem(is);
+				}
+
+				catch(NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e)
+				{
+					e.printStackTrace();
+				}
 			}
 
 			px.end();
@@ -107,6 +199,16 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor
 		}
 
 		return false;
+	}
+
+	public static void register(Listener l)
+	{
+		Bukkit.getPluginManager().registerEvents(l, Fulcrum.instance);
+	}
+
+	public static void unregister(Listener l)
+	{
+		HandlerList.unregisterAll(l);
 	}
 
 	@Override

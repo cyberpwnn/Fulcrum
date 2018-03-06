@@ -9,12 +9,15 @@ import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import com.volmit.fulcrum.bukkit.BlockType;
 import com.volmit.fulcrum.lang.GList;
 
 public interface IAdapter
 {
+	public ItemStack getSkull(String uri) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException;
+
 	public void applyPhysics(Block b);
 
 	public void sendReload(Chunk c);
