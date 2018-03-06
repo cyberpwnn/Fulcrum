@@ -16,6 +16,8 @@ import com.volmit.fulcrum.adapter.IAdapter;
 import com.volmit.fulcrum.bukkit.P;
 import com.volmit.fulcrum.bukkit.TICK;
 import com.volmit.fulcrum.bukkit.Task;
+import com.volmit.fulcrum.lang.F;
+import com.volmit.fulcrum.lang.Profiler;
 import com.volmit.fulcrum.world.FastBlock;
 import com.volmit.fulcrum.world.FastBlock12;
 import com.volmit.fulcrum.world.FastChunk;
@@ -78,11 +80,28 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor
 		{
 			Player p = P.getAnyPlayer();
 			Location ll = P.targetBlock(p, 332);
-
-			if(args[0].equalsIgnoreCase("test"))
+			Profiler px = new Profiler();
+			px.begin();
+			if(args[0].equalsIgnoreCase("fast"))
 			{
-				ll.clone();
+
+				faster(ll.getWorld()).createExplosion(ll, 40f, false);
+				sender.sendMessage("Using FastWorld Adapter");
 			}
+
+			if(args[0].equalsIgnoreCase("slow"))
+			{
+				ll.getWorld().createExplosion(ll, 400f, true);
+				sender.sendMessage("Using Bukkit");
+			}
+
+			if(args[0].equalsIgnoreCase("u"))
+			{
+				adapter.applyPhysics(ll.getBlock());
+			}
+
+			px.end();
+			sender.sendMessage("Took: " + F.time(px.getMilliseconds(), 5));
 
 			return true;
 		}

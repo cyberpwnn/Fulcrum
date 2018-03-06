@@ -6,6 +6,7 @@ import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Biome;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
@@ -14,6 +15,8 @@ import com.volmit.fulcrum.lang.GList;
 
 public interface IAdapter
 {
+	public void applyPhysics(Block b);
+
 	public void sendReload(Chunk c);
 
 	public void sendReload(Chunk c, Player p);

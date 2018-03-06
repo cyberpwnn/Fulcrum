@@ -8,6 +8,7 @@ import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Biome;
+import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.v1_12_R1.CraftChunk;
 import org.bukkit.craftbukkit.v1_12_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_12_R1.block.CraftBlock;
@@ -19,6 +20,7 @@ import org.bukkit.entity.Player;
 import com.volmit.fulcrum.bukkit.BlockType;
 import com.volmit.fulcrum.bukkit.P;
 import com.volmit.fulcrum.bukkit.Task;
+import com.volmit.fulcrum.lang.F;
 import com.volmit.fulcrum.lang.GList;
 import com.volmit.fulcrum.lang.GMap;
 import com.volmit.fulcrum.lang.GSet;
@@ -37,6 +39,7 @@ public final class Adapter12 implements IAdapter
 {
 	private GMap<Chunk, GSet<Location>> update;
 	private GMap<Chunk, GSet<Integer>> dirty;
+	private long processed = 0;
 
 	public Adapter12()
 	{
@@ -49,6 +52,14 @@ public final class Adapter12 implements IAdapter
 			public void run()
 			{
 				onTick();
+
+				if(processed == 0)
+				{
+					return;
+				}
+
+				System.out.println("Processed " + F.f(processed) + " block changes");
+				processed = 0;
 			}
 		};
 	}
@@ -142,6 +153,7 @@ public final class Adapter12 implements IAdapter
 		IBlockData ibd = net.minecraft.server.v1_12_R1.Block.getByCombinedId(combined);
 		chunk.a(bp, ibd);
 		makeDirty(l);
+		processed++;
 	}
 
 	@Override
@@ -345,5 +357,18 @@ public final class Adapter12 implements IAdapter
 	{
 		w.setBiome(x, z, b);
 		makeFullyDirty(w.getChunkAt(w.getBlockAt(x, 0, z)));
+	}
+
+	@Override
+	public void applyPhysics(Block bfg)
+	{
+		net.minecraft.server.v1_12_R1.Block b = CraftMagicNumbers.getBlock((CraftBlock) bfg);
+		int x = bfg.getX();
+		int y = bfg.getY();
+		int z = bfg.getZ();
+		BlockPosition bp = new BlockPosition(x, y, z);
+		CraftWorld w = (CraftWorld) bfg.getWorld();
+		net.minecraft.server.v1_12_R1.World v = (net.minecraft.server.v1_12_R1.World) w.getHandle();
+		v.update(bp, b, true);
 	}
 }

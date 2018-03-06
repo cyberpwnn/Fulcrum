@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.bukkit.BlockChangeDelegate;
+import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.ChunkSnapshot;
 import org.bukkit.Difficulty;
@@ -32,6 +33,11 @@ import org.bukkit.entity.Item;
 import org.bukkit.entity.LightningStrike;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.HandlerList;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.generator.BlockPopulator;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.inventory.ItemStack;
@@ -45,9 +51,10 @@ import com.google.common.io.Files;
 import com.volmit.fulcrum.Fulcrum;
 import com.volmit.fulcrum.data.cluster.DataCluster;
 import com.volmit.fulcrum.data.cluster.RAWStorageMedium;
+import com.volmit.fulcrum.lang.GList;
 
 @SuppressWarnings("deprecation")
-public class FastWorld12 implements FastWorld
+public class FastWorld12 implements FastWorld, Listener
 {
 	private World w;
 
@@ -246,17 +253,15 @@ public class FastWorld12 implements FastWorld
 	}
 
 	@Override
-	public boolean generateTree(Location location, TreeType type)
+	public boolean generateTree(Location loc, TreeType type)
 	{
-		return w.generateTree(location, type);
-		// TODO FASTER
+		return w.generateTree(loc, type);
 	}
 
 	@Override
 	public boolean generateTree(Location loc, TreeType type, BlockChangeDelegate delegate)
 	{
-		return w.generateTree(loc, type, delegate);
-		// TODO FASTER
+		return generateTree(loc, type);
 	}
 
 	@Override
@@ -424,36 +429,54 @@ public class FastWorld12 implements FastWorld
 	@Override
 	public boolean createExplosion(double x, double y, double z, float power)
 	{
-		return w.createExplosion(x, y, z, power);
-		// TODO FAST
+		return createExplosion(x, y, z, power, false);
 	}
 
 	@Override
 	public boolean createExplosion(double x, double y, double z, float power, boolean setFire)
 	{
-		return w.createExplosion(x, y, z, power, setFire);
-		// TODO FAST
+		return createExplosion(x, y, z, power, setFire, true);
 	}
 
 	@Override
 	public boolean createExplosion(double x, double y, double z, float power, boolean setFire, boolean breakBlocks)
 	{
-		return w.createExplosion(x, y, z, power, setFire, breakBlocks);
-		// TODO FAST
+		catchExplode();
+		boolean b = w.createExplosion(x, y, z, power, setFire, breakBlocks);
+		HandlerList.unregisterAll(this);
+
+		return b;
 	}
 
 	@Override
 	public boolean createExplosion(Location loc, float power)
 	{
-		return w.createExplosion(loc, power);
-		// TODO FAST
+		return createExplosion(loc, power, false);
 	}
 
 	@Override
 	public boolean createExplosion(Location loc, float power, boolean setFire)
 	{
-		return w.createExplosion(loc, power, setFire);
-		// TODO FAST
+		return createExplosion(loc.getX(), loc.getY(), loc.getZ(), power, setFire);
+	}
+
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void on(BlockExplodeEvent e)
+	{
+		for(Block i : e.blockList())
+		{
+			Fulcrum.faster(i).setType(Material.AIR);
+		}
+
+		HandlerList.unregisterAll(this);
+		BlockExplodeEvent bee = new BlockExplodeEvent(e.getBlock(), new GList<Block>(e.blockList()), e.getYield());
+		e.blockList().clear();
+		Bukkit.getPluginManager().callEvent(bee);
+	}
+
+	private void catchExplode()
+	{
+		Bukkit.getPluginManager().registerEvents(this, Fulcrum.instance);
 	}
 
 	@Override
