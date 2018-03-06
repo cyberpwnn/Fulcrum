@@ -72,7 +72,6 @@ public class PetWither extends FulcrumPet
 	@Override
 	protected void onDamaged(Pet p, double damage, boolean cancelled)
 	{
-		new ParticleVillagerEmote().setAngry(true).play(p.getLocation());
 		new Audio().s(Sound.ENTITY_WITHER_SKELETON_HURT).vp(0.5f, 1.1f).c(SoundCategory.NEUTRAL).play(p.getLocation());
 	}
 
