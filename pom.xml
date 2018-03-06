@@ -39,7 +39,7 @@
 				<version>2.3.1</version>
 				<configuration>
 					<finalName>${project.name}</finalName>
-					<outputDirectory>C:\Users\cyberpwn\Documents\development\servers\dynamic\plugins</outputDirectory>
+					<outputDirectory>C:\Users\avilt\Documents\development\workspace\Fulcrum\target</outputDirectory>
 				</configuration>
 			</plugin>
 		</plugins>
