@@ -16,6 +16,14 @@ import com.volmit.fulcrum.lang.GList;
 
 public interface IAdapter
 {
+	public void queueUpdate(Block b);
+
+	public void pushPhysics();
+
+	public boolean isPushingPhysics();
+
+	public void popPhysics();
+
 	public ItemStack getSkull(String uri) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException;
 
 	public void applyPhysics(Block b);

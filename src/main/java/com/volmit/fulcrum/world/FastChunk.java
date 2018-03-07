@@ -4,6 +4,7 @@ import org.bukkit.Chunk;
 import org.bukkit.block.Block;
 
 import com.volmit.fulcrum.data.cluster.DataCluster;
+import com.volmit.fulcrum.lang.GList;
 
 public interface FastChunk extends Chunk
 {
@@ -16,6 +17,8 @@ public interface FastChunk extends Chunk
 	public void writeData(String node, DataCluster cc);
 
 	public boolean hasData(String node, Block block);
+
+	public GList<FastBlock> getDataBlocks();
 
 	public boolean hasData(String node);
 }

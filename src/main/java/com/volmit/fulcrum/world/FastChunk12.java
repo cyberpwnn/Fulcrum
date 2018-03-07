@@ -1,12 +1,16 @@
 package com.volmit.fulcrum.world;
 
+import java.io.File;
+
 import org.bukkit.Chunk;
 import org.bukkit.ChunkSnapshot;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Entity;
 
+import com.volmit.fulcrum.Fulcrum;
 import com.volmit.fulcrum.data.cluster.DataCluster;
+import com.volmit.fulcrum.lang.GList;
 
 public class FastChunk12 implements FastChunk
 {
@@ -142,5 +146,51 @@ public class FastChunk12 implements FastChunk
 	public boolean hasData(String node)
 	{
 		return getWorld().hasData(node, this);
+	}
+
+	private File getFileData()
+	{
+		return new File(getWorld().getWorldFolder(), "fulcrum");
+	}
+
+	private File getFileData(Chunk c)
+	{
+		return new File(new File(getFileData(), toMCATag(c)), c.getX() + "." + c.getZ());
+	}
+
+	private String toMCATag(Chunk c)
+	{
+		return (c.getX() >> 5) + "." + (c.getZ() >> 5);
+	}
+
+	@Override
+	public GList<FastBlock> getDataBlocks()
+	{
+		GList<FastBlock> fb = new GList<FastBlock>();
+
+		if(!getFileData(this).exists() && Fulcrum.blockCache.size() < 1)
+		{
+			return fb;
+		}
+
+		for(File i : Fulcrum.blockCache.files.v())
+		{
+			String[] f = i.getParentFile().getName().split("\\.");
+			fb.add((FastBlock) getWorld().getBlockAt(Integer.valueOf(f[0]), Integer.valueOf(f[1]), Integer.valueOf(f[2])));
+		}
+
+		if(getFileData(this).exists())
+		{
+			for(File i : getFileData(this).listFiles())
+			{
+				if(i.isDirectory())
+				{
+					String[] f = i.getName().split("\\.");
+					fb.add((FastBlock) getWorld().getBlockAt(Integer.valueOf(f[0]), Integer.valueOf(f[1]), Integer.valueOf(f[2])));
+				}
+			}
+		}
+
+		return fb;
 	}
 }

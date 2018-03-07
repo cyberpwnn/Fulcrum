@@ -1,5 +1,8 @@
 package com.volmit.fulcrum;
 
+import java.io.File;
+import java.io.IOException;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -32,24 +35,84 @@ import com.volmit.fulcrum.fx.EffectCauldronAcceptItem;
 import com.volmit.fulcrum.fx.EffectCauldronAcceptRecipe;
 import com.volmit.fulcrum.fx.EffectCauldronBubble;
 import com.volmit.fulcrum.fx.EffectCauldronRejectRecipe;
+import com.volmit.fulcrum.lang.C;
 import com.volmit.fulcrum.lang.F;
 import com.volmit.fulcrum.lang.Profiler;
+import com.volmit.fulcrum.world.BlockCache;
+import com.volmit.fulcrum.world.ChunkCache;
 import com.volmit.fulcrum.world.FastBlock;
 import com.volmit.fulcrum.world.FastBlock12;
 import com.volmit.fulcrum.world.FastChunk;
 import com.volmit.fulcrum.world.FastChunk12;
 import com.volmit.fulcrum.world.FastWorld;
 import com.volmit.fulcrum.world.FastWorld12;
+import com.volmit.fulcrum.world.WorldCache;
 
 public class Fulcrum extends JavaPlugin implements CommandExecutor
 {
 	public static Fulcrum instance;
 	public static IAdapter adapter;
+	public static WorldCache worldCache;
+	public static ChunkCache chunkCache;
+	public static BlockCache blockCache;
 
 	@Override
 	public void onLoad()
 	{
 		instance = this;
+		worldCache = new WorldCache();
+		chunkCache = new ChunkCache();
+		blockCache = new BlockCache();
+	}
+
+	public static int getCacheSize()
+	{
+		return worldCache.size() + chunkCache.size() + blockCache.size();
+	}
+
+	public static void flushCache()
+	{
+		try
+		{
+			worldCache.flush();
+			chunkCache.flush();
+			blockCache.flush();
+		}
+
+		catch(IOException e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	public static int getDataCount()
+	{
+		int v = 0;
+		for(World r : Bukkit.getWorlds())
+		{
+			File f = new File(r.getWorldFolder(), "fulcrum");
+
+			if(f.exists())
+			{
+				for(File i : f.listFiles()) // mca
+				{
+					if(i.isDirectory())
+					{
+						for(File j : i.listFiles()) // chk
+						{
+							if(j.isDirectory())
+							{
+								v += j.listFiles().length;
+							}
+						}
+					}
+				}
+			}
+		}
+		v += chunkCache.files.size();
+		v += blockCache.files.size();
+
+		return v;
 	}
 
 	public static FastBlock faster(Block b)
@@ -89,7 +152,6 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor
 		adapter = new Adapter12();
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args)
 	{
@@ -110,6 +172,11 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor
 			{
 				ll.getWorld().createExplosion(ll, 40f, false);
 				sender.sendMessage("Using Bukkit");
+			}
+
+			if(args[0].equalsIgnoreCase("total"))
+			{
+				sender.sendMessage(C.GRAY + "Total: " + C.WHITE + F.f(getDataCount()));
 			}
 
 			if(args[0].equalsIgnoreCase("fx"))
@@ -253,12 +320,21 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor
 	@Override
 	public void onDisable()
 	{
-
+		flushCache();
 	}
 
 	public void onTick()
 	{
 		TICK.tick++;
+
+		if(TICK.tick % 600 == 0)
+		{
+			if(getCacheSize() > 1000)
+			{
+				flushCache();
+				System.out.println("Flushed Cache: " + getCacheSize());
+			}
+		}
 	}
 
 	public int startTask(int delay, Runnable r)

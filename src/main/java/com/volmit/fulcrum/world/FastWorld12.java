@@ -2,7 +2,6 @@ package com.volmit.fulcrum.world;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -47,10 +46,8 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Consumer;
 import org.bukkit.util.Vector;
 
-import com.google.common.io.Files;
 import com.volmit.fulcrum.Fulcrum;
 import com.volmit.fulcrum.data.cluster.DataCluster;
-import com.volmit.fulcrum.data.cluster.RAWStorageMedium;
 import com.volmit.fulcrum.lang.GList;
 
 @SuppressWarnings("deprecation")
@@ -463,10 +460,14 @@ public class FastWorld12 implements FastWorld, Listener
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void on(BlockExplodeEvent e)
 	{
+		Fulcrum.adapter.pushPhysics();
+
 		for(Block i : e.blockList())
 		{
 			Fulcrum.faster(i).setType(Material.AIR);
 		}
+
+		Fulcrum.adapter.popPhysics();
 
 		HandlerList.unregisterAll(this);
 		BlockExplodeEvent bee = new BlockExplodeEvent(e.getBlock(), new GList<Block>(e.blockList()), e.getYield());
@@ -932,69 +933,99 @@ public class FastWorld12 implements FastWorld, Listener
 	@Override
 	public DataCluster readData(String node, Block block)
 	{
-		if(!hasData(node, block))
+		try
 		{
-			return new DataCluster();
+			return Fulcrum.blockCache.read(new BlockKey(block, node), new File(getFileData(block), node + ".dat"));
 		}
 
-		return new RAWStorageMedium().load(read(new File(getFileData(block), node + ".dat")));
+		catch(IOException e)
+		{
+			e.printStackTrace();
+		}
+
+		return new DataCluster();
 	}
 
 	@Override
 	public DataCluster readData(String node, Chunk chunk)
 	{
-		if(!hasData(node, chunk))
+		try
 		{
-			return new DataCluster();
+			return Fulcrum.chunkCache.read(new ChunkKey(chunk, node), new File(getFileData(chunk), node + ".dat"));
 		}
 
-		return new RAWStorageMedium().load(read(new File(getFileData(chunk), node + ".dat")));
+		catch(IOException e)
+		{
+			e.printStackTrace();
+		}
+
+		return new DataCluster();
 	}
 
 	@Override
 	public DataCluster readData(String node)
 	{
-		if(!hasData(node))
+		try
 		{
-			return new DataCluster();
+			return Fulcrum.worldCache.read(new WorldKey(this, node), new File(getFileData(), node + ".dat"));
 		}
 
-		return new RAWStorageMedium().load(read(new File(getFileData(), node + ".dat")));
+		catch(IOException e)
+		{
+			e.printStackTrace();
+		}
+
+		return new DataCluster();
 	}
 
 	@Override
 	public void writeData(String node, DataCluster cc, Block block)
 	{
-		write(new File(getFileData(block), node + ".dat"), new RAWStorageMedium().save(cc));
+		Fulcrum.blockCache.write(new BlockKey(block, node), cc, new File(getFileData(block), node + ".dat"));
 	}
 
 	@Override
 	public void writeData(String node, DataCluster cc, Chunk chunk)
 	{
-		write(new File(getFileData(chunk), node + ".dat"), new RAWStorageMedium().save(cc));
+		Fulcrum.chunkCache.write(new ChunkKey(chunk, node), cc, new File(getFileData(chunk), node + ".dat"));
 	}
 
 	@Override
 	public void writeData(String node, DataCluster cc)
 	{
-		write(new File(getFileData(), node + ".dat"), new RAWStorageMedium().save(cc));
+		Fulcrum.worldCache.write(new WorldKey(this, node), cc, new File(getFileData(), node + ".dat"));
 	}
 
 	@Override
 	public boolean hasData(String node, Block block)
 	{
+		if(Fulcrum.blockCache.has(new BlockKey(block, node)))
+		{
+			return true;
+		}
+
 		return new File(getFileData(block), node + ".dat").exists();
 	}
 
 	@Override
 	public boolean hasData(String node, Chunk chunk)
 	{
+		if(Fulcrum.chunkCache.has(new ChunkKey(chunk, node)))
+		{
+			return true;
+		}
+
 		return new File(getFileData(chunk), node + ".dat").exists();
 	}
 
 	@Override
 	public boolean hasData(String node)
 	{
+		if(Fulcrum.worldCache.has(new WorldKey(this, node)))
+		{
+			return true;
+		}
+
 		return new File(getFileData(), node + ".dat").exists();
 	}
 
@@ -1018,42 +1049,49 @@ public class FastWorld12 implements FastWorld, Listener
 		return (c.getX() >> 5) + "." + (c.getZ() >> 5);
 	}
 
-	private void write(File f, ByteBuffer bb)
+	@Override
+	public GList<FastChunk> getLoadedDataChunks()
 	{
-		try
+		GList<FastChunk> fc = new GList<FastChunk>();
+
+		if(!getFileData().exists() && Fulcrum.chunkCache.size() < 1)
 		{
-			if(!f.exists())
+			return fc;
+		}
+
+		fc.add(getLoadedChunks());
+		GList<String> l = new GList<String>();
+
+		if(getFileData().exists())
+		{
+			for(File i : getFileData().listFiles())
 			{
-				f.getParentFile().mkdirs();
-				f.createNewFile();
+				if(i.isDirectory())
+				{
+					for(File j : i.listFiles())
+					{
+						if(j.isDirectory())
+						{
+							l.add(j.getName());
+						}
+					}
+				}
 			}
-
-			Files.write(bb.array(), f);
 		}
 
-		catch(IOException e)
+		for(File i : Fulcrum.chunkCache.files.v())
 		{
-			e.printStackTrace();
+			l.add(i.getParentFile().getName());
 		}
-	}
 
-	private ByteBuffer read(File f)
-	{
-		if(!f.exists())
+		for(FastChunk i : fc.copy())
 		{
-			return null;
+			if(!l.contains(i.getX() + "." + i.getZ()))
+			{
+				fc.remove(i);
+			}
 		}
 
-		try
-		{
-			return ByteBuffer.wrap(Files.toByteArray(f));
-		}
-
-		catch(IOException e)
-		{
-			e.printStackTrace();
-		}
-
-		return null;
+		return fc;
 	}
 }

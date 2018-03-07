@@ -5,6 +5,7 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 
 import com.volmit.fulcrum.data.cluster.DataCluster;
+import com.volmit.fulcrum.lang.GList;
 
 public interface FastWorld extends World
 {
@@ -25,4 +26,6 @@ public interface FastWorld extends World
 	public boolean hasData(String node, Chunk chunk);
 
 	public boolean hasData(String node);
+
+	public GList<FastChunk> getLoadedDataChunks();
 }

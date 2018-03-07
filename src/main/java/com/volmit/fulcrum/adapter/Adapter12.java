@@ -31,6 +31,7 @@ import com.volmit.fulcrum.lang.F;
 import com.volmit.fulcrum.lang.GList;
 import com.volmit.fulcrum.lang.GMap;
 import com.volmit.fulcrum.lang.GSet;
+import com.volmit.fulcrum.lang.M;
 
 import net.minecraft.server.v1_12_R1.BiomeBase;
 import net.minecraft.server.v1_12_R1.BlockPosition;
@@ -46,12 +47,16 @@ public final class Adapter12 implements IAdapter
 {
 	private GMap<Chunk, GSet<Location>> update;
 	private GMap<Chunk, GSet<Integer>> dirty;
+	private GList<Block> physics;
 	private long processed = 0;
+	private boolean push;
 
 	public Adapter12()
 	{
+		physics = new GList<Block>();
 		update = new GMap<Chunk, GSet<Location>>();
 		dirty = new GMap<Chunk, GSet<Integer>>();
+		push = false;
 
 		new Task(0)
 		{
@@ -122,8 +127,22 @@ public final class Adapter12 implements IAdapter
 			sendChunkSection(i, getBitMask(bits));
 		}
 
+		long nsx = M.ns();
+		long nf = 1500000;
+
+		if(physics.size() > 50000)
+		{
+			nf += 5000000;
+		}
+
+		while(!physics.isEmpty() && M.ns() - nsx < nf)
+		{
+			applyPhysics(physics.pop());
+		}
+
 		dirty.clear();
 		update.clear();
+		popPhysics();
 	}
 
 	@Override
@@ -172,6 +191,11 @@ public final class Adapter12 implements IAdapter
 		}
 
 		update.get(l.getChunk()).add(l);
+
+		if(isPushingPhysics())
+		{
+			queueUpdate(l.getBlock());
+		}
 	}
 
 	@Override
@@ -395,5 +419,29 @@ public final class Adapter12 implements IAdapter
 		localItemStack.setItemMeta(localItemMeta);
 
 		return localItemStack;
+	}
+
+	@Override
+	public void queueUpdate(Block b)
+	{
+		physics.add(b);
+	}
+
+	@Override
+	public void pushPhysics()
+	{
+		push = true;
+	}
+
+	@Override
+	public boolean isPushingPhysics()
+	{
+		return push;
+	}
+
+	@Override
+	public void popPhysics()
+	{
+		push = false;
 	}
 }
