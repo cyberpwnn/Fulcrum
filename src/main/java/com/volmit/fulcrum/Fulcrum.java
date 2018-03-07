@@ -9,9 +9,7 @@ import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Zombie;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
@@ -24,11 +22,16 @@ import com.volmit.fulcrum.bukkit.P;
 import com.volmit.fulcrum.bukkit.TICK;
 import com.volmit.fulcrum.bukkit.Task;
 import com.volmit.fulcrum.entity.Pet;
+import com.volmit.fulcrum.entity.PetHand;
 import com.volmit.fulcrum.entity.pets.PetDan;
 import com.volmit.fulcrum.entity.pets.PetGay;
 import com.volmit.fulcrum.entity.pets.PetMoobark;
 import com.volmit.fulcrum.entity.pets.PetTim;
 import com.volmit.fulcrum.entity.pets.PetWither;
+import com.volmit.fulcrum.fx.EffectCauldronAcceptItem;
+import com.volmit.fulcrum.fx.EffectCauldronAcceptRecipe;
+import com.volmit.fulcrum.fx.EffectCauldronBubble;
+import com.volmit.fulcrum.fx.EffectCauldronRejectRecipe;
 import com.volmit.fulcrum.lang.F;
 import com.volmit.fulcrum.lang.Profiler;
 import com.volmit.fulcrum.world.FastBlock;
@@ -109,21 +112,37 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor
 				sender.sendMessage("Using Bukkit");
 			}
 
-			if(args[0].equalsIgnoreCase("ba"))
+			if(args[0].equalsIgnoreCase("fx"))
 			{
-
-				try
+				if(args.length == 2)
 				{
-					ItemStack is = Items.getSkull("http://textures.minecraft.net/texture/4fc6c7ea21a7b674dcc7b9e92780ea6088d36474cc631e9aa2f1164fa565d7b");
-					Zombie z = (Zombie) ll.getWorld().spawnEntity(ll, EntityType.ZOMBIE);
-					z.setBaby(true);
-					z.getEquipment().setHelmet(is);
-					z.getEquipment().setItemInHand(new ItemStack(Material.IRON_SWORD));
-				}
+					if(args[1].equalsIgnoreCase("bubble"))
+					{
+						System.out.println("bub");
+						new Task(0)
+						{
+							@Override
+							public void run()
+							{
+								new EffectCauldronBubble().play(ll);
+							}
+						};
+					}
 
-				catch(NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e)
-				{
-					e.printStackTrace();
+					if(args[1].equalsIgnoreCase("accept"))
+					{
+						new EffectCauldronAcceptItem().play(ll);
+					}
+
+					if(args[1].equalsIgnoreCase("bad"))
+					{
+						new EffectCauldronRejectRecipe().play(ll);
+					}
+
+					if(args[1].equalsIgnoreCase("good"))
+					{
+						new EffectCauldronAcceptRecipe().play(ll);
+					}
 				}
 			}
 
@@ -158,6 +177,12 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor
 				try
 				{
 					Pet pet = new PetMoobark(p, ll.clone().add(0, 1, 0), "Moobark");
+					pet.setHeldItem(PetHand.LEFT_HAND_ABOVE, new ItemStack(Material.DIAMOND_SWORD));
+					pet.setHeldItem(PetHand.LEFT_HAND_HEAD, new ItemStack(Material.MAGMA_CREAM));
+					pet.setHeldItem(PetHand.LEFT_HAND_FORWARD, new ItemStack(Material.GOLD_PICKAXE));
+					pet.setHeldItem(PetHand.RIGHT_HAND_ABOVE, new ItemStack(Material.IRON_AXE));
+					pet.setHeldItem(PetHand.RIGHT_HAND_HEAD, new ItemStack(Material.COOKED_BEEF));
+					pet.setHeldItem(PetHand.RIGHT_HAND_FORWARD, new ItemStack(Material.STONE_HOE));
 				}
 
 				catch(NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e)
