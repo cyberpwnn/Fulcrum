@@ -17,6 +17,7 @@ import org.bukkit.plugin.Plugin;
 import com.volmit.fulcrum.Fulcrum;
 import com.volmit.fulcrum.bukkit.BlockType;
 import com.volmit.fulcrum.data.cluster.DataCluster;
+import com.volmit.fulcrum.images.ImageBakery;
 
 public class FastBlock12 implements FastBlock
 {
@@ -357,5 +358,35 @@ public class FastBlock12 implements FastBlock
 	public boolean hasData(String node)
 	{
 		return getChunk().hasData(node, this);
+	}
+
+	@Override
+	public void setTexture(BlockFace face, String texture)
+	{
+		ImageBakery.setTexture(b, face, texture);
+	}
+
+	@Override
+	public void removeTexture(BlockFace face)
+	{
+		ImageBakery.removeTexture(b, face);
+	}
+
+	@Override
+	public void setTextures(String texture)
+	{
+		setTexture(BlockFace.NORTH, texture);
+		setTexture(BlockFace.SOUTH, texture);
+		setTexture(BlockFace.EAST, texture);
+		setTexture(BlockFace.WEST, texture);
+	}
+
+	@Override
+	public void removeTextures()
+	{
+		removeTexture(BlockFace.NORTH);
+		removeTexture(BlockFace.SOUTH);
+		removeTexture(BlockFace.EAST);
+		removeTexture(BlockFace.WEST);
 	}
 }

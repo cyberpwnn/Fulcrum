@@ -7,8 +7,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.map.MapCanvas;
 import org.bukkit.map.MapView;
 
-import com.volmit.fulcrum.bukkit.TICK;
-
 public class BakedImageRenderer extends FulcrumRenderer
 {
 	public BakedImageRenderer(BufferedImage img)

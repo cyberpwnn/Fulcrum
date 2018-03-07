@@ -11,19 +11,95 @@ import java.util.zip.ZipFile;
 import javax.imageio.ImageIO;
 import javax.naming.directory.InvalidAttributesException;
 
+import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.ItemFrame;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.map.MapRenderer;
 
 import com.volmit.fulcrum.lang.GList;
 import com.volmit.fulcrum.lang.GMap;
+import com.volmit.fulcrum.lang.GSet;
 import com.volmit.fulcrum.map.BakedImageRenderer;
 import com.volmit.fulcrum.map.Papyrus;
+import com.volmit.fulcrum.vfx.particle.ParticleSuspended;
 
 public class ImageBakery
 {
 	private static final GMap<String, BufferedImage> imgs = new GMap<String, BufferedImage>();
 	private static final GMap<String, GMap<World, Papyrus>> renderers = new GMap<String, GMap<World, Papyrus>>();
+	private static final GMap<Block, GSet<BlockFace>> textures = new GMap<Block, GSet<BlockFace>>();
+
+	public static void removeTexture(Block block, BlockFace face)
+	{
+		ItemFrame frame = getFrame(block, face);
+
+		if(frame == null)
+		{
+			return;
+		}
+
+		frame.setItem(new ItemStack(Material.AIR));
+		frame.remove();
+	}
+
+	public static void setTexture(Block block, BlockFace face, String texture)
+	{
+		if(!block.getRelative(face).getType().equals(Material.AIR))
+		{
+			return;
+		}
+
+		if(!textures.containsKey(block))
+		{
+			textures.put(block, new GSet<BlockFace>());
+		}
+
+		if(!textures.get(block).contains(face))
+		{
+			placeFrame(block, face);
+		}
+
+		ItemFrame frame = getFrame(block, face);
+
+		if(frame == null)
+		{
+			System.out.println("Failed to find");
+			return;
+		}
+
+		frame.setItem(ImageBakery.getBakedMap(block.getWorld(), texture));
+	}
+
+	private static ItemFrame placeFrame(Block block, BlockFace face)
+	{
+		block.getRelative(face).setType(Material.ITEM_FRAME);
+		ItemFrame i = (ItemFrame) block.getWorld().spawn(block.getRelative(face).getLocation(), ItemFrame.class);
+		i.setFacingDirection(face);
+		new ParticleSuspended().setDeep(true).play(i.getLocation());
+		return i;
+	}
+
+	private static ItemFrame getFrame(Block block, BlockFace face)
+	{
+		for(Entity i : block.getWorld().getNearbyEntities(block.getRelative(face).getLocation().clone().add(0.5, 0.5, 0.5), 0.5, 0.5, 0.5))
+		{
+			if(i instanceof ItemFrame)
+			{
+				ItemFrame frame = (ItemFrame) i;
+				if(frame.getAttachedFace().equals(face.getOppositeFace()))
+				{
+					frame.getLocation().getBlock().equals(block.getRelative(face));
+					return frame;
+				}
+			}
+		}
+
+		return null;
+	}
 
 	public static GList<String> getImages()
 	{

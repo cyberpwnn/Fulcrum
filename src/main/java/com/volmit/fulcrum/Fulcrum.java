@@ -9,15 +9,18 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -28,6 +31,7 @@ import com.volmit.fulcrum.bukkit.Items;
 import com.volmit.fulcrum.bukkit.P;
 import com.volmit.fulcrum.bukkit.TICK;
 import com.volmit.fulcrum.bukkit.Task;
+import com.volmit.fulcrum.bukkit.W;
 import com.volmit.fulcrum.entity.Pet;
 import com.volmit.fulcrum.entity.PetHand;
 import com.volmit.fulcrum.entity.pets.PetDan;
@@ -167,34 +171,45 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 	}
 
 	@EventHandler
-	public void on(PlayerInteractEvent e)
+	public void on(BlockPlaceEvent e)
 	{
-		if(e.getClickedBlock().getType().equals(Material.AIR))
+		if(e.getBlockAgainst().getType().equals(Material.GOLD_BLOCK) && e.getBlock().getType().equals(Material.WORKBENCH))
 		{
-			return;
+			FastBlock fb = faster(e.getBlock());
+			fb.setTexture(BlockFace.NORTH, "fulcrum:crafting_table_side_0");
+			fb.setTexture(BlockFace.SOUTH, "fulcrum:crafting_table_side_1");
+			fb.setTexture(BlockFace.EAST, "fulcrum:crafting_table_front_1");
+			fb.setTexture(BlockFace.WEST, "fulcrum:crafting_table_side_2");
 		}
 
-		if(!e.getPlayer().isSneaking())
+		for(Block i : W.blockFaces(e.getBlock()))
 		{
-			return;
+			faster(i).removeTexture(i.getFace(e.getBlock()));
 		}
+	}
 
-		if(!e.getAction().equals(Action.RIGHT_CLICK_BLOCK))
+	public void disableFrameRotate(PlayerInteractEvent e)
+	{
+		if(e.getAction().equals(Action.RIGHT_CLICK_BLOCK) && e.getClickedBlock().getType().equals(Material.ITEM_FRAME))
 		{
-			return;
+			e.setCancelled(true);
 		}
+	}
 
-		if(M.ms() - ms < 100)
+	@EventHandler
+	public void on(HangingBreakByEntityEvent e)
+	{
+		e.setCancelled(true);
+	}
+
+	@EventHandler
+	public void on(BlockBreakEvent e)
+	{
+		if(e.getBlock().getType().equals(Material.WORKBENCH))
 		{
-			return;
+			FastBlock fb = faster(e.getBlock());
+			fb.removeTextures();
 		}
-
-		ms = M.ms();
-		ItemStack map = ImageBakery.getBakedMap(e.getClickedBlock().getWorld(), ImageBakery.getImages().pickRandom());
-		e.getClickedBlock().getRelative(e.getBlockFace()).setType(Material.ITEM_FRAME);
-		ItemFrame i = (ItemFrame) e.getClickedBlock().getWorld().spawn(e.getClickedBlock().getRelative(e.getBlockFace()).getLocation(), ItemFrame.class);
-		i.setFacingDirection(e.getBlockFace());
-		i.setItem(map);
 	}
 
 	@Override
@@ -209,7 +224,7 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 			if(args[0].equalsIgnoreCase("fast"))
 			{
 
-				faster(ll.getWorld()).createExplosion(ll, 40f, false);
+				faster(ll.getWorld()).createExplosion(ll, 300f, false);
 				sender.sendMessage("Using FastWorld Adapter");
 			}
 
