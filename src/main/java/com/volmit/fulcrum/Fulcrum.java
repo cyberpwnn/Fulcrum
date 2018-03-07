@@ -12,9 +12,13 @@ import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -35,8 +39,11 @@ import com.volmit.fulcrum.fx.EffectCauldronAcceptItem;
 import com.volmit.fulcrum.fx.EffectCauldronAcceptRecipe;
 import com.volmit.fulcrum.fx.EffectCauldronBubble;
 import com.volmit.fulcrum.fx.EffectCauldronRejectRecipe;
+import com.volmit.fulcrum.images.ImageBakery;
+import com.volmit.fulcrum.images.PluginUtil;
 import com.volmit.fulcrum.lang.C;
 import com.volmit.fulcrum.lang.F;
+import com.volmit.fulcrum.lang.M;
 import com.volmit.fulcrum.lang.Profiler;
 import com.volmit.fulcrum.world.BlockCache;
 import com.volmit.fulcrum.world.ChunkCache;
@@ -48,22 +55,14 @@ import com.volmit.fulcrum.world.FastWorld;
 import com.volmit.fulcrum.world.FastWorld12;
 import com.volmit.fulcrum.world.WorldCache;
 
-public class Fulcrum extends JavaPlugin implements CommandExecutor
+public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 {
 	public static Fulcrum instance;
 	public static IAdapter adapter;
 	public static WorldCache worldCache;
 	public static ChunkCache chunkCache;
 	public static BlockCache blockCache;
-
-	@Override
-	public void onLoad()
-	{
-		instance = this;
-		worldCache = new WorldCache();
-		chunkCache = new ChunkCache();
-		blockCache = new BlockCache();
-	}
+	public static long ms = M.ms();
 
 	public static int getCacheSize()
 	{
@@ -138,6 +137,23 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor
 	@Override
 	public void onEnable()
 	{
+		instance = this;
+		worldCache = new WorldCache();
+		chunkCache = new ChunkCache();
+		blockCache = new BlockCache();
+		adapter = new Adapter12();
+
+		try
+		{
+			ImageBakery.scan(new File(getDataFolder().getParentFile(), PluginUtil.getPluginFileName(getName())), "fulcrum");
+		}
+
+		catch(IOException e)
+		{
+			e.printStackTrace();
+		}
+
+		getServer().getPluginManager().registerEvents(this, this);
 		getCommand("fulcrum").setExecutor(this);
 
 		new Task(0)
@@ -148,8 +164,37 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor
 				onTick();
 			}
 		};
+	}
 
-		adapter = new Adapter12();
+	@EventHandler
+	public void on(PlayerInteractEvent e)
+	{
+		if(e.getClickedBlock().getType().equals(Material.AIR))
+		{
+			return;
+		}
+
+		if(!e.getPlayer().isSneaking())
+		{
+			return;
+		}
+
+		if(!e.getAction().equals(Action.RIGHT_CLICK_BLOCK))
+		{
+			return;
+		}
+
+		if(M.ms() - ms < 100)
+		{
+			return;
+		}
+
+		ms = M.ms();
+		ItemStack map = ImageBakery.getBakedMap(e.getClickedBlock().getWorld(), ImageBakery.getImages().pickRandom());
+		e.getClickedBlock().getRelative(e.getBlockFace()).setType(Material.ITEM_FRAME);
+		ItemFrame i = (ItemFrame) e.getClickedBlock().getWorld().spawn(e.getClickedBlock().getRelative(e.getBlockFace()).getLocation(), ItemFrame.class);
+		i.setFacingDirection(e.getBlockFace());
+		i.setItem(map);
 	}
 
 	@Override
