@@ -1,5 +1,7 @@
 package com.volmit.fulcrum.entity.pets;
 
+import java.awt.Color;
+
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
@@ -11,6 +13,7 @@ import com.volmit.fulcrum.bukkit.Items;
 import com.volmit.fulcrum.entity.FulcrumPet;
 import com.volmit.fulcrum.entity.Pet;
 import com.volmit.fulcrum.sfx.Audio;
+import com.volmit.fulcrum.vfx.particle.ParticleNote;
 import com.volmit.fulcrum.vfx.particle.ParticleVillagerEmote;
 
 public class PetFred extends FulcrumPet
@@ -42,10 +45,11 @@ public class PetFred extends FulcrumPet
 	@Override
 	protected void onInteract(Pet p, Player who)
 	{
-		new ParticleVillagerEmote().setAngry(true).play(p.getLocation());
-		new Audio().s(Sound.UI_BUTTON_CLICK).vp(1f, 1.3f).c(SoundCategory.NEUTRAL).play(p.getLocation());
+		new ParticleNote().setColor(Color.red).play(p.getLocation());
+		new Audio().s(Sound.ENTITY_WITHER_DEATH).vp(1.2f, 0.2f).c(SoundCategory.NEUTRAL).play(p.getLocation());
+		new Audio().s(Sound.ENTITY_ENDERDRAGON_DEATH).vp(1.2f, 0.2f).c(SoundCategory.NEUTRAL).play(p.getLocation());
+		new Audio().s(Sound.ENTITY_PLAYER_BURP).vp(0.2f, 1.2f).c(SoundCategory.NEUTRAL).play(p.getLocation());
 	}
-
 	@Override
 	protected void onDamagedByEntity(Pet p, Entity damager, double damage, boolean cancelled)
 	{
