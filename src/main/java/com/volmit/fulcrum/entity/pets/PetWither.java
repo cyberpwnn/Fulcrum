@@ -12,7 +12,6 @@ import com.volmit.fulcrum.entity.FulcrumPet;
 import com.volmit.fulcrum.entity.Pet;
 import com.volmit.fulcrum.sfx.Audio;
 import com.volmit.fulcrum.vfx.particle.ParticleEnchantmentTable;
-import com.volmit.fulcrum.vfx.particle.ParticleVillagerEmote;
 
 public class PetWither extends FulcrumPet
 {
