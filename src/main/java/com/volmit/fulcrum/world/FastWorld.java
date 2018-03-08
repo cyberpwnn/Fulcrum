@@ -1,31 +1,43 @@
 package com.volmit.fulcrum.world;
 
 import org.bukkit.Chunk;
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 
 import com.volmit.fulcrum.data.cluster.DataCluster;
-import com.volmit.fulcrum.lang.GList;
 
 public interface FastWorld extends World
 {
-	public DataCluster readData(String node, Block block);
+	public DataCluster pull(String node, Block block);
 
-	public DataCluster readData(String node, Chunk chunk);
+	public DataCluster pull(String node, Chunk chunk);
 
-	public DataCluster readData(String node);
+	public DataCluster pull(String node);
 
-	public void writeData(String node, DataCluster cc, Block block);
+	public void push(String node, DataCluster cc, Block block);
 
-	public void writeData(String node, DataCluster cc, Chunk chunk);
+	public void push(String node, DataCluster cc, Chunk chunk);
 
-	public void writeData(String node, DataCluster cc);
+	public void push(String node, DataCluster cc);
 
-	public boolean hasData(String node, Block block);
+	public FastChunk getFastChunkAt(int x, int z);
 
-	public boolean hasData(String node, Chunk chunk);
+	public FastChunk[] getLoadedFastChunks();
 
-	public boolean hasData(String node);
+	public FastBlock getFastBlockAt(int x, int y, int z);
 
-	public GList<FastChunk> getLoadedDataChunks();
+	public FastBlock getFastBlockAt(Location location);
+
+	public void lockState(String node, Block block);
+
+	public void lockState(String node, int x, int y, int z);
+
+	public void lockState(String node, Location location);
+
+	public void drop(String node);
+
+	public void drop(String node, Block block);
+
+	public void drop(String node, Chunk chunk);
 }

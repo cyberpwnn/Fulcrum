@@ -931,167 +931,156 @@ public class FastWorld12 implements FastWorld, Listener
 	}
 
 	@Override
-	public DataCluster readData(String node, Block block)
+	public DataCluster pull(String node, Block block)
 	{
 		try
 		{
-			return Fulcrum.blockCache.read(new BlockKey(block, node), new File(getFileData(block), node + ".dat"));
-		}
-
-		catch(IOException e)
-		{
-			e.printStackTrace();
-		}
-
-		return new DataCluster();
-	}
-
-	@Override
-	public DataCluster readData(String node, Chunk chunk)
-	{
-		try
-		{
-			return Fulcrum.chunkCache.read(new ChunkKey(chunk, node), new File(getFileData(chunk), node + ".dat"));
-		}
-
-		catch(IOException e)
-		{
-			e.printStackTrace();
-		}
-
-		return new DataCluster();
-	}
-
-	@Override
-	public DataCluster readData(String node)
-	{
-		try
-		{
-			return Fulcrum.worldCache.read(new WorldKey(this, node), new File(getFileData(), node + ".dat"));
-		}
-
-		catch(IOException e)
-		{
-			e.printStackTrace();
-		}
-
-		return new DataCluster();
-	}
-
-	@Override
-	public void writeData(String node, DataCluster cc, Block block)
-	{
-		Fulcrum.blockCache.write(new BlockKey(block, node), cc, new File(getFileData(block), node + ".dat"));
-	}
-
-	@Override
-	public void writeData(String node, DataCluster cc, Chunk chunk)
-	{
-		Fulcrum.chunkCache.write(new ChunkKey(chunk, node), cc, new File(getFileData(chunk), node + ".dat"));
-	}
-
-	@Override
-	public void writeData(String node, DataCluster cc)
-	{
-		Fulcrum.worldCache.write(new WorldKey(this, node), cc, new File(getFileData(), node + ".dat"));
-	}
-
-	@Override
-	public boolean hasData(String node, Block block)
-	{
-		if(Fulcrum.blockCache.has(new BlockKey(block, node)))
-		{
-			return true;
-		}
-
-		return new File(getFileData(block), node + ".dat").exists();
-	}
-
-	@Override
-	public boolean hasData(String node, Chunk chunk)
-	{
-		if(Fulcrum.chunkCache.has(new ChunkKey(chunk, node)))
-		{
-			return true;
-		}
-
-		return new File(getFileData(chunk), node + ".dat").exists();
-	}
-
-	@Override
-	public boolean hasData(String node)
-	{
-		if(Fulcrum.worldCache.has(new WorldKey(this, node)))
-		{
-			return true;
-		}
-
-		return new File(getFileData(), node + ".dat").exists();
-	}
-
-	private File getFileData()
-	{
-		return new File(getWorldFolder(), "fulcrum");
-	}
-
-	private File getFileData(Chunk c)
-	{
-		return new File(new File(getFileData(), toMCATag(c)), c.getX() + "." + c.getZ());
-	}
-
-	private File getFileData(Block b)
-	{
-		return new File(getFileData(b.getChunk()), b.getX() + "." + b.getY() + "." + b.getZ());
-	}
-
-	private String toMCATag(Chunk c)
-	{
-		return (c.getX() >> 5) + "." + (c.getZ() >> 5);
-	}
-
-	@Override
-	public GList<FastChunk> getLoadedDataChunks()
-	{
-		GList<FastChunk> fc = new GList<FastChunk>();
-
-		if(!getFileData().exists() && Fulcrum.chunkCache.size() < 1)
-		{
-			return fc;
-		}
-
-		fc.add(getLoadedChunks());
-		GList<String> l = new GList<String>();
-
-		if(getFileData().exists())
-		{
-			for(File i : getFileData().listFiles())
+			if(!node.endsWith("%LCK"))
 			{
-				if(i.isDirectory())
+				DataCluster cc = Fulcrum.cache.pull(block, node + "%LCK");
+
+				if(cc.contains("locked-material") && cc.contains("locked-data"))
 				{
-					for(File j : i.listFiles())
+					if(!cc.getString("locked-material").equals(block.getType().name()) || cc.getInt("locked-data") != (int) block.getData())
 					{
-						if(j.isDirectory())
-						{
-							l.add(j.getName());
-						}
+						cc.clear();
+						push(node + "%LCK", cc, block);
+						push(node, new DataCluster(), block);
+						return new DataCluster();
 					}
 				}
 			}
+
+			return Fulcrum.cache.pull(block, node);
 		}
 
-		for(File i : Fulcrum.chunkCache.files.v())
+		catch(IOException e)
 		{
-			l.add(i.getParentFile().getName());
+			e.printStackTrace();
 		}
 
-		for(FastChunk i : fc.copy())
+		return new DataCluster();
+	}
+
+	@Override
+	public DataCluster pull(String node, Chunk chunk)
+	{
+		try
 		{
-			if(!l.contains(i.getX() + "." + i.getZ()))
-			{
-				fc.remove(i);
-			}
+			return Fulcrum.cache.pull(chunk, node);
+		}
+
+		catch(IOException e)
+		{
+			e.printStackTrace();
+		}
+
+		return new DataCluster();
+	}
+
+	@Override
+	public DataCluster pull(String node)
+	{
+		try
+		{
+			return Fulcrum.cache.pull(this, node);
+		}
+
+		catch(IOException e)
+		{
+			e.printStackTrace();
+		}
+
+		return new DataCluster();
+	}
+
+	@Override
+	public void push(String node, DataCluster cc, Block block)
+	{
+		Fulcrum.cache.push(block, node, cc);
+	}
+
+	@Override
+	public void push(String node, DataCluster cc, Chunk chunk)
+	{
+		Fulcrum.cache.push(chunk, node, cc);
+	}
+
+	@Override
+	public void push(String node, DataCluster cc)
+	{
+		Fulcrum.cache.push(this, node, cc);
+	}
+
+	@Override
+	public FastChunk getFastChunkAt(int x, int z)
+	{
+		return new FastChunk12(w.getChunkAt(x, z));
+	}
+
+	@Override
+	public FastChunk[] getLoadedFastChunks()
+	{
+		Chunk[] c = w.getLoadedChunks();
+		FastChunk[] fc = new FastChunk[c.length];
+
+		for(int i = 0; i < c.length; i++)
+		{
+			fc[i] = new FastChunk12(c[i]);
 		}
 
 		return fc;
+	}
+
+	@Override
+	public FastBlock getFastBlockAt(int x, int y, int z)
+	{
+		return new FastBlock12(w.getBlockAt(x, y, z));
+	}
+
+	@Override
+	public FastBlock getFastBlockAt(Location location)
+	{
+		return new FastBlock12(w.getBlockAt(location));
+	}
+
+	@Override
+	public void lockState(String node, Block block)
+	{
+		DataCluster lock = pull(node + "%LCK", block);
+		lock.put("locked-material", block.getType().name());
+		lock.put("locked-data", (int) block.getData());
+		push(node + "%LCK", lock, block);
+	}
+
+	@Override
+	public void lockState(String node, int x, int y, int z)
+	{
+		lockState(node, getBlockAt(x, y, z));
+	}
+
+	@Override
+	public void lockState(String node, Location location)
+	{
+		lockState(node, getBlockAt(location));
+	}
+
+	@Override
+	public void drop(String node)
+	{
+		push(node, new DataCluster());
+	}
+
+	@Override
+	public void drop(String node, Block block)
+	{
+		push(node, new DataCluster(), block);
+		push(node + "%LCK", new DataCluster(), block);
+	}
+
+	@Override
+	public void drop(String node, Chunk chunk)
+	{
+		push(node, new DataCluster(), chunk);
 	}
 }

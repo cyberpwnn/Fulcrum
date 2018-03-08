@@ -4,39 +4,22 @@ import org.bukkit.block.Block;
 
 public class BlockKey
 {
+	private String world;
 	private int x;
 	private int y;
 	private int z;
-	private String world;
-	private String category;
 
-	public BlockKey(int x, int y, int z, String world, String category)
+	public BlockKey(Block c)
 	{
+		this(c.getWorld().getName(), c.getX(), c.getY(), c.getZ());
+	}
+
+	public BlockKey(String world, int x, int y, int z)
+	{
+		this.world = world;
 		this.x = x;
 		this.y = y;
 		this.z = z;
-		this.world = world;
-		this.category = category;
-	}
-
-	public BlockKey(Block block, String category)
-	{
-		this(block.getX(), block.getY(), block.getZ(), block.getWorld().getName(), category);
-	}
-
-	public int getX()
-	{
-		return x;
-	}
-
-	public int getY()
-	{
-		return y;
-	}
-
-	public int getZ()
-	{
-		return z;
 	}
 
 	public String getWorld()
@@ -44,9 +27,39 @@ public class BlockKey
 		return world;
 	}
 
-	public String getCategory()
+	public void setWorld(String world)
 	{
-		return category;
+		this.world = world;
+	}
+
+	public int getX()
+	{
+		return x;
+	}
+
+	public void setX(int x)
+	{
+		this.x = x;
+	}
+
+	public int getZ()
+	{
+		return z;
+	}
+
+	public void setZ(int z)
+	{
+		this.z = z;
+	}
+
+	public int getY()
+	{
+		return y;
+	}
+
+	public void setY(int y)
+	{
+		this.y = y;
 	}
 
 	@Override
@@ -54,7 +67,6 @@ public class BlockKey
 	{
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((category == null) ? 0 : category.hashCode());
 		result = prime * result + ((world == null) ? 0 : world.hashCode());
 		result = prime * result + x;
 		result = prime * result + y;
@@ -78,17 +90,6 @@ public class BlockKey
 			return false;
 		}
 		BlockKey other = (BlockKey) obj;
-		if(category == null)
-		{
-			if(other.category != null)
-			{
-				return false;
-			}
-		}
-		else if(!category.equals(other.category))
-		{
-			return false;
-		}
 		if(world == null)
 		{
 			if(other.world != null)
@@ -114,4 +115,5 @@ public class BlockKey
 		}
 		return true;
 	}
+
 }

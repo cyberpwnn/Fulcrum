@@ -201,4 +201,9 @@ public class DataCluster
 		types.add(new ClusterLong(0l));
 		types.add(new ClusterStringList(new GList<String>()));
 	}
+
+	public boolean isEmpty()
+	{
+		return clusters.isEmpty();
+	}
 }

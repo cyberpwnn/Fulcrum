@@ -343,21 +343,15 @@ public class FastBlock12 implements FastBlock
 	}
 
 	@Override
-	public DataCluster readData(String node)
+	public DataCluster pull(String node)
 	{
-		return getChunk().readData(node, this);
+		return getChunk().pull(node, this);
 	}
 
 	@Override
-	public void writeData(String node, DataCluster cc)
+	public void push(String node, DataCluster cc)
 	{
-		getChunk().writeData(node, cc, this);
-	}
-
-	@Override
-	public boolean hasData(String node)
-	{
-		return getChunk().hasData(node, this);
+		getChunk().push(node, cc, this);
 	}
 
 	@Override
@@ -388,5 +382,29 @@ public class FastBlock12 implements FastBlock
 		removeTexture(BlockFace.SOUTH);
 		removeTexture(BlockFace.EAST);
 		removeTexture(BlockFace.WEST);
+	}
+
+	@Override
+	public FastWorld getFastWorld()
+	{
+		return new FastWorld12(b.getWorld());
+	}
+
+	@Override
+	public FastChunk getFastChunk()
+	{
+		return new FastChunk12(b.getChunk());
+	}
+
+	@Override
+	public void lockBlockState(String node)
+	{
+		getFastWorld().lockState(node, this);
+	}
+
+	@Override
+	public void drop(String node)
+	{
+		getFastWorld().drop(node, this);
 	}
 }

@@ -1,21 +1,39 @@
 package com.volmit.fulcrum.world;
 
 import org.bukkit.Chunk;
+import org.bukkit.World;
 
-public class ChunkKey
+public class MCAKey
 {
 	private String world;
 	private int x;
 	private int z;
 
-	public ChunkKey(Chunk c)
-	{
-		this(c.getWorld().getName(), c.getX(), c.getZ());
-	}
-
-	public ChunkKey(String world, int x, int z)
+	public MCAKey(String world, int x, int z)
 	{
 		this.world = world;
+		this.x = x;
+		this.z = z;
+	}
+
+	public MCAKey(Chunk c)
+	{
+		this(c.getWorld(), c.getX() >> 5, c.getZ() >> 5);
+	}
+
+	public boolean contains(Chunk c)
+	{
+		return contains(c.getWorld().getName(), c.getX(), c.getZ());
+	}
+
+	public boolean contains(String world, int cx, int cz)
+	{
+		return cx >> 5 == x && cz >> 5 == z && world.equals(getWorld());
+	}
+
+	public MCAKey(World world, int x, int z)
+	{
+		this.world = world.getName();
 		this.x = x;
 		this.z = z;
 	}
@@ -76,7 +94,7 @@ public class ChunkKey
 		{
 			return false;
 		}
-		ChunkKey other = (ChunkKey) obj;
+		MCAKey other = (MCAKey) obj;
 		if(world == null)
 		{
 			if(other.world != null)

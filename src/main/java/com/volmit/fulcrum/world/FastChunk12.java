@@ -1,16 +1,12 @@
 package com.volmit.fulcrum.world;
 
-import java.io.File;
-
 import org.bukkit.Chunk;
 import org.bukkit.ChunkSnapshot;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Entity;
 
-import com.volmit.fulcrum.Fulcrum;
 import com.volmit.fulcrum.data.cluster.DataCluster;
-import com.volmit.fulcrum.lang.GList;
 
 public class FastChunk12 implements FastChunk
 {
@@ -113,84 +109,56 @@ public class FastChunk12 implements FastChunk
 	}
 
 	@Override
-	public DataCluster readData(String node, Block block)
+	public DataCluster pull(String node, Block block)
 	{
-		return getWorld().readData(node, block);
+		return getWorld().pull(node, block);
 	}
 
 	@Override
-	public DataCluster readData(String node)
+	public DataCluster pull(String node)
 	{
-		return getWorld().readData(node, this);
+		return getWorld().pull(node, this);
 	}
 
 	@Override
-	public void writeData(String node, DataCluster cc, Block block)
+	public void push(String node, DataCluster cc, Block block)
 	{
-		getWorld().writeData(node, cc, block);
+		getWorld().push(node, cc, block);
 	}
 
 	@Override
-	public void writeData(String node, DataCluster cc)
+	public void push(String node, DataCluster cc)
 	{
-		getWorld().writeData(node, cc, this);
+		getWorld().push(node, cc, this);
 	}
 
 	@Override
-	public boolean hasData(String node, Block block)
+	public FastBlock getFastBlockAt(int x, int y, int z)
 	{
-		return getWorld().hasData(node, block);
+		return new FastBlock12(c.getBlock(x, y, z));
 	}
 
 	@Override
-	public boolean hasData(String node)
+	public FastWorld getFastWorld()
 	{
-		return getWorld().hasData(node, this);
-	}
-
-	private File getFileData()
-	{
-		return new File(getWorld().getWorldFolder(), "fulcrum");
-	}
-
-	private File getFileData(Chunk c)
-	{
-		return new File(new File(getFileData(), toMCATag(c)), c.getX() + "." + c.getZ());
-	}
-
-	private String toMCATag(Chunk c)
-	{
-		return (c.getX() >> 5) + "." + (c.getZ() >> 5);
+		return new FastWorld12(c.getWorld());
 	}
 
 	@Override
-	public GList<FastBlock> getDataBlocks()
+	public void lockState(String node, int x, int y, int z)
 	{
-		GList<FastBlock> fb = new GList<FastBlock>();
+		lockState(node, c.getBlock(x, y, z));
+	}
 
-		if(!getFileData(this).exists() && Fulcrum.blockCache.size() < 1)
-		{
-			return fb;
-		}
+	@Override
+	public void lockState(String node, Block block)
+	{
+		getFastWorld().lockState(node, block);
+	}
 
-		for(File i : Fulcrum.blockCache.files.v())
-		{
-			String[] f = i.getParentFile().getName().split("\\.");
-			fb.add((FastBlock) getWorld().getBlockAt(Integer.valueOf(f[0]), Integer.valueOf(f[1]), Integer.valueOf(f[2])));
-		}
-
-		if(getFileData(this).exists())
-		{
-			for(File i : getFileData(this).listFiles())
-			{
-				if(i.isDirectory())
-				{
-					String[] f = i.getName().split("\\.");
-					fb.add((FastBlock) getWorld().getBlockAt(Integer.valueOf(f[0]), Integer.valueOf(f[1]), Integer.valueOf(f[2])));
-				}
-			}
-		}
-
-		return fb;
+	@Override
+	public void drop(String node)
+	{
+		getFastWorld().drop(node, this);
 	}
 }
