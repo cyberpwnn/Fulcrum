@@ -5,17 +5,24 @@ import java.io.IOException;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.volmit.fulcrum.adapter.Adapter12;
 import com.volmit.fulcrum.adapter.IAdapter;
+import com.volmit.fulcrum.bukkit.BlockType;
+import com.volmit.fulcrum.bukkit.Dimension;
+import com.volmit.fulcrum.bukkit.Direction;
+import com.volmit.fulcrum.bukkit.P;
 import com.volmit.fulcrum.bukkit.TICK;
 import com.volmit.fulcrum.bukkit.Task;
 import com.volmit.fulcrum.images.ImageBakery;
@@ -28,6 +35,10 @@ import com.volmit.fulcrum.world.FastChunk12;
 import com.volmit.fulcrum.world.FastWorld;
 import com.volmit.fulcrum.world.FastWorld12;
 import com.volmit.fulcrum.world.MCACache;
+import com.volmit.fulcrum.world.scm.IVariableBlockType;
+import com.volmit.fulcrum.world.scm.IVariableChooser;
+import com.volmit.fulcrum.world.scm.IVolume;
+import com.volmit.fulcrum.world.scm.MappedVolume;
 
 public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 {
@@ -109,6 +120,41 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 	{
 		if(command.getName().equalsIgnoreCase("fulcrum"))
 		{
+			Player p = (Player) sender;
+			Location l = P.targetBlock(p, 100);
+			IVolume v = new MappedVolume(new Dimension(5, 5, 5));
+			v.clear(IVariableBlockType.anythingExcept(new BlockType(Material.STONE)));
+			v.set(0, 0, 0, IVariableBlockType.anyVariantOf(Material.STONE));
+			v.set(0, 1, 0, IVariableBlockType.anyVariantOf(Material.STONE));
+			v.set(0, 2, 0, IVariableBlockType.anyVariantOf(Material.STONE));
+			v.set(4, 4, 4, IVariableBlockType.anyVariantOf(Material.STONE));
+			v.set(4, 3, 4, IVariableBlockType.anyVariantOf(Material.STONE));
+			v.set(4, 2, 4, IVariableBlockType.anyVariantOf(Material.STONE));
+
+			int k = 0;
+
+			for(Direction i : Direction.values())
+			{
+				k++;
+
+				v.rotate(Direction.N, i).place(l.clone().add(0, (v.getDimension().getHeight() + 1) * k, 0), new IVariableChooser()
+				{
+					@Override
+					public BlockType realize(IVariableBlockType type)
+					{
+						if(type.isValid(new BlockType(Material.STONE)))
+						{
+							return new BlockType(Material.STONE);
+						}
+
+						else
+						{
+							return new BlockType(Material.GLASS);
+						}
+					}
+				});
+			}
+
 			return true;
 		}
 
