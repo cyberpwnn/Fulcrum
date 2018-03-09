@@ -47,6 +47,43 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 	public static MCACache cache;
 	public static long ms = M.ms();
 
+	@Override
+	public void onEnable()
+	{
+		instance = this;
+		cache = new MCACache();
+		adapter = new Adapter12();
+
+		try
+		{
+			ImageBakery.scan(new File(getDataFolder().getParentFile(), PluginUtil.getPluginFileName(getName())), "fulcrum");
+			System.out.println("Loaded images");
+		}
+
+		catch(IOException e)
+		{
+			e.printStackTrace();
+		}
+
+		getServer().getPluginManager().registerEvents(this, this);
+		getCommand("fulcrum").setExecutor(this);
+
+		new Task(0)
+		{
+			@Override
+			public void run()
+			{
+				onTick();
+			}
+		};
+	}
+
+	@Override
+	public void onDisable()
+	{
+		flushCache();
+	}
+
 	public static int getCacheSize()
 	{
 		return cache.size();
@@ -83,36 +120,6 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 	public static FastWorld faster(World world)
 	{
 		return new FastWorld12(world);
-	}
-
-	@Override
-	public void onEnable()
-	{
-		instance = this;
-		cache = new MCACache();
-		adapter = new Adapter12();
-
-		try
-		{
-			ImageBakery.scan(new File(getDataFolder().getParentFile(), PluginUtil.getPluginFileName(getName())), "fulcrum");
-		}
-
-		catch(IOException e)
-		{
-			e.printStackTrace();
-		}
-
-		getServer().getPluginManager().registerEvents(this, this);
-		getCommand("fulcrum").setExecutor(this);
-
-		new Task(0)
-		{
-			@Override
-			public void run()
-			{
-				onTick();
-			}
-		};
 	}
 
 	@Override
@@ -169,12 +176,6 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 	public static void unregister(Listener l)
 	{
 		HandlerList.unregisterAll(l);
-	}
-
-	@Override
-	public void onDisable()
-	{
-		flushCache();
 	}
 
 	public void onTick()

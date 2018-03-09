@@ -11,6 +11,7 @@ import java.util.zip.ZipFile;
 import javax.imageio.ImageIO;
 import javax.naming.directory.InvalidAttributesException;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -20,9 +21,11 @@ import org.bukkit.entity.ItemFrame;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.map.MapRenderer;
 
+import com.volmit.fulcrum.lang.F;
 import com.volmit.fulcrum.lang.GList;
 import com.volmit.fulcrum.lang.GMap;
 import com.volmit.fulcrum.lang.GSet;
+import com.volmit.fulcrum.lang.M;
 import com.volmit.fulcrum.map.BakedImageRenderer;
 import com.volmit.fulcrum.map.Papyrus;
 import com.volmit.fulcrum.vfx.particle.ParticleSuspended;
@@ -108,6 +111,11 @@ public class ImageBakery
 
 	public static ItemStack getBakedMap(World world, String id)
 	{
+		if(!getImages().contains(id))
+		{
+			id = "fulcrum:unknown";
+		}
+
 		if(!renderers.containsKey(id))
 		{
 			renderers.put(id, new GMap<World, Papyrus>());
@@ -219,5 +227,27 @@ public class ImageBakery
 		}
 
 		zipFile.close();
+	}
+
+	public static void compile()
+	{
+		int k = getImages().size() * Bukkit.getWorlds().size();
+		int v = 0;
+		long ms = M.ms();
+
+		for(String i : getImages())
+		{
+			for(World j : Bukkit.getWorlds())
+			{
+				getBakedMap(j, i);
+				v++;
+
+				if(M.ms() - ms > 5000)
+				{
+					ms = M.ms();
+					System.out.println("Compiling Renderers: " + F.pc((double) v / (double) k, 2));
+				}
+			}
+		}
 	}
 }
