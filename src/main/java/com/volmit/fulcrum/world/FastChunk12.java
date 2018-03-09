@@ -145,18 +145,6 @@ public class FastChunk12 implements FastChunk
 	}
 
 	@Override
-	public void lockState(String node, int x, int y, int z)
-	{
-		lockState(node, c.getBlock(x, y, z));
-	}
-
-	@Override
-	public void lockState(String node, Block block)
-	{
-		getFastWorld().lockState(node, block);
-	}
-
-	@Override
 	public void drop(String node)
 	{
 		getFastWorld().drop(node, this);

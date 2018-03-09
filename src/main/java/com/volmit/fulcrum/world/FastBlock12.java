@@ -396,11 +396,6 @@ public class FastBlock12 implements FastBlock
 		return new FastChunk12(b.getChunk());
 	}
 
-	@Override
-	public void lockBlockState(String node)
-	{
-		getFastWorld().lockState(node, this);
-	}
 
 	@Override
 	public void drop(String node)

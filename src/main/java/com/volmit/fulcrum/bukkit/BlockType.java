@@ -10,14 +10,76 @@ public class BlockType
 	private Material material;
 	private Byte data;
 
-	/**
-	 * Create a BlockType
-	 *
-	 * @param material
-	 *            the material
-	 * @param data
-	 *            the data
-	 */
+	@SuppressWarnings("deprecation")
+	public BlockType(String s)
+	{
+		Material material = null;
+		String m = "0";
+		String b = "0";
+
+		if(s.contains(":"))
+		{
+			m = s.split(":")[0];
+			b = s.split(":")[1];
+		}
+
+		else
+		{
+			m = s;
+		}
+
+		try
+		{
+			material = Material.getMaterial(Integer.valueOf(m));
+
+			if(material == null)
+			{
+				try
+				{
+					material = Material.valueOf(m.toUpperCase());
+
+					if(material == null)
+					{
+
+					}
+				}
+
+				catch(Exception e)
+				{
+
+				}
+			}
+		}
+
+		catch(Exception e)
+		{
+			try
+			{
+				material = Material.valueOf(m.toUpperCase());
+
+				if(material == null)
+				{
+
+				}
+			}
+
+			catch(Exception ex)
+			{
+
+			}
+		}
+
+		try
+		{
+			data = Integer.valueOf(b).byteValue();
+		}
+
+		catch(Exception e)
+		{
+			data = (byte) 0;
+		}
+	}
+
 	public BlockType(Material material, Byte data)
 	{
 		this.material = material;

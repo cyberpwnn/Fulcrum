@@ -5,3 +5,5 @@ load: startup
 commands:
   fulcrum:
     aliases: [fu, fulc, fm]
+  scm:
+    aliases: [mbscm]

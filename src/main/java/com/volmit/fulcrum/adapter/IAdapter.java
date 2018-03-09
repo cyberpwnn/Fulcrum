@@ -26,6 +26,8 @@ public interface IAdapter
 
 	public ItemStack getSkull(String uri) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException;
 
+	public void makeSectionDirty(Location l);
+
 	public void applyPhysics(Block b);
 
 	public void sendReload(Chunk c);

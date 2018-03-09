@@ -15,10 +15,6 @@ public interface FastChunk extends Chunk
 
 	public void push(String node, DataCluster cc);
 
-	public void lockState(String node, int x, int y, int z);
-
-	public void lockState(String node, Block block);
-
 	public void drop(String node);
 
 	public FastBlock getFastBlockAt(int x, int y, int z);

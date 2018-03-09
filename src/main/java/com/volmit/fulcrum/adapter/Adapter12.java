@@ -420,6 +420,11 @@ public final class Adapter12 implements IAdapter
 
 		return localItemStack;
 	}
+	
+	public void makeSectionDirty(Location l)
+	{
+		makeDirty(l.getChunk(), l.getBlockY() >> 4);
+	}
 
 	@Override
 	public void queueUpdate(Block b)

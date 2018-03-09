@@ -29,12 +29,6 @@ public interface FastWorld extends World
 
 	public FastBlock getFastBlockAt(Location location);
 
-	public void lockState(String node, Block block);
-
-	public void lockState(String node, int x, int y, int z);
-
-	public void lockState(String node, Location location);
-
 	public void drop(String node);
 
 	public void drop(String node, Block block);

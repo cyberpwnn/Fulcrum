@@ -23,7 +23,5 @@ public interface FastBlock extends Block
 
 	public FastChunk getFastChunk();
 
-	public void lockBlockState(String node);
-
 	public void drop(String node);
 }

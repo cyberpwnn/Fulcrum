@@ -935,22 +935,6 @@ public class FastWorld12 implements FastWorld, Listener
 	{
 		try
 		{
-			if(!node.endsWith("%LCK"))
-			{
-				DataCluster cc = Fulcrum.cache.pull(block, node + "%LCK");
-
-				if(cc.contains("locked-material") && cc.contains("locked-data"))
-				{
-					if(!cc.getString("locked-material").equals(block.getType().name()) || cc.getInt("locked-data") != (int) block.getData())
-					{
-						cc.clear();
-						push(node + "%LCK", cc, block);
-						push(node, new DataCluster(), block);
-						return new DataCluster();
-					}
-				}
-			}
-
 			return Fulcrum.cache.pull(block, node);
 		}
 
@@ -1045,27 +1029,6 @@ public class FastWorld12 implements FastWorld, Listener
 	}
 
 	@Override
-	public void lockState(String node, Block block)
-	{
-		DataCluster lock = pull(node + "%LCK", block);
-		lock.put("locked-material", block.getType().name());
-		lock.put("locked-data", (int) block.getData());
-		push(node + "%LCK", lock, block);
-	}
-
-	@Override
-	public void lockState(String node, int x, int y, int z)
-	{
-		lockState(node, getBlockAt(x, y, z));
-	}
-
-	@Override
-	public void lockState(String node, Location location)
-	{
-		lockState(node, getBlockAt(location));
-	}
-
-	@Override
 	public void drop(String node)
 	{
 		push(node, new DataCluster());
@@ -1075,7 +1038,6 @@ public class FastWorld12 implements FastWorld, Listener
 	public void drop(String node, Block block)
 	{
 		push(node, new DataCluster(), block);
-		push(node + "%LCK", new DataCluster(), block);
 	}
 
 	@Override

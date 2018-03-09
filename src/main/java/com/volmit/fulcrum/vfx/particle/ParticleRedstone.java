@@ -34,7 +34,7 @@ public class ParticleRedstone extends ParticleBase implements ColoredEffect
 	}
 
 	@Override
-	public ColoredEffect setColor(Color color)
+	public ParticleRedstone setColor(Color color)
 	{
 		this.color = color;
 		return this;
