@@ -17,7 +17,7 @@ public interface IVolume
 
 	public void load(File f) throws IOException;
 
-	public IMappedVolume match(Location location);
+	public IMappedVolume match(Location location, SnappedWorld w);
 
 	public void compile();
 

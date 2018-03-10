@@ -18,7 +18,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
@@ -34,6 +33,7 @@ import com.volmit.fulcrum.bukkit.TICK;
 import com.volmit.fulcrum.bukkit.W;
 import com.volmit.fulcrum.event.VolumeConstructEvent;
 import com.volmit.fulcrum.lang.C;
+import com.volmit.fulcrum.lang.F;
 import com.volmit.fulcrum.lang.GBiset;
 import com.volmit.fulcrum.lang.GList;
 import com.volmit.fulcrum.lang.GMap;
@@ -43,6 +43,7 @@ import com.volmit.fulcrum.world.scm.IMappedVolume;
 import com.volmit.fulcrum.world.scm.IVolume;
 import com.volmit.fulcrum.world.scm.PermutationType;
 import com.volmit.fulcrum.world.scm.SCMVolume;
+import com.volmit.fulcrum.world.scm.SnappedWorld;
 
 public class SCMManager implements Listener, CommandExecutor
 {
@@ -84,6 +85,7 @@ public class SCMManager implements Listener, CommandExecutor
 				sender.sendMessage("/scm wand");
 				sender.sendMessage("/scm update");
 				sender.sendMessage("/scm list");
+				sender.sendMessage("/scm status");
 				sender.sendMessage("/scm save <id>");
 				sender.sendMessage("/scm place <id>");
 				sender.sendMessage("/scm delete <id>");
@@ -113,6 +115,19 @@ public class SCMManager implements Listener, CommandExecutor
 				{
 					sender.sendMessage(i);
 				}
+			}
+
+			else if(args[0].equalsIgnoreCase("status"))
+			{
+				int s = 0;
+
+				for(String i : volumes.k())
+				{
+					s += volumes.get(i).getVectorSchematic().getTypes().size();
+				}
+
+				sender.sendMessage("There are " + volumes.size() + " SCM Volumes");
+				sender.sendMessage("Cached " + F.f(s) + " SCM Vector Maps");
 			}
 
 			else if(args[0].equalsIgnoreCase("update"))
@@ -260,12 +275,14 @@ public class SCMManager implements Listener, CommandExecutor
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void on(BlockPlaceEvent e)
 	{
+		SnappedWorld w = new SnappedWorld(e.getBlock().getWorld());
+
 		new A()
 		{
 			@Override
 			public void run()
 			{
-				GBiset<String, IMappedVolume> s = doMatch(e.getBlock().getLocation());
+				GBiset<String, IMappedVolume> s = doMatch(e.getBlock().getLocation(), w);
 
 				if(s != null)
 				{
@@ -285,6 +302,8 @@ public class SCMManager implements Listener, CommandExecutor
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void on(BlockBreakEvent e)
 	{
+		SnappedWorld w = new SnappedWorld(e.getBlock().getWorld());
+
 		new A()
 		{
 			@Override
@@ -292,7 +311,7 @@ public class SCMManager implements Listener, CommandExecutor
 			{
 				for(Block i : W.blockFaces(e.getBlock()))
 				{
-					GBiset<String, IMappedVolume> s = doMatch(i.getLocation());
+					GBiset<String, IMappedVolume> s = doMatch(i.getLocation(), w);
 
 					if(s != null)
 					{
@@ -304,10 +323,12 @@ public class SCMManager implements Listener, CommandExecutor
 								Fulcrum.callEvent(new VolumeConstructEvent(e, volumes.get(s.getA()), s.getB(), s.getA()));
 							}
 						};
+
+						return;
 					}
 				}
 
-				GBiset<String, IMappedVolume> s = doMatch(e.getBlock().getLocation());
+				GBiset<String, IMappedVolume> s = doMatch(e.getBlock().getLocation(), w);
 
 				if(s != null)
 				{
@@ -324,25 +345,14 @@ public class SCMManager implements Listener, CommandExecutor
 		};
 	}
 
-	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-	public void on(BlockFromToEvent e)
-	{
-		GBiset<String, IMappedVolume> s = doMatch(e.getToBlock().getLocation());
-
-		if(s != null)
-		{
-			Fulcrum.callEvent(new VolumeConstructEvent(e, volumes.get(s.getA()), s.getB(), s.getA()));
-		}
-	}
-
-	public GBiset<String, IMappedVolume> doMatch(Location at)
+	public GBiset<String, IMappedVolume> doMatch(Location at, SnappedWorld w)
 	{
 		GBiset<String, IMappedVolume> s = null;
 
 		for(String i : volumes.k())
 		{
 			IVolume v = volumes.get(i);
-			IMappedVolume m = v.match(at);
+			IMappedVolume m = v.match(at, w);
 
 			if(m != null)
 			{
@@ -529,7 +539,7 @@ public class SCMManager implements Listener, CommandExecutor
 
 		if(e.getCause() instanceof BlockBreakEvent)
 		{
-			((BlockPlaceEvent) e.getCause()).getPlayer().sendMessage("Constructed " + e.getVolumeName());
+			((BlockBreakEvent) e.getCause()).getPlayer().sendMessage("Constructed " + e.getVolumeName());
 		}
 
 		new Audio().s(Sound.BLOCK_ENCHANTMENT_TABLE_USE).vp(5f, 1.5f).play(e.getMappedVolume().getReverseRealizedMapping().k().pickRandom());

@@ -128,9 +128,9 @@ public class SCMVolume implements IVolume
 	}
 
 	@Override
-	public IMappedVolume match(Location location)
+	public IMappedVolume match(Location location, SnappedWorld w)
 	{
-		return vectorSchem.match(location);
+		return vectorSchem.match(location, w);
 	}
 
 	@Override
