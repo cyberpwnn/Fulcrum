@@ -327,6 +327,26 @@ public class VectorMath
 		return v;
 	}
 
+	public static Vector flip(Vector v, Axis axis)
+	{
+		if(axis.equals(Axis.X))
+		{
+			return new Vector(-v.getX(), v.getY(), v.getZ());
+		}
+
+		if(axis.equals(Axis.Y))
+		{
+			return new Vector(v.getX(), -v.getY(), v.getZ());
+		}
+
+		if(axis.equals(Axis.Z))
+		{
+			return new Vector(v.getX(), v.getY(), -v.getZ());
+		}
+
+		return v;
+	}
+
 	/**
 	 * Get a speed value from a vector (velocity)
 	 *

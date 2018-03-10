@@ -1,18 +1,15 @@
 package com.volmit.fulcrum.bukkit;
 
-public abstract class S extends Execution
+import org.bukkit.Bukkit;
+
+import com.volmit.fulcrum.Fulcrum;
+
+public abstract class S implements Runnable
 {
 	public static ParallelPoolManager mgr;
 
 	public S()
 	{
-		mgr.syncQueue(new Execution()
-		{
-			@Override
-			public void run()
-			{
-				S.this.run();
-			}
-		});
+		Bukkit.getScheduler().scheduleSyncDelayedTask(Fulcrum.instance, this);
 	}
 }

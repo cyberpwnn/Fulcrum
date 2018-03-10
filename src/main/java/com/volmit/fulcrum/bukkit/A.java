@@ -1,18 +1,14 @@
 package com.volmit.fulcrum.bukkit;
 
-public abstract class A extends Execution
-{
-	public static ParallelPoolManager mgr = null;
+import org.bukkit.Bukkit;
 
+import com.volmit.fulcrum.Fulcrum;
+
+public abstract class A implements Runnable
+{
+	@SuppressWarnings("deprecation")
 	public A()
 	{
-		mgr.queue(new Execution()
-		{
-			@Override
-			public void run()
-			{
-				A.this.run();
-			}
-		});
+		Bukkit.getScheduler().scheduleAsyncDelayedTask(Fulcrum.instance, this);
 	}
 }

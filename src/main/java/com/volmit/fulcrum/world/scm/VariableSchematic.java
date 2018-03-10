@@ -1,14 +1,6 @@
 package com.volmit.fulcrum.world.scm;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.Iterator;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -53,10 +45,11 @@ public class VariableSchematic
 		}
 	}
 
-	public VariableSchematic(Location o, Cuboid c)
+	public VariableSchematic(Cuboid c)
 	{
 		this.dimension = new Dimension(c.getSizeX(), c.getSizeY(), c.getSizeZ());
 		this.schematic = new VariableBlock[dimension.getWidth()][dimension.getHeight()][dimension.getDepth()];
+		Location o = c.getLowerNE();
 
 		for(int i = 0; i < dimension.getWidth(); i++)
 		{
@@ -69,59 +62,6 @@ public class VariableSchematic
 				}
 			}
 		}
-	}
-
-	public VariableSchematic(File f) throws IOException
-	{
-		if(!f.exists())
-		{
-			throw new IOException();
-		}
-
-		FileInputStream fin = new FileInputStream(f);
-		GZIPInputStream gzi = new GZIPInputStream(fin);
-		DataInputStream din = new DataInputStream(gzi);
-		this.dimension = new Dimension(din.readInt(), din.readInt(), din.readInt());
-		this.schematic = new VariableBlock[dimension.getWidth()][dimension.getHeight()][dimension.getDepth()];
-
-		for(int i = 0; i < dimension.getWidth(); i++)
-		{
-			for(int j = 0; j < dimension.getHeight(); j++)
-			{
-				for(int k = 0; k < dimension.getDepth(); k++)
-				{
-					BlockType bt = new BlockType(Material.valueOf(din.readUTF()), din.readByte());
-					set(i, j, k, bt.getMaterial(), bt.getData());
-				}
-			}
-		}
-
-		din.close();
-	}
-
-	public void save(File f) throws IOException
-	{
-		f.getParentFile().mkdirs();
-		FileOutputStream fos = new FileOutputStream(f);
-		GZIPOutputStream gzo = new GZIPOutputStream(fos);
-		DataOutputStream dos = new DataOutputStream(gzo);
-		dos.writeInt(dimension.getWidth());
-		dos.writeInt(dimension.getHeight());
-		dos.writeInt(dimension.getDepth());
-
-		for(int i = 0; i < dimension.getWidth(); i++)
-		{
-			for(int j = 0; j < dimension.getHeight(); j++)
-			{
-				for(int k = 0; k < dimension.getDepth(); k++)
-				{
-					dos.writeUTF(getSchematic()[i][j][k].random().getMaterial().toString());
-					dos.writeByte(getSchematic()[i][j][k].random().getData());
-				}
-			}
-		}
-
-		dos.close();
 	}
 
 	public VectorSchematic toVectorSchematic()

@@ -3,8 +3,10 @@ package com.volmit.fulcrum.world.scm;
 import org.bukkit.Location;
 import org.bukkit.util.Vector;
 
+import com.volmit.fulcrum.bukkit.Axis;
 import com.volmit.fulcrum.bukkit.BlockType;
 import com.volmit.fulcrum.bukkit.Direction;
+import com.volmit.fulcrum.bukkit.VectorMath;
 import com.volmit.fulcrum.lang.GList;
 import com.volmit.fulcrum.lang.GMap;
 
@@ -60,6 +62,13 @@ public class VectorSchematic
 			types.add(rotate(Direction.N, Direction.E).rotate(Direction.E, Direction.D));
 			types.add(rotate(Direction.N, Direction.W).rotate(Direction.W, Direction.D));
 			types.add(rotate(Direction.N, Direction.S).rotate(Direction.S, Direction.D));
+		}
+
+		for(VectorSchematic c : types.copy())
+		{
+			types.add(c.flip(Axis.X));
+			types.add(c.flip(Axis.Y));
+			types.add(c.flip(Axis.Z));
 		}
 
 		this.pt = type;
@@ -131,7 +140,7 @@ public class VectorSchematic
 	 *            the location
 	 * @return the mapping or null if no match
 	 */
-	public GMap<Vector, Location> match(Location location)
+	public IMappedVolume match(Location location)
 	{
 		if(pt.equals(PermutationType.NONE))
 		{
@@ -163,7 +172,7 @@ public class VectorSchematic
 
 				if(found)
 				{
-					return map;
+					return new MappedSCMVolume(this, map);
 				}
 			}
 
@@ -174,11 +183,11 @@ public class VectorSchematic
 		{
 			for(VectorSchematic i : types)
 			{
-				GMap<Vector, Location> mat = i.match(location);
+				IMappedVolume vol = i.match(location);
 
-				if(mat != null)
+				if(vol != null)
 				{
-					return mat;
+					return vol;
 				}
 			}
 		}
@@ -223,6 +232,29 @@ public class VectorSchematic
 		for(Vector i : a.k())
 		{
 			b.put(from.angle(i, to), a.get(i));
+		}
+
+		Vector c = getNormal(b.k());
+
+		for(Vector i : b.k())
+		{
+			Vector d = i.clone().add(c);
+			v.getSchematic().put(d, b.get(i));
+		}
+
+		return v;
+	}
+
+	public VectorSchematic flip(Axis axis)
+	{
+		GMap<Vector, VariableBlock> a = getSchematic().copy();
+		GMap<Vector, VariableBlock> b = new GMap<Vector, VariableBlock>();
+		VectorSchematic v = new VectorSchematic();
+		v.setPermutationType(PermutationType.NONE);
+
+		for(Vector i : a.k())
+		{
+			b.put(VectorMath.flip(i, axis), a.get(i));
 		}
 
 		Vector c = getNormal(b.k());
