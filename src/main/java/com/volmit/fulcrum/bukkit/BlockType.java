@@ -99,7 +99,6 @@ public class BlockType
 		this(location.getBlock());
 	}
 
-	@SuppressWarnings("deprecation")
 	public static BlockType snapshotOf(Location l, SnappedWorld w)
 	{
 		return w.get(l);
