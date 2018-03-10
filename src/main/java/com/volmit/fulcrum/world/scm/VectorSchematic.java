@@ -50,18 +50,17 @@ public class VectorSchematic
 
 		if(type.equals(PermutationType.ANY_AXIS))
 		{
-			types.add(rotate(Direction.N, Direction.N));
-			types.add(rotate(Direction.N, Direction.E));
-			types.add(rotate(Direction.N, Direction.W));
-			types.add(rotate(Direction.N, Direction.S));
-			types.add(rotate(Direction.N, Direction.N).rotate(Direction.N, Direction.U));
-			types.add(rotate(Direction.N, Direction.E).rotate(Direction.E, Direction.U));
-			types.add(rotate(Direction.N, Direction.W).rotate(Direction.W, Direction.U));
-			types.add(rotate(Direction.N, Direction.S).rotate(Direction.S, Direction.U));
-			types.add(rotate(Direction.N, Direction.N).rotate(Direction.N, Direction.D));
-			types.add(rotate(Direction.N, Direction.E).rotate(Direction.E, Direction.D));
-			types.add(rotate(Direction.N, Direction.W).rotate(Direction.W, Direction.D));
-			types.add(rotate(Direction.N, Direction.S).rotate(Direction.S, Direction.D));
+			for(Direction i : Direction.udnews())
+			{
+				for(Direction j : Direction.udnews())
+				{
+					for(Direction k : Direction.udnews())
+					{
+						types.add(rotate(i, j));
+						types.add(rotate(i, j).rotate(j, k));
+					}
+				}
+			}
 		}
 
 		for(VectorSchematic c : types.copy())
@@ -70,6 +69,8 @@ public class VectorSchematic
 			types.add(c.flip(Axis.Y));
 			types.add(c.flip(Axis.Z));
 		}
+
+		types.removeDuplicates();
 
 		this.pt = type;
 	}
@@ -140,11 +141,11 @@ public class VectorSchematic
 	 *            the location
 	 * @return the mapping or null if no match
 	 */
-	public IMappedVolume match(Location location)
+	public IMappedVolume match(Location location, SnappedWorld w)
 	{
 		if(pt.equals(PermutationType.NONE))
 		{
-			BlockType mb = new BlockType(location);
+			BlockType mb = BlockType.snapshotOf(location, w);
 
 			for(Vector i : find(mb))
 			{
@@ -156,7 +157,7 @@ public class VectorSchematic
 				for(Vector j : schematic.k())
 				{
 					Location attempt = base.clone().add(j);
-					BlockType mbx = new BlockType(attempt);
+					BlockType mbx = BlockType.snapshotOf(attempt, w);
 
 					if(schematic.get(j).is(mbx))
 					{
@@ -183,7 +184,7 @@ public class VectorSchematic
 		{
 			for(VectorSchematic i : types)
 			{
-				IMappedVolume vol = i.match(location);
+				IMappedVolume vol = i.match(location, w);
 
 				if(vol != null)
 				{
@@ -283,7 +284,9 @@ public class VectorSchematic
 	{
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + ((pt == null) ? 0 : pt.hashCode());
 		result = prime * result + ((schematic == null) ? 0 : schematic.hashCode());
+		result = prime * result + ((types == null) ? 0 : types.hashCode());
 		return result;
 	}
 
@@ -303,6 +306,10 @@ public class VectorSchematic
 			return false;
 		}
 		VectorSchematic other = (VectorSchematic) obj;
+		if(pt != other.pt)
+		{
+			return false;
+		}
 		if(schematic == null)
 		{
 			if(other.schematic != null)
@@ -311,6 +318,17 @@ public class VectorSchematic
 			}
 		}
 		else if(!schematic.equals(other.schematic))
+		{
+			return false;
+		}
+		if(types == null)
+		{
+			if(other.types != null)
+			{
+				return false;
+			}
+		}
+		else if(!types.equals(other.types))
 		{
 			return false;
 		}
@@ -323,5 +341,10 @@ public class VectorSchematic
 	public void clear()
 	{
 		schematic.clear();
+	}
+
+	public GList<VectorSchematic> getTypes()
+	{
+		return types;
 	}
 }
