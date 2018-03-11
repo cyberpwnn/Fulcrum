@@ -1,5 +1,6 @@
 package com.volmit.fulcrum.bukkit;
 
+import org.bukkit.block.BlockFace;
 import org.bukkit.util.Vector;
 
 import com.volmit.fulcrum.bukkit.Cuboid.CuboidDirection;
@@ -27,6 +28,29 @@ public enum Direction
 	private int y;
 	private int z;
 	private CuboidDirection f;
+
+	public static Direction fromFace(BlockFace face)
+	{
+		switch(face)
+		{
+			case DOWN:
+				return D;
+			case EAST:
+				return E;
+			case NORTH:
+				return N;
+			case SOUTH:
+				return S;
+			case UP:
+				return U;
+			case WEST:
+				return W;
+			default:
+				break;
+		}
+
+		return null;
+	}
 
 	public boolean isVertical()
 	{
@@ -396,6 +420,27 @@ public enum Direction
 				return Axis.Y;
 			case W:
 				return Axis.X;
+		}
+
+		return null;
+	}
+
+	public BlockFace blockFace()
+	{
+		switch(this)
+		{
+			case D:
+				return BlockFace.DOWN;
+			case E:
+				return BlockFace.EAST;
+			case N:
+				return BlockFace.NORTH;
+			case S:
+				return BlockFace.SOUTH;
+			case U:
+				return BlockFace.UP;
+			case W:
+				return BlockFace.WEST;
 		}
 
 		return null;

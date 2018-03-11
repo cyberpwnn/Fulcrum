@@ -1,6 +1,7 @@
 package com.volmit.fulcrum.world.scm;
 
 import org.bukkit.Location;
+import org.bukkit.material.Stairs;
 import org.bukkit.util.Vector;
 
 import com.volmit.fulcrum.bukkit.Axis;
@@ -69,6 +70,10 @@ public class VectorSchematic
 			types.add(c.flip(Axis.Y));
 			types.add(c.flip(Axis.Z));
 		}
+
+		types.add(flip(Axis.X));
+		types.add(flip(Axis.Y));
+		types.add(flip(Axis.Z));
 
 		types.removeDuplicates();
 
@@ -223,6 +228,7 @@ public class VectorSchematic
 		return new Vector(minx < 0 ? -minx : 0, miny < 0 ? -miny : 0, minz < 0 ? -minz : 0);
 	}
 
+	@SuppressWarnings("deprecation")
 	public VectorSchematic rotate(Direction from, Direction to)
 	{
 		GMap<Vector, VariableBlock> a = getSchematic().copy();
@@ -232,7 +238,42 @@ public class VectorSchematic
 
 		for(Vector i : a.k())
 		{
-			b.put(from.angle(i, to), a.get(i));
+			VariableBlock mask = new VariableBlock();
+
+			for(BlockType j : a.get(i).getBlocks())
+			{
+				BlockType k = j;
+
+				if(j.getMaterial().name().contains("_STAIRS"))
+				{
+					Stairs s = new Stairs(j.getMaterial(), j.getData());
+
+					Direction ax = Direction.fromFace(s.getFacing());
+					Direction bx = s.isInverted() ? Direction.U : Direction.D;
+
+					Direction nax = Direction.getDirection(from.angle(ax.toVector(), to));
+					Direction nbx = Direction.getDirection(from.angle(bx.toVector(), to));
+
+					if(nax.isVertical() && !nbx.isVertical())
+					{
+						Direction ncx = nax;
+						nax = nbx;
+						nbx = ncx;
+					}
+
+					if(!nax.isVertical() && nbx.isVertical())
+					{
+						s.setFacingDirection(nax.blockFace());
+						s.setInverted(nbx.equals(Direction.U));
+					}
+
+					k = new BlockType(s.getItemType(), s.getData());
+				}
+
+				mask.addBlock(k);
+			}
+
+			b.put(from.angle(i, to), mask);
 		}
 
 		Vector c = getNormal(b.k());
@@ -246,6 +287,7 @@ public class VectorSchematic
 		return v;
 	}
 
+	@SuppressWarnings("deprecation")
 	public VectorSchematic flip(Axis axis)
 	{
 		GMap<Vector, VariableBlock> a = getSchematic().copy();
@@ -255,7 +297,41 @@ public class VectorSchematic
 
 		for(Vector i : a.k())
 		{
-			b.put(VectorMath.flip(i, axis), a.get(i));
+			VariableBlock mask = new VariableBlock();
+
+			for(BlockType j : a.get(i).getBlocks())
+			{
+				BlockType k = j;
+
+				if(j.getMaterial().name().contains("_STAIRS"))
+				{
+					Stairs s = new Stairs(j.getMaterial(), j.getData());
+					Direction da = Direction.fromFace(s.getFacing());
+
+					if(Direction.getDirection(axis.negative()).equals(da))
+					{
+						da = Direction.getDirection(axis.positive());
+					}
+
+					if(Direction.getDirection(axis.positive()).equals(da))
+					{
+						da = Direction.getDirection(axis.negative());
+					}
+
+					if(axis.equals(Axis.Y))
+					{
+						s.setInverted(!s.isInverted());
+					}
+
+					s.setFacingDirection(da.blockFace());
+
+					k = new BlockType(s.getItemType(), s.getData());
+				}
+
+				mask.addBlock(k);
+			}
+
+			b.put(VectorMath.flip(i, axis), mask);
 		}
 
 		Vector c = getNormal(b.k());
