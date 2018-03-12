@@ -18,11 +18,29 @@ import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_12_R1.util.CraftMagicNumbers;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockBurnEvent;
+import org.bukkit.event.block.BlockExplodeEvent;
+import org.bukkit.event.block.BlockFadeEvent;
+import org.bukkit.event.block.BlockFormEvent;
+import org.bukkit.event.block.BlockFromToEvent;
+import org.bukkit.event.block.BlockGrowEvent;
+import org.bukkit.event.block.BlockIgniteEvent;
+import org.bukkit.event.block.BlockPhysicsEvent;
+import org.bukkit.event.block.BlockPistonExtendEvent;
+import org.bukkit.event.block.BlockPistonRetractEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.player.PlayerResourcePackStatusEvent;
+import org.bukkit.event.player.PlayerResourcePackStatusEvent.Status;
+import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
+import com.volmit.fulcrum.Fulcrum;
 import com.volmit.fulcrum.bukkit.Base64;
 import com.volmit.fulcrum.bukkit.BlockType;
 import com.volmit.fulcrum.bukkit.P;
@@ -32,6 +50,7 @@ import com.volmit.fulcrum.lang.GList;
 import com.volmit.fulcrum.lang.GMap;
 import com.volmit.fulcrum.lang.GSet;
 import com.volmit.fulcrum.lang.M;
+import com.volmit.fulcrum.world.scm.GhostWorld;
 
 import net.minecraft.server.v1_12_R1.BiomeBase;
 import net.minecraft.server.v1_12_R1.BlockPosition;
@@ -45,18 +64,25 @@ import net.minecraft.server.v1_12_R1.PacketPlayOutUnloadChunk;
 
 public final class Adapter12 implements IAdapter
 {
+	private GhostWorld world;
 	private GMap<Chunk, GSet<Location>> update;
 	private GMap<Chunk, GSet<Integer>> dirty;
 	private GList<Block> physics;
+	private GSet<Chunk> drop;
+	private GSet<Chunk> udrop;
 	private long processed = 0;
 	private boolean push;
 
 	public Adapter12()
 	{
+		Fulcrum.register(this);
+		world = new GhostWorld();
 		physics = new GList<Block>();
 		update = new GMap<Chunk, GSet<Location>>();
 		dirty = new GMap<Chunk, GSet<Integer>>();
 		push = false;
+		drop = new GSet<Chunk>();
+		udrop = new GSet<Chunk>();
 
 		new Task(0)
 		{
@@ -76,8 +102,150 @@ public final class Adapter12 implements IAdapter
 		};
 	}
 
+	@EventHandler
+	public void on(BlockBreakEvent e)
+	{
+		drop.add(e.getBlock().getChunk());
+	}
+
+	@EventHandler
+	public void on(BlockPlaceEvent e)
+	{
+		drop.add(e.getBlock().getChunk());
+	}
+
+	@EventHandler
+	public void on(ChunkUnloadEvent e)
+	{
+		udrop.add(e.getChunk());
+	}
+
+	@EventHandler
+	public void on(BlockPhysicsEvent e)
+	{
+		drop.add(e.getBlock().getChunk());
+	}
+
+	@EventHandler
+	public void on(BlockFromToEvent e)
+	{
+		drop.add(e.getBlock().getChunk());
+	}
+
+	@EventHandler
+	public void on(BlockBurnEvent e)
+	{
+		drop.add(e.getBlock().getChunk());
+	}
+
+	@EventHandler
+	public void on(BlockFadeEvent e)
+	{
+		drop.add(e.getBlock().getChunk());
+	}
+
+	@EventHandler
+	public void on(BlockGrowEvent e)
+	{
+		drop.add(e.getBlock().getChunk());
+	}
+
+	@EventHandler
+	public void on(BlockFormEvent e)
+	{
+		drop.add(e.getBlock().getChunk());
+	}
+
+	@EventHandler
+	public void on(BlockIgniteEvent e)
+	{
+		drop.add(e.getBlock().getChunk());
+	}
+
+	@EventHandler
+	public void on(BlockPistonExtendEvent e)
+	{
+		drop.add(e.getBlock().getChunk());
+
+		for(Block i : e.getBlocks())
+		{
+			drop.add(i.getChunk());
+		}
+	}
+
+	@EventHandler
+	public void on(BlockPistonRetractEvent e)
+	{
+		drop.add(e.getBlock().getChunk());
+
+		for(Block i : e.getBlocks())
+		{
+			drop.add(i.getChunk());
+		}
+	}
+
+	@EventHandler
+	public void on(BlockExplodeEvent e)
+	{
+		drop.add(e.getBlock().getChunk());
+
+		for(Block i : e.blockList())
+		{
+			drop.add(i.getChunk());
+		}
+	}
+
+	@Override
+	public void sendResourcePack(Player p, String url)
+	{
+		p.setResourcePack(url);
+		Fulcrum.register(new Listener()
+		{
+			@EventHandler
+			public void on(PlayerResourcePackStatusEvent e)
+			{
+				if(e.getPlayer().equals(p))
+				{
+					if(e.getStatus().equals(Status.ACCEPTED))
+					{
+						p.sendMessage("Good Boy");
+					}
+
+					if(e.getStatus().equals(Status.FAILED_DOWNLOAD))
+					{
+						p.kickPlayer("Stop using TimeWarnerCable");
+					}
+
+					if(e.getStatus().equals(Status.DECLINED))
+					{
+						p.kickPlayer("In multiplayer options re-allow resource packs.");
+					}
+
+					if(e.getStatus().equals(Status.SUCCESSFULLY_LOADED))
+					{
+						p.sendMessage("All set.");
+						Fulcrum.unregister(this);
+					}
+				}
+			}
+		});
+	}
+
 	private void onTick()
 	{
+		for(Chunk i : drop)
+		{
+			world.drop(i);
+		}
+
+		for(Chunk i : udrop)
+		{
+			world.drop(i);
+		}
+
+		udrop.clear();
+		drop.clear();
+
 		for(Chunk i : update.k())
 		{
 			if(update.get(i).size() > 24)
@@ -420,7 +588,8 @@ public final class Adapter12 implements IAdapter
 
 		return localItemStack;
 	}
-	
+
+	@Override
 	public void makeSectionDirty(Location l)
 	{
 		makeDirty(l.getChunk(), l.getBlockY() >> 4);
@@ -448,5 +617,17 @@ public final class Adapter12 implements IAdapter
 	public void popPhysics()
 	{
 		push = false;
+	}
+
+	@Override
+	public BlockType getBlockAsync(Location l)
+	{
+		return world.get(l);
+	}
+
+	@Override
+	public int getGhostSize()
+	{
+		return world.size();
 	}
 }

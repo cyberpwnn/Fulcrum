@@ -43,7 +43,6 @@ import com.volmit.fulcrum.world.scm.IMappedVolume;
 import com.volmit.fulcrum.world.scm.IVolume;
 import com.volmit.fulcrum.world.scm.PermutationType;
 import com.volmit.fulcrum.world.scm.SCMVolume;
-import com.volmit.fulcrum.world.scm.SnappedWorld;
 
 public class SCMManager implements Listener, CommandExecutor
 {
@@ -275,14 +274,12 @@ public class SCMManager implements Listener, CommandExecutor
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void on(BlockPlaceEvent e)
 	{
-		SnappedWorld w = new SnappedWorld(e.getBlock().getWorld());
-
 		new A()
 		{
 			@Override
 			public void run()
 			{
-				GBiset<String, IMappedVolume> s = doMatch(e.getBlock().getLocation(), w);
+				GBiset<String, IMappedVolume> s = doMatch(e.getBlock().getLocation());
 
 				if(s != null)
 				{
@@ -302,8 +299,6 @@ public class SCMManager implements Listener, CommandExecutor
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void on(BlockBreakEvent e)
 	{
-		SnappedWorld w = new SnappedWorld(e.getBlock().getWorld());
-
 		new A()
 		{
 			@Override
@@ -311,7 +306,7 @@ public class SCMManager implements Listener, CommandExecutor
 			{
 				for(Block i : W.blockFaces(e.getBlock()))
 				{
-					GBiset<String, IMappedVolume> s = doMatch(i.getLocation(), w);
+					GBiset<String, IMappedVolume> s = doMatch(i.getLocation());
 
 					if(s != null)
 					{
@@ -328,7 +323,7 @@ public class SCMManager implements Listener, CommandExecutor
 					}
 				}
 
-				GBiset<String, IMappedVolume> s = doMatch(e.getBlock().getLocation(), w);
+				GBiset<String, IMappedVolume> s = doMatch(e.getBlock().getLocation());
 
 				if(s != null)
 				{
@@ -345,14 +340,14 @@ public class SCMManager implements Listener, CommandExecutor
 		};
 	}
 
-	public GBiset<String, IMappedVolume> doMatch(Location at, SnappedWorld w)
+	public GBiset<String, IMappedVolume> doMatch(Location at)
 	{
 		GBiset<String, IMappedVolume> s = null;
 
 		for(String i : volumes.k())
 		{
 			IVolume v = volumes.get(i);
-			IMappedVolume m = v.match(at, w);
+			IMappedVolume m = v.match(at);
 
 			if(m != null)
 			{

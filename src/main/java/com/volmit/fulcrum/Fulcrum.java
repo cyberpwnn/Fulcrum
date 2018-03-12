@@ -10,6 +10,7 @@ import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
@@ -21,6 +22,8 @@ import com.volmit.fulcrum.bukkit.TICK;
 import com.volmit.fulcrum.bukkit.Task;
 import com.volmit.fulcrum.images.ImageBakery;
 import com.volmit.fulcrum.images.PluginUtil;
+import com.volmit.fulcrum.lang.C;
+import com.volmit.fulcrum.lang.F;
 import com.volmit.fulcrum.lang.M;
 import com.volmit.fulcrum.world.FastBlock;
 import com.volmit.fulcrum.world.FastBlock12;
@@ -37,6 +40,7 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 	public static MCACache cache;
 	public static long ms = M.ms();
 	public static SCMManager scmmgr;
+	public static MultiblockManager mbmgr;
 
 	@Override
 	public void onEnable()
@@ -45,6 +49,7 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 		cache = new MCACache();
 		adapter = new Adapter12();
 		scmmgr = new SCMManager();
+		mbmgr = new MultiblockManager();
 
 		try
 		{
@@ -119,6 +124,15 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 	{
 		if(command.getName().equalsIgnoreCase("fulcrum"))
 		{
+			if(args.length == 0)
+			{
+				sender.sendMessage(C.GREEN + "Ghost World: " + C.WHITE + F.f(adapter.getGhostSize()) + C.GRAY + " Thread Safe Chunks Active");
+				sender.sendMessage(C.GREEN + "Write Cache: " + C.WHITE + F.f(getCacheSize()) + C.GRAY + " Cached Indices");
+				return true;
+			}
+
+			adapter.sendResourcePack((Player) sender, args[0]);
+
 			return true;
 		}
 
@@ -140,6 +154,7 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 		TICK.tick++;
 		cache.tick();
 		scmmgr.onTick();
+		mbmgr.onTick();
 	}
 
 	public static void callEvent(Event e)

@@ -3,18 +3,22 @@ package com.volmit.fulcrum.world.scm;
 import org.bukkit.Chunk;
 import org.bukkit.ChunkSnapshot;
 import org.bukkit.Location;
-import org.bukkit.World;
 
 import com.volmit.fulcrum.bukkit.BlockType;
 import com.volmit.fulcrum.lang.GMap;
 
-public class SnappedWorld
+public class GhostWorld
 {
 	private GMap<Chunk, ChunkSnapshot> snap;
 
-	public SnappedWorld(World world)
+	public GhostWorld()
 	{
 		snap = new GMap<Chunk, ChunkSnapshot>();
+	}
+
+	public void drop(Chunk c)
+	{
+		snap.remove(c);
 	}
 
 	@SuppressWarnings("deprecation")
@@ -31,5 +35,10 @@ public class SnappedWorld
 		int cxb = l.getBlockX() - ((l.getBlockX() >> 4) << 4);
 		int czb = l.getBlockZ() - ((l.getBlockZ() >> 4) << 4);
 		return new BlockType(s.getBlockType(cxb, l.getBlockY(), czb), (byte) s.getBlockData(cxb, l.getBlockY(), czb));
+	}
+
+	public int size()
+	{
+		return snap.size();
 	}
 }

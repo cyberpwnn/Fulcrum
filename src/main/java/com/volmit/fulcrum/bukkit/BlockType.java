@@ -5,7 +5,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 
-import com.volmit.fulcrum.world.scm.SnappedWorld;
+import com.volmit.fulcrum.Fulcrum;
 
 public class BlockType
 {
@@ -99,9 +99,9 @@ public class BlockType
 		this(location.getBlock());
 	}
 
-	public static BlockType snapshotOf(Location l, SnappedWorld w)
+	public static BlockType snapshotOf(Location l)
 	{
-		return w.get(l);
+		return Fulcrum.adapter.getBlockAsync(l);
 	}
 
 	@SuppressWarnings("deprecation")

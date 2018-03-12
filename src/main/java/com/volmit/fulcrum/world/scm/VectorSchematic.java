@@ -146,11 +146,11 @@ public class VectorSchematic
 	 *            the location
 	 * @return the mapping or null if no match
 	 */
-	public IMappedVolume match(Location location, SnappedWorld w)
+	public IMappedVolume match(Location location)
 	{
 		if(pt.equals(PermutationType.NONE))
 		{
-			BlockType mb = BlockType.snapshotOf(location, w);
+			BlockType mb = BlockType.snapshotOf(location);
 
 			for(Vector i : find(mb))
 			{
@@ -162,7 +162,7 @@ public class VectorSchematic
 				for(Vector j : schematic.k())
 				{
 					Location attempt = base.clone().add(j);
-					BlockType mbx = BlockType.snapshotOf(attempt, w);
+					BlockType mbx = BlockType.snapshotOf(attempt);
 
 					if(schematic.get(j).is(mbx))
 					{
@@ -189,7 +189,7 @@ public class VectorSchematic
 		{
 			for(VectorSchematic i : types)
 			{
-				IMappedVolume vol = i.match(location, w);
+				IMappedVolume vol = i.match(location);
 
 				if(vol != null)
 				{

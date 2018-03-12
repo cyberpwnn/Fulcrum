@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -320,78 +321,86 @@ public class MCACache implements Listener
 
 	public void readMCA(MCAKey key) throws IOException
 	{
-		File f = new File(Bukkit.getWorld(key.getWorld()).getWorldFolder(), "fulcrum");
-		File d = new File(f, key.getX() + "." + key.getZ() + ".rtg");
-
-		if(!d.exists())
+		try
 		{
-			return;
+			File f = new File(Bukkit.getWorld(key.getWorld()).getWorldFolder(), "fulcrum");
+			File d = new File(f, key.getX() + "." + key.getZ() + ".rtg");
+
+			if(!d.exists())
+			{
+				return;
+			}
+
+			FileInputStream fin = new FileInputStream(d);
+			GZIPInputStream gzi = new GZIPInputStream(fin);
+			DataInputStream din = new DataInputStream(gzi);
+
+			long blockSize = din.readLong();
+
+			for(int i = 0; i < blockSize; i++)
+			{
+				int x = din.readInt();
+				int y = din.readInt();
+				int z = din.readInt();
+				String category = din.readUTF();
+				int length = din.readInt();
+				byte[] data = new byte[length];
+				din.read(data, 0, length);
+				ChunkKey ck = new ChunkKey(key.getWorld(), x >> 4, z >> 4);
+				BlockKey bk = new BlockKey(key.getWorld(), x, y, z);
+				DataCluster cc = load(data);
+
+				if(!blockMap.containsKey(key))
+				{
+					blockMap.put(key, new GMap<ChunkKey, GMap<BlockKey, GMap<String, DataCluster>>>());
+				}
+
+				if(!blockMap.get(key).containsKey(ck))
+				{
+					blockMap.get(key).put(ck, new GMap<BlockKey, GMap<String, DataCluster>>());
+				}
+
+				if(!blockMap.get(key).get(ck).containsKey(bk))
+				{
+					blockMap.get(key).get(ck).put(bk, new GMap<String, DataCluster>());
+				}
+
+				blockMap.get(key).get(ck).get(bk).put(category, cc);
+			}
+
+			long chunkSize = din.readLong();
+
+			for(int i = 0; i < chunkSize; i++)
+			{
+				int x = din.readInt();
+				int z = din.readInt();
+				String category = din.readUTF();
+				int length = din.readInt();
+				byte[] data = new byte[length];
+				din.read(data, 0, length);
+				ChunkKey ck = new ChunkKey(key.getWorld(), x, z);
+				DataCluster cc = load(data);
+
+				if(!chunkMap.containsKey(key))
+				{
+					chunkMap.put(key, new GMap<ChunkKey, GMap<String, DataCluster>>());
+				}
+
+				if(!chunkMap.get(key).containsKey(ck))
+				{
+					chunkMap.get(key).put(ck, new GMap<String, DataCluster>());
+				}
+
+				chunkMap.get(key).get(ck).put(category, cc);
+			}
+
+			din.close();
 		}
 
-		FileInputStream fin = new FileInputStream(d);
-		GZIPInputStream gzi = new GZIPInputStream(fin);
-		DataInputStream din = new DataInputStream(gzi);
-
-		long blockSize = din.readLong();
-
-		for(int i = 0; i < blockSize; i++)
+		catch(EOFException e)
 		{
-			int x = din.readInt();
-			int y = din.readInt();
-			int z = din.readInt();
-			String category = din.readUTF();
-			int length = din.readInt();
-			byte[] data = new byte[length];
-			din.read(data, 0, length);
-			ChunkKey ck = new ChunkKey(key.getWorld(), x >> 4, z >> 4);
-			BlockKey bk = new BlockKey(key.getWorld(), x, y, z);
-			DataCluster cc = load(data);
-
-			if(!blockMap.containsKey(key))
-			{
-				blockMap.put(key, new GMap<ChunkKey, GMap<BlockKey, GMap<String, DataCluster>>>());
-			}
-
-			if(!blockMap.get(key).containsKey(ck))
-			{
-				blockMap.get(key).put(ck, new GMap<BlockKey, GMap<String, DataCluster>>());
-			}
-
-			if(!blockMap.get(key).get(ck).containsKey(bk))
-			{
-				blockMap.get(key).get(ck).put(bk, new GMap<String, DataCluster>());
-			}
-
-			blockMap.get(key).get(ck).get(bk).put(category, cc);
+			System.out.println("Fulcrum failed to read ghost data at MCA " + key.getX() + " " + key.getZ() + " deleting.");
 		}
-
-		long chunkSize = din.readLong();
-
-		for(int i = 0; i < chunkSize; i++)
-		{
-			int x = din.readInt();
-			int z = din.readInt();
-			String category = din.readUTF();
-			int length = din.readInt();
-			byte[] data = new byte[length];
-			din.read(data, 0, length);
-			ChunkKey ck = new ChunkKey(key.getWorld(), x, z);
-			DataCluster cc = load(data);
-
-			if(!chunkMap.containsKey(key))
-			{
-				chunkMap.put(key, new GMap<ChunkKey, GMap<String, DataCluster>>());
-			}
-
-			if(!chunkMap.get(key).containsKey(ck))
-			{
-				chunkMap.get(key).put(ck, new GMap<String, DataCluster>());
-			}
-
-			chunkMap.get(key).get(ck).put(category, cc);
-		}
-
-		din.close();
 	}
 
 	public void writeMCA(MCAKey key) throws IOException

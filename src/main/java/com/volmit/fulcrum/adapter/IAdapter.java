@@ -9,12 +9,13 @@ import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 
 import com.volmit.fulcrum.bukkit.BlockType;
 import com.volmit.fulcrum.lang.GList;
 
-public interface IAdapter
+public interface IAdapter extends Listener
 {
 	public void queueUpdate(Block b);
 
@@ -71,4 +72,10 @@ public interface IAdapter
 	public void sendMultiBlockChange(Chunk c, GList<Location> points) throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchFieldException;
 
 	public void sendChunkSection(Chunk c, int section);
+
+	public BlockType getBlockAsync(Location location);
+
+	public int getGhostSize();
+
+	public void sendResourcePack(Player p, String url);
 }
