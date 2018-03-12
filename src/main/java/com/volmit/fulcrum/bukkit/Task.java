@@ -63,6 +63,7 @@ public abstract class Task implements ITask, ICancellable
 	public void cancel()
 	{
 		completed = true;
+		Fulcrum.instance.stopTask(id);
 	}
 
 	@Override

@@ -6,11 +6,13 @@ import java.util.Arrays;
 import java.util.UUID;
 
 import org.bukkit.Chunk;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
+import org.bukkit.block.CreatureSpawner;
 import org.bukkit.craftbukkit.v1_12_R1.CraftChunk;
 import org.bukkit.craftbukkit.v1_12_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_12_R1.block.CraftBlock;
@@ -37,14 +39,21 @@ import org.bukkit.event.player.PlayerResourcePackStatusEvent.Status;
 import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.potion.PotionEffectType;
+import org.bukkit.util.Vector;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.volmit.fulcrum.Fulcrum;
 import com.volmit.fulcrum.bukkit.Base64;
 import com.volmit.fulcrum.bukkit.BlockType;
+import com.volmit.fulcrum.bukkit.Cuboid;
+import com.volmit.fulcrum.bukkit.Cuboid.CuboidDirection;
 import com.volmit.fulcrum.bukkit.P;
+import com.volmit.fulcrum.bukkit.PE;
 import com.volmit.fulcrum.bukkit.Task;
+import com.volmit.fulcrum.bukkit.TaskLater;
+import com.volmit.fulcrum.lang.C;
 import com.volmit.fulcrum.lang.F;
 import com.volmit.fulcrum.lang.GList;
 import com.volmit.fulcrum.lang.GMap;
@@ -54,13 +63,22 @@ import com.volmit.fulcrum.world.scm.GhostWorld;
 
 import net.minecraft.server.v1_12_R1.BiomeBase;
 import net.minecraft.server.v1_12_R1.BlockPosition;
+import net.minecraft.server.v1_12_R1.ChatComponentText;
+import net.minecraft.server.v1_12_R1.ChatMessageType;
 import net.minecraft.server.v1_12_R1.ChunkCoordIntPair;
 import net.minecraft.server.v1_12_R1.ChunkSection;
 import net.minecraft.server.v1_12_R1.IBlockData;
+import net.minecraft.server.v1_12_R1.MojangsonParseException;
+import net.minecraft.server.v1_12_R1.MojangsonParser;
+import net.minecraft.server.v1_12_R1.NBTTagCompound;
+import net.minecraft.server.v1_12_R1.Packet;
+import net.minecraft.server.v1_12_R1.PacketPlayOutChat;
 import net.minecraft.server.v1_12_R1.PacketPlayOutEntity;
 import net.minecraft.server.v1_12_R1.PacketPlayOutMapChunk;
 import net.minecraft.server.v1_12_R1.PacketPlayOutMultiBlockChange;
+import net.minecraft.server.v1_12_R1.PacketPlayOutPlayerListHeaderFooter;
 import net.minecraft.server.v1_12_R1.PacketPlayOutUnloadChunk;
+import net.minecraft.server.v1_12_R1.TileEntity;
 
 public final class Adapter12 implements IAdapter
 {
@@ -195,40 +213,160 @@ public final class Adapter12 implements IAdapter
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void sendResourcePack(Player p, String url)
 	{
-		p.setResourcePack(url);
-		Fulcrum.register(new Listener()
+		p.sendMessage("Downloading " + C.WHITE + url);
+		PE.BLINDNESS.a(300).d(12000).apply(p);
+		PE.SLOW.a(1000).d(12000).apply(p);
+		PE.SLOW_DIGGING.a(1000).d(12000).apply(p);
+		Location lx = p.getLocation().clone();
+		Location la = p.getLocation().clone();
+		lx.setDirection(new Vector(0, 1, 0));
+		boolean[] fx = {false};
+		boolean[] fa = {false};
+		GameMode g = p.getGameMode();
+		p.setGameMode(GameMode.ADVENTURE);
+
+		Cuboid c = new Cuboid(lx);
+		c = c.expand(CuboidDirection.Up, 1);
+		c = c.expand(CuboidDirection.Down, 1);
+		c = c.expand(CuboidDirection.East, 1);
+		c = c.expand(CuboidDirection.West, 1);
+		c = c.expand(CuboidDirection.North, 1);
+		c = c.expand(CuboidDirection.South, 1);
+		Cuboid cx = c;
+
+		for(Block i : new GList<Block>(c.iterator()))
 		{
-			@EventHandler
-			public void on(PlayerResourcePackStatusEvent e)
+			p.sendBlockChange(i.getLocation(), Material.AIR, (byte) 0);
+		}
+
+		for(Block i : new GList<Block>(c.getFace(CuboidDirection.Up).iterator()))
+		{
+			p.sendBlockChange(i.getLocation(), Material.CONCRETE, (byte) 15);
+		}
+
+		for(Block i : new GList<Block>(c.getFace(CuboidDirection.North).iterator()))
+		{
+			p.sendBlockChange(i.getLocation(), Material.CONCRETE, (byte) 15);
+		}
+
+		for(Block i : new GList<Block>(c.getFace(CuboidDirection.South).iterator()))
+		{
+			p.sendBlockChange(i.getLocation(), Material.CONCRETE, (byte) 15);
+		}
+
+		for(Block i : new GList<Block>(c.getFace(CuboidDirection.East).iterator()))
+		{
+			p.sendBlockChange(i.getLocation(), Material.CONCRETE, (byte) 15);
+		}
+
+		for(Block i : new GList<Block>(c.getFace(CuboidDirection.West).iterator()))
+		{
+			p.sendBlockChange(i.getLocation(), Material.CONCRETE, (byte) 15);
+		}
+
+		new Task(0)
+		{
+			@Override
+			public void run()
 			{
-				if(e.getPlayer().equals(p))
+				if(fx[0])
 				{
-					if(e.getStatus().equals(Status.ACCEPTED))
+					p.closeInventory();
+					p.closeInventory();
+					p.closeInventory();
+					p.removePotionEffect(PotionEffectType.BLINDNESS);
+					p.removePotionEffect(PotionEffectType.SLOW);
+					p.removePotionEffect(PotionEffectType.SLOW_DIGGING);
+
+					if(!fa[0])
 					{
-						p.sendMessage("Good Boy");
+						p.sendTitle("    ", C.GREEN + "Resources Loaded", 2, 20, 5);
 					}
 
-					if(e.getStatus().equals(Status.FAILED_DOWNLOAD))
+					else
 					{
-						p.kickPlayer("Stop using TimeWarnerCable");
+						p.sendTitle("    ", C.RED + "Resources Failed to Load", 2, 20, 5);
 					}
 
-					if(e.getStatus().equals(Status.DECLINED))
+					p.setGameMode(g);
+
+					for(Block i : new GList<Block>(cx.iterator()))
 					{
-						p.kickPlayer("In multiplayer options re-allow resource packs.");
+						Fulcrum.adapter.makeDirty(i.getLocation());
 					}
 
-					if(e.getStatus().equals(Status.SUCCESSFULLY_LOADED))
-					{
-						p.sendMessage("All set.");
-						Fulcrum.unregister(this);
-					}
+					cancel();
+					p.teleport(la);
+					p.resetPlayerTime();
+					return;
 				}
+
+				p.setPlayerTime(13686, false);
+				p.teleport(lx);
 			}
-		});
+		};
+
+		p.sendTitle(C.GRAY + "Please Wait", C.GRAY + "Applying Resources", 0, 100000, 100);
+
+		new TaskLater(20)
+		{
+			@Override
+			public void run()
+			{
+				p.setResourcePack(url);
+				Fulcrum.register(new Listener()
+				{
+					@EventHandler
+					public void on(PlayerResourcePackStatusEvent e)
+					{
+						if(e.getPlayer().equals(p))
+						{
+							if(e.getStatus().equals(Status.ACCEPTED))
+							{
+
+							}
+
+							if(e.getStatus().equals(Status.FAILED_DOWNLOAD))
+							{
+								Fulcrum.unregister(this);
+								new TaskLater(5)
+								{
+									@Override
+									public void run()
+									{
+										fx[0] = true;
+										fa[0] = true;
+									}
+								};
+							}
+
+							if(e.getStatus().equals(Status.DECLINED))
+							{
+								p.kickPlayer("In multiplayer options re-allow resource packs.");
+							}
+
+							if(e.getStatus().equals(Status.SUCCESSFULLY_LOADED))
+							{
+								Fulcrum.unregister(this);
+								new TaskLater(5)
+								{
+									@Override
+									public void run()
+									{
+										fx[0] = true;
+									}
+								};
+							}
+						}
+					}
+
+				});
+			}
+		};
 	}
 
 	private void onTick()
@@ -404,7 +542,7 @@ public final class Adapter12 implements IAdapter
 	public void sendChunkSection(Chunk c, int bitmask, Player p)
 	{
 		PacketPlayOutMapChunk map = new PacketPlayOutMapChunk(((CraftChunk) c).getHandle(), bitmask);
-		((CraftPlayer) p).getHandle().playerConnection.sendPacket(map);
+		sendPacket(p, map);
 	}
 
 	@SuppressWarnings("deprecation")
@@ -440,10 +578,7 @@ public final class Adapter12 implements IAdapter
 		fcp.set(mb, cp);
 		fchs.set(mb, chs);
 
-		for(Player i : P.getPlayersWithinViewOf(c))
-		{
-			((CraftPlayer) i).getHandle().playerConnection.sendPacket(mb);
-		}
+		sendPacket(c, mb);
 	}
 
 	private int getBitMask(boolean[] modifiedSections)
@@ -541,14 +676,14 @@ public final class Adapter12 implements IAdapter
 	public void notifyEntity(Entity e, Player p)
 	{
 		PacketPlayOutEntity px = new PacketPlayOutEntity(e.getEntityId());
-		((CraftPlayer) p).getHandle().playerConnection.sendPacket(px);
+		sendPacket(p, px);
 	}
 
 	@Override
 	public void sendUnload(Chunk c, Player p)
 	{
 		PacketPlayOutUnloadChunk px = new PacketPlayOutUnloadChunk(c.getX(), c.getZ());
-		((CraftPlayer) p).getHandle().playerConnection.sendPacket(px);
+		sendPacket(p, px);
 	}
 
 	@Override
@@ -629,5 +764,135 @@ public final class Adapter12 implements IAdapter
 	public int getGhostSize()
 	{
 		return world.size();
+	}
+
+	@Override
+	public void updateBlockData(Location block, String mojangson)
+	{
+		try
+		{
+			BlockPosition pos = new BlockPosition(block.getBlockX(), block.getBlockY(), block.getBlockZ());
+			net.minecraft.server.v1_12_R1.World nmsworld = ((CraftWorld) block.getWorld()).getHandle();
+			IBlockData blockData = nmsworld.getType(pos);
+			TileEntity tile = nmsworld.getTileEntity(pos);
+			NBTTagCompound nbt = tile.save(new NBTTagCompound());
+			nbt.g();
+			NBTTagCompound parsedNBT = null;
+			parsedNBT = MojangsonParser.parse(mojangson);
+			nbt.a(parsedNBT);
+			nbt.setInt("x", pos.getX());
+			nbt.setInt("y", pos.getY());
+			nbt.setInt("z", pos.getZ());
+			tile.load(nbt);
+			tile.update();
+			nmsworld.notify(pos, blockData, blockData, 3);
+		}
+
+		catch(MojangsonParseException e)
+		{
+			System.out.println(e.getMessage());
+		}
+
+		catch(Exception e)
+		{
+
+		}
+	}
+
+	@Override
+	public void setSpawnerType(Location block, String mat, short dmg)
+	{
+		block.getBlock().setType(Material.MOB_SPAWNER);
+		CreatureSpawner s = ((CreatureSpawner) block.getBlock().getState());
+		s.setMaxSpawnDelay(100000);
+		s.setMinSpawnDelay(100000);
+		s.setDelay(100000);
+		s.setRequiredPlayerRange(0);
+		s.update();
+		updateBlockData(block, "{RequiredPlayerRange:0s}");
+		updateBlockData(block, "{SpawnData:{id:\"minecraft:armor_stand\",Invisible:0,Marker:1}}");
+		updateBlockData(block, "{SpawnData:{Invisible:1b,NoBasePlate:1b,ShowArms:0b,ArmorItems:[{id:\"\",Count:0},{id:\"\",Count:0},{id:\"\",Count:0},{id:\"minecraft:" + mat + "\",Count:1b,Damage:" + dmg + "s,tag:{Unbreakable:1}}]}}");
+	}
+
+	@Override
+	public void sendActionBar(String s, Player player)
+	{
+		sendPacket(player, new PacketPlayOutChat(new ChatComponentText(s), ChatMessageType.GAME_INFO));
+	}
+
+	@Override
+	public void sendTitle(String title, String subtitle, int i, int s, int o, Player p)
+	{
+		p.sendTitle(title, subtitle, i, s, o);
+	}
+
+	@Override
+	public void sendTabHeaderFooter(String header, String footer, Player p)
+	{
+		PacketPlayOutPlayerListHeaderFooter packet = new PacketPlayOutPlayerListHeaderFooter();
+
+		try
+		{
+			PacketPlayOutPlayerListHeaderFooter.class.getField("a").set(packet, new ChatComponentText(header));
+			PacketPlayOutPlayerListHeaderFooter.class.getField("b").set(packet, new ChatComponentText(footer));
+		}
+
+		catch(IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e)
+		{
+			e.printStackTrace();
+		}
+
+		sendPacket(p, packet);
+	}
+
+	@Override
+	public void sendMessage(String s, Player p)
+	{
+		sendPacket(p, new PacketPlayOutChat(new ChatComponentText(s), ChatMessageType.CHAT));
+	}
+
+	@Override
+	public void sendSystemMessage(String s, Player p)
+	{
+		sendPacket(p, new PacketPlayOutChat(new ChatComponentText(s), ChatMessageType.SYSTEM));
+	}
+
+	@Override
+	public void sendPacket(Player p, Object packet)
+	{
+		((CraftPlayer) p).getHandle().playerConnection.sendPacket((Packet<?>) packet);
+	}
+
+	@Override
+	public void sendPacket(Location l, Object packet)
+	{
+		sendPacket(l.getChunk(), packet);
+	}
+
+	@Override
+	public void sendPacket(World world, Object packet)
+	{
+		for(Player i : world.getPlayers())
+		{
+			sendPacket(i, packet);
+		}
+	}
+
+	@Override
+	public void sendPacket(Object packet)
+	{
+		for(Player i : P.onlinePlayers())
+		{
+			sendPacket(i, packet);
+		}
+	}
+
+	@Override
+	public void sendPacket(Chunk c, Object packet)
+	{
+		for(Player i : P.getPlayersWithinViewOf(c))
+		{
+			sendPacket(i, packet);
+		}
 	}
 }

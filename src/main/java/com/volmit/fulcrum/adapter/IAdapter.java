@@ -78,4 +78,28 @@ public interface IAdapter extends Listener
 	public int getGhostSize();
 
 	public void sendResourcePack(Player p, String url);
+
+	public void updateBlockData(Location block, String mojangson);
+
+	public void setSpawnerType(Location block, String type, short damage);
+
+	public void sendActionBar(String s, Player p);
+
+	public void sendTitle(String title, String subtitle, int i, int s, int o, Player p);
+
+	public void sendTabHeaderFooter(String header, String footer, Player p);
+
+	public void sendMessage(String s, Player p);
+
+	public void sendSystemMessage(String s, Player p);
+
+	public void sendPacket(Player p, Object packet);
+
+	public void sendPacket(Location l, Object packet);
+
+	public void sendPacket(Chunk c, Object packet);
+
+	public void sendPacket(World world, Object packet);
+
+	public void sendPacket(Object packet);
 }

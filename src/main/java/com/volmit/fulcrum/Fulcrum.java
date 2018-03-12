@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.command.Command;
@@ -18,12 +19,11 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import com.volmit.fulcrum.adapter.Adapter12;
 import com.volmit.fulcrum.adapter.IAdapter;
+import com.volmit.fulcrum.bukkit.P;
 import com.volmit.fulcrum.bukkit.TICK;
 import com.volmit.fulcrum.bukkit.Task;
 import com.volmit.fulcrum.images.ImageBakery;
 import com.volmit.fulcrum.images.PluginUtil;
-import com.volmit.fulcrum.lang.C;
-import com.volmit.fulcrum.lang.F;
 import com.volmit.fulcrum.lang.M;
 import com.volmit.fulcrum.world.FastBlock;
 import com.volmit.fulcrum.world.FastBlock12;
@@ -124,14 +124,36 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 	{
 		if(command.getName().equalsIgnoreCase("fulcrum"))
 		{
-			if(args.length == 0)
-			{
-				sender.sendMessage(C.GREEN + "Ghost World: " + C.WHITE + F.f(adapter.getGhostSize()) + C.GRAY + " Thread Safe Chunks Active");
-				sender.sendMessage(C.GREEN + "Write Cache: " + C.WHITE + F.f(getCacheSize()) + C.GRAY + " Cached Indices");
-				return true;
-			}
+			Player p = (Player) sender;
+			Location l = P.targetBlock(p, 32);
 
-			adapter.sendResourcePack((Player) sender, args[0]);
+			if(args.length > 0)
+			{
+				if(args.length == 2 && args[0].equalsIgnoreCase("block"))
+				{
+					String[] k = args[1].split(":");
+
+					if(k.length == 2)
+					{
+						adapter.setSpawnerType(l, k[0], Short.valueOf(k[1]));
+					}
+
+					else
+					{
+						sender.sendMessage("/fulcrum block iron_hoe:0 (material:dura)");
+					}
+				}
+
+				else if(args.length == 2 && args[0].equalsIgnoreCase("rcdn"))
+				{
+					adapter.sendResourcePack((Player) sender, "http://cdn.volmit.com/r/" + args[1] + ".zip");
+				}
+
+				else if(args.length == 2 && args[0].equalsIgnoreCase("rurl"))
+				{
+					adapter.sendResourcePack((Player) sender, args[1]);
+				}
+			}
 
 			return true;
 		}
