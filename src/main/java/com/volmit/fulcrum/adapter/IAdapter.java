@@ -14,6 +14,7 @@ import org.bukkit.inventory.ItemStack;
 
 import com.volmit.fulcrum.bukkit.BlockType;
 import com.volmit.fulcrum.lang.GList;
+import com.volmit.fulcrum.resourcepack.ResourcePack;
 
 public interface IAdapter extends Listener
 {
@@ -77,7 +78,15 @@ public interface IAdapter extends Listener
 
 	public int getGhostSize();
 
+	public void sendResourcePackPacket(Player p, String url);
+
 	public void sendResourcePack(Player p, String url);
+
+	public void sendResourcePack(Player p, ResourcePack pack);
+
+	public void sendResourcePackWeb(Player p, String pack);
+
+	public void sendResourcePackPrepare(Player p, Runnable r);
 
 	public void updateBlockData(Location block, String mojangson);
 
@@ -102,4 +111,6 @@ public interface IAdapter extends Listener
 	public void sendPacket(World world, Object packet);
 
 	public void sendPacket(Object packet);
+
+	public String getServerPublicAddress();
 }

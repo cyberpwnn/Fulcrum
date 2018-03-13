@@ -44,6 +44,7 @@ public class ShittyWebserver
 		try
 		{
 			writeResource(Fulcrum.class.getResource("/index.html"), new File(root, "index.html"));
+			writeResource(Fulcrum.class.getResource("/smalllogo.png"), new File(root, "smalllogo.png"));
 		}
 
 		catch(Exception e)
@@ -81,5 +82,20 @@ public class ShittyWebserver
 
 		fos.close();
 		in.close();
+	}
+
+	public int getPort()
+	{
+		return port;
+	}
+
+	public File getRoot()
+	{
+		return root;
+	}
+
+	public Server getServer()
+	{
+		return server;
 	}
 }

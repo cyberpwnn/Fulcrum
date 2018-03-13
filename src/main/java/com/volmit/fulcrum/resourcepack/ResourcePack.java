@@ -1,13 +1,17 @@
 package com.volmit.fulcrum.resourcepack;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.util.regex.Matcher;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
+import com.volmit.fulcrum.Fulcrum;
 import com.volmit.fulcrum.lang.GMap;
 
 public class ResourcePack
@@ -36,6 +40,72 @@ public class ResourcePack
 	public PackMeta getMeta()
 	{
 		return meta;
+	}
+
+	public void writeToArchive(File f) throws IOException
+	{
+		File fx = new File(Fulcrum.instance.getDataFolder(), "temp");
+		fx.mkdirs();
+		writeToFolder(fx);
+		f.createNewFile();
+		FileOutputStream fos = new FileOutputStream(f);
+		ZipOutputStream zos = new ZipOutputStream(fos);
+
+		for(File i : fx.listFiles())
+		{
+			addToZip(i, fx, zos);
+		}
+
+		zos.close();
+		delete(fx);
+	}
+
+	private void delete(File fx)
+	{
+		if(fx.isDirectory())
+		{
+			for(File i : fx.listFiles())
+			{
+				delete(i);
+			}
+		}
+
+		else
+		{
+			fx.delete();
+		}
+	}
+
+	private void addToZip(File file, File root, ZipOutputStream s) throws IOException
+	{
+		if(file.isDirectory())
+		{
+			for(File i : file.listFiles())
+			{
+				addToZip(i, root, s);
+			}
+		}
+
+		else
+		{
+			System.out.println("Zipping " + file.getPath());
+			String path = file.getAbsolutePath();
+			String base = root.getAbsolutePath();
+			String relative = new File(base).toURI().relativize(new File(path).toURI()).getPath();
+			ZipEntry ze = new ZipEntry(relative);
+			FileInputStream fin = new FileInputStream(file);
+			s.putNextEntry(ze);
+			byte[] buf = new byte[1024];
+			int read = 0;
+
+			while((read = fin.read(buf)) != -1)
+			{
+				s.write(buf, 0, read);
+			}
+
+			s.closeEntry();
+			fin.close();
+		}
 	}
 
 	public void writeToFolder(File f) throws IOException

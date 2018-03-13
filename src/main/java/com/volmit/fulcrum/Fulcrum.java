@@ -25,6 +25,9 @@ import com.volmit.fulcrum.bukkit.Task;
 import com.volmit.fulcrum.images.ImageBakery;
 import com.volmit.fulcrum.images.PluginUtil;
 import com.volmit.fulcrum.lang.M;
+import com.volmit.fulcrum.resourcepack.PackNode;
+import com.volmit.fulcrum.resourcepack.ResourcePack;
+import com.volmit.fulcrum.resourcepack.TextureType;
 import com.volmit.fulcrum.webserver.ShittyWebserver;
 import com.volmit.fulcrum.world.FastBlock;
 import com.volmit.fulcrum.world.FastBlock12;
@@ -160,6 +163,16 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 				else if(args.length == 2 && args[0].equalsIgnoreCase("rurl"))
 				{
 					adapter.sendResourcePack((Player) sender, args[1]);
+				}
+
+				else if(args[0].equalsIgnoreCase("dyn"))
+				{
+					ResourcePack pack = new ResourcePack();
+					pack.getMeta().setPackIcon(Fulcrum.class.getResource("/unknown.png"));
+					pack.setResource(PackNode.texture(TextureType.ITEMS, "diamond.png"), Fulcrum.class.getResource("/smalllogo.png"));
+					pack.getMeta().setPackDescription("This is desc");
+
+					adapter.sendResourcePack(p, pack);
 				}
 			}
 

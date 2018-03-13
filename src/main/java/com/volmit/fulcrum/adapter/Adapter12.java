@@ -1,7 +1,12 @@
 package com.volmit.fulcrum.adapter;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -45,12 +50,14 @@ import org.bukkit.util.Vector;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.volmit.fulcrum.Fulcrum;
+import com.volmit.fulcrum.bukkit.A;
 import com.volmit.fulcrum.bukkit.Base64;
 import com.volmit.fulcrum.bukkit.BlockType;
 import com.volmit.fulcrum.bukkit.Cuboid;
 import com.volmit.fulcrum.bukkit.Cuboid.CuboidDirection;
 import com.volmit.fulcrum.bukkit.P;
 import com.volmit.fulcrum.bukkit.PE;
+import com.volmit.fulcrum.bukkit.S;
 import com.volmit.fulcrum.bukkit.Task;
 import com.volmit.fulcrum.bukkit.TaskLater;
 import com.volmit.fulcrum.lang.C;
@@ -59,6 +66,7 @@ import com.volmit.fulcrum.lang.GList;
 import com.volmit.fulcrum.lang.GMap;
 import com.volmit.fulcrum.lang.GSet;
 import com.volmit.fulcrum.lang.M;
+import com.volmit.fulcrum.resourcepack.ResourcePack;
 import com.volmit.fulcrum.world.scm.GhostWorld;
 
 import net.minecraft.server.v1_12_R1.BiomeBase;
@@ -211,162 +219,6 @@ public final class Adapter12 implements IAdapter
 		{
 			drop.add(i.getChunk());
 		}
-	}
-
-	@SuppressWarnings("deprecation")
-	@Override
-	public void sendResourcePack(Player p, String url)
-	{
-		p.sendMessage("Downloading " + C.WHITE + url);
-		PE.BLINDNESS.a(300).d(12000).apply(p);
-		PE.SLOW.a(1000).d(12000).apply(p);
-		PE.SLOW_DIGGING.a(1000).d(12000).apply(p);
-		Location lx = p.getLocation().clone();
-		Location la = p.getLocation().clone();
-		lx.setDirection(new Vector(0, 1, 0));
-		boolean[] fx = {false};
-		boolean[] fa = {false};
-		GameMode g = p.getGameMode();
-		p.setGameMode(GameMode.ADVENTURE);
-
-		Cuboid c = new Cuboid(lx);
-		c = c.expand(CuboidDirection.Up, 1);
-		c = c.expand(CuboidDirection.Down, 1);
-		c = c.expand(CuboidDirection.East, 1);
-		c = c.expand(CuboidDirection.West, 1);
-		c = c.expand(CuboidDirection.North, 1);
-		c = c.expand(CuboidDirection.South, 1);
-		Cuboid cx = c;
-
-		for(Block i : new GList<Block>(c.iterator()))
-		{
-			p.sendBlockChange(i.getLocation(), Material.AIR, (byte) 0);
-		}
-
-		for(Block i : new GList<Block>(c.getFace(CuboidDirection.Up).iterator()))
-		{
-			p.sendBlockChange(i.getLocation(), Material.CONCRETE, (byte) 15);
-		}
-
-		for(Block i : new GList<Block>(c.getFace(CuboidDirection.North).iterator()))
-		{
-			p.sendBlockChange(i.getLocation(), Material.CONCRETE, (byte) 15);
-		}
-
-		for(Block i : new GList<Block>(c.getFace(CuboidDirection.South).iterator()))
-		{
-			p.sendBlockChange(i.getLocation(), Material.CONCRETE, (byte) 15);
-		}
-
-		for(Block i : new GList<Block>(c.getFace(CuboidDirection.East).iterator()))
-		{
-			p.sendBlockChange(i.getLocation(), Material.CONCRETE, (byte) 15);
-		}
-
-		for(Block i : new GList<Block>(c.getFace(CuboidDirection.West).iterator()))
-		{
-			p.sendBlockChange(i.getLocation(), Material.CONCRETE, (byte) 15);
-		}
-
-		new Task(0)
-		{
-			@Override
-			public void run()
-			{
-				if(fx[0])
-				{
-					p.closeInventory();
-					p.closeInventory();
-					p.closeInventory();
-					p.removePotionEffect(PotionEffectType.BLINDNESS);
-					p.removePotionEffect(PotionEffectType.SLOW);
-					p.removePotionEffect(PotionEffectType.SLOW_DIGGING);
-
-					if(!fa[0])
-					{
-						p.sendTitle("    ", C.GREEN + "Resources Loaded", 2, 20, 5);
-					}
-
-					else
-					{
-						p.sendTitle("    ", C.RED + "Resources Failed to Load", 2, 20, 5);
-					}
-
-					p.setGameMode(g);
-
-					for(Block i : new GList<Block>(cx.iterator()))
-					{
-						Fulcrum.adapter.makeDirty(i.getLocation());
-					}
-
-					cancel();
-					p.teleport(la);
-					p.resetPlayerTime();
-					return;
-				}
-
-				p.setPlayerTime(13686, false);
-				p.teleport(lx);
-			}
-		};
-
-		p.sendTitle(C.GRAY + "Please Wait", C.GRAY + "Applying Resources", 0, 100000, 100);
-
-		new TaskLater(20)
-		{
-			@Override
-			public void run()
-			{
-				p.setResourcePack(url);
-				Fulcrum.register(new Listener()
-				{
-					@EventHandler
-					public void on(PlayerResourcePackStatusEvent e)
-					{
-						if(e.getPlayer().equals(p))
-						{
-							if(e.getStatus().equals(Status.ACCEPTED))
-							{
-
-							}
-
-							if(e.getStatus().equals(Status.FAILED_DOWNLOAD))
-							{
-								Fulcrum.unregister(this);
-								new TaskLater(5)
-								{
-									@Override
-									public void run()
-									{
-										fx[0] = true;
-										fa[0] = true;
-									}
-								};
-							}
-
-							if(e.getStatus().equals(Status.DECLINED))
-							{
-								p.kickPlayer("In multiplayer options re-allow resource packs.");
-							}
-
-							if(e.getStatus().equals(Status.SUCCESSFULLY_LOADED))
-							{
-								Fulcrum.unregister(this);
-								new TaskLater(5)
-								{
-									@Override
-									public void run()
-									{
-										fx[0] = true;
-									}
-								};
-							}
-						}
-					}
-
-				});
-			}
-		};
 	}
 
 	private void onTick()
@@ -893,6 +745,288 @@ public final class Adapter12 implements IAdapter
 		for(Player i : P.getPlayersWithinViewOf(c))
 		{
 			sendPacket(i, packet);
+		}
+	}
+
+	@Override
+	public void sendResourcePackPacket(Player p, String url)
+	{
+		p.setResourcePack(url);
+	}
+
+	@Override
+	public void sendResourcePack(Player p, String url)
+	{
+		sendResourcePackPrepare(p, new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				sendResourcePackPacket(p, url);
+			}
+		});
+	}
+
+	@Override
+	public void sendResourcePack(Player p, ResourcePack pack)
+	{
+		new A()
+		{
+			@Override
+			public void run()
+			{
+				String fn = UUID.randomUUID().toString().replaceAll("-", "") + ".zip";
+				File f = new File(Fulcrum.server.getRoot(), fn);
+				String uurl = getServerPublicAddress();
+				System.out.println(p.getName() + " -> " + p.getAddress().getAddress().getHostAddress());
+
+				if(p.getAddress().getAddress().getHostAddress().equals("127.0.0.1"))
+				{
+					System.out.println("Client is on the same network as the server. Setting url to local");
+					uurl = "localhost";
+				}
+
+				String url = uurl;
+
+				try
+				{
+					pack.writeToArchive(f);
+				}
+
+				catch(IOException e)
+				{
+					e.printStackTrace();
+				}
+
+				new S()
+				{
+					@Override
+					public void run()
+					{
+						sendResourcePackPrepare(p, new Runnable()
+						{
+							@Override
+							public void run()
+							{
+								sendResourcePackPacket(p, "http://" + url + ":" + Fulcrum.server.getPort() + "/" + fn);
+								System.out.println("Sending " + p + " DYNAMIC pack @ " + "http://" + url + ":" + Fulcrum.server.getPort() + "/" + fn);
+							}
+						});
+					}
+				};
+			}
+		};
+	}
+
+	@Override
+	public void sendResourcePackWeb(Player p, String pack)
+	{
+		new A()
+		{
+			@Override
+			public void run()
+			{
+				String uurl = getServerPublicAddress();
+				System.out.println(p.getName() + " -> " + p.getAddress().getAddress().getHostAddress());
+
+				if(p.getAddress().getAddress().getHostAddress().equals("127.0.0.1"))
+				{
+					System.out.println("Client is on the same network as the server. Setting url to local");
+					uurl = "localhost";
+				}
+				String url = uurl;
+
+				new S()
+				{
+					@Override
+					public void run()
+					{
+						sendResourcePackPrepare(p, new Runnable()
+						{
+							@Override
+							public void run()
+							{
+								sendResourcePackPacket(p, "http://" + url + ":" + Fulcrum.server.getPort() + "/" + pack);
+								System.out.println("Sending " + p + " DYNAMIC pack @ " + "http://" + url + ":" + Fulcrum.server.getPort() + "/" + pack);
+							}
+						});
+					}
+				};
+			}
+		};
+	}
+
+	@SuppressWarnings("deprecation")
+	@Override
+	public void sendResourcePackPrepare(Player p, Runnable r)
+	{
+		PE.BLINDNESS.a(300).d(12000).apply(p);
+		PE.SLOW.a(1000).d(12000).apply(p);
+		PE.SLOW_DIGGING.a(1000).d(12000).apply(p);
+		Location lx = p.getLocation().clone();
+		Location la = p.getLocation().clone();
+		lx.setDirection(new Vector(0, 1, 0));
+		boolean[] fx = {false};
+		boolean[] fa = {false};
+		GameMode g = p.getGameMode();
+		p.setGameMode(GameMode.ADVENTURE);
+
+		Cuboid c = new Cuboid(lx);
+		c = c.expand(CuboidDirection.Up, 1);
+		c = c.expand(CuboidDirection.Down, 1);
+		c = c.expand(CuboidDirection.East, 1);
+		c = c.expand(CuboidDirection.West, 1);
+		c = c.expand(CuboidDirection.North, 1);
+		c = c.expand(CuboidDirection.South, 1);
+		Cuboid cx = c;
+
+		for(Block i : new GList<Block>(c.iterator()))
+		{
+			p.sendBlockChange(i.getLocation(), Material.AIR, (byte) 0);
+		}
+
+		for(Block i : new GList<Block>(c.getFace(CuboidDirection.Up).iterator()))
+		{
+			p.sendBlockChange(i.getLocation(), Material.CONCRETE, (byte) 15);
+		}
+
+		for(Block i : new GList<Block>(c.getFace(CuboidDirection.North).iterator()))
+		{
+			p.sendBlockChange(i.getLocation(), Material.CONCRETE, (byte) 15);
+		}
+
+		for(Block i : new GList<Block>(c.getFace(CuboidDirection.South).iterator()))
+		{
+			p.sendBlockChange(i.getLocation(), Material.CONCRETE, (byte) 15);
+		}
+
+		for(Block i : new GList<Block>(c.getFace(CuboidDirection.East).iterator()))
+		{
+			p.sendBlockChange(i.getLocation(), Material.CONCRETE, (byte) 15);
+		}
+
+		for(Block i : new GList<Block>(c.getFace(CuboidDirection.West).iterator()))
+		{
+			p.sendBlockChange(i.getLocation(), Material.CONCRETE, (byte) 15);
+		}
+
+		new Task(0)
+		{
+			@Override
+			public void run()
+			{
+				if(fx[0])
+				{
+					p.closeInventory();
+					p.closeInventory();
+					p.closeInventory();
+					p.removePotionEffect(PotionEffectType.BLINDNESS);
+					p.removePotionEffect(PotionEffectType.SLOW);
+					p.removePotionEffect(PotionEffectType.SLOW_DIGGING);
+
+					if(!fa[0])
+					{
+						p.sendTitle("    ", C.GREEN + "Resources Loaded", 2, 20, 5);
+					}
+
+					else
+					{
+						p.sendTitle("    ", C.RED + "Resources Failed to Load", 2, 20, 5);
+					}
+
+					p.setGameMode(g);
+
+					for(Block i : new GList<Block>(cx.iterator()))
+					{
+						Fulcrum.adapter.makeDirty(i.getLocation());
+					}
+
+					cancel();
+					p.teleport(la);
+					p.resetPlayerTime();
+					return;
+				}
+
+				p.setPlayerTime(13686, false);
+				p.teleport(lx);
+			}
+		};
+
+		p.sendTitle(C.GRAY + "Please Wait", C.GRAY + "Applying Resources", 0, 100000, 100);
+
+		new TaskLater(20)
+		{
+			@Override
+			public void run()
+			{
+				r.run();
+				Fulcrum.register(new Listener()
+				{
+					@EventHandler
+					public void on(PlayerResourcePackStatusEvent e)
+					{
+						if(e.getPlayer().equals(p))
+						{
+							if(e.getStatus().equals(Status.ACCEPTED))
+							{
+
+							}
+
+							if(e.getStatus().equals(Status.FAILED_DOWNLOAD))
+							{
+								Fulcrum.unregister(this);
+								new TaskLater(5)
+								{
+									@Override
+									public void run()
+									{
+										fx[0] = true;
+										fa[0] = true;
+									}
+								};
+							}
+
+							if(e.getStatus().equals(Status.DECLINED))
+							{
+								p.kickPlayer("In multiplayer options re-allow resource packs.");
+							}
+
+							if(e.getStatus().equals(Status.SUCCESSFULLY_LOADED))
+							{
+								Fulcrum.unregister(this);
+								new TaskLater(5)
+								{
+									@Override
+									public void run()
+									{
+										fx[0] = true;
+									}
+								};
+							}
+						}
+					}
+
+				});
+			}
+		};
+	}
+
+	@Override
+	public String getServerPublicAddress()
+	{
+		try
+		{
+			BufferedReader pr = new BufferedReader(new InputStreamReader(new URL("http://checkip.amazonaws.com/").openStream()));
+			String address = pr.readLine();
+
+			pr.close();
+
+			return address;
+		}
+
+		catch(Exception e)
+		{
+			return null;
 		}
 	}
 }
