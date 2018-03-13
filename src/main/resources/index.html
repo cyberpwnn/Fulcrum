@@ -1,6 +1,94 @@
 <!DOCTYPE html>
-	<body>
-		<h1>Fulcrum ${project.version}</h1>
-		<p>No, you can't has CSS</p>
-	</body>
+<html lang="en" >
+/*
+Shitty Webpage made by ${project.webdesign}
+*/
+<head>
+  <meta charset="UTF-8">
+  <title>Fulcrum</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="theme-color" content="#23272A">
+  <meta name="msapplication-navbutton-color" content="#23272A">
+  <meta name="apple-mobile-web-app-status-bar-style" content="#23272A">
+  <link href="https://fonts.googleapis.com/css?family=Lato:300|Oswald:300|Ubuntu" rel="stylesheet">
+
+</head>
+<style>
+html, body {
+  color: white;
+  margin: 0;
+  padding: 0;
+}
+
+h1, h2, h3, h4 {
+  font-family: "Ubuntu";
+}
+
+.body {
+  min-height: 100vh;
+  background-color: rgba(143,4,169, 0.9);
+  background-image: linear-gradient(to top, black 0%, rgba(0, 0, 0, 0) 90%), repeating-linear-gradient(65deg, rgba(255, 255, 255, 0) 0, rgba(255, 255, 255, 0.05) 400px);
+  overflow-x: hidden;
+}
+
+.header {
+  text-align: center;
+}
+
+.header h1 {
+  font-family: 'Ubuntu', sans-serif;
+}
+
+#logo {
+  padding: 0 20px 20px 0;
+  width: 100px;
+  height: 100px;
+  left: 46%;
+  top: 30%;
+  position: absolute;
+}
+
+/* .content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 60vh;
+} */
+
+.content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-right: -50%;
+  transform: translate(-50%, -50%);
+}
+
+.wrapper .row {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  margin: 10px 0;
+}
+
+.wrapper h2 {
+  font-size: 1.9em;
+}
+
+}
+</style>
+<body>
+  <div class="body">
+      <div class="content">
+          <div class="header">
+            <h1>Fulcrum ${package.version}</h1>
+
+          </div>
+      </div>
+      <img src="./smalllogo.png" id="logo">
+  </div>
+        
+</body>
+
 </html>
