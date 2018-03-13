@@ -43,10 +43,10 @@ public class ShittyWebserver
 
 		try
 		{
-			writeResource(Fulcrum.class.getResource("/index.html"), new File(root, "index.html"));
-			writeResource(Fulcrum.class.getResource("/smalllogo.png"), new File(root, "smalllogo.png"));
-			writeResource(Fulcrum.class.getResource("/canvas.js"), new File(root, "canvas.js"));
-			writeResource(Fulcrum.class.getResource("/index.js"), new File(root, "index.js"));
+			writeResource(Fulcrum.class.getResource("/web/index.html"), new File(root, "index.html"));
+			writeResource(Fulcrum.class.getResource("/web/smalllogo.png"), new File(root, "smalllogo.png"));
+			writeResource(Fulcrum.class.getResource("/web/canvas.js"), new File(root, "canvas.js"));
+			writeResource(Fulcrum.class.getResource("/web/index.js"), new File(root, "index.js"));
 		}
 
 		catch(Exception e)

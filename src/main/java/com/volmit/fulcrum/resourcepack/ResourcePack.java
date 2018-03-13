@@ -130,6 +130,12 @@ public class ResourcePack
 
 	private void writeResourceToFile(URL url, File f) throws IOException
 	{
+		if(url == null)
+		{
+			System.out.println("WARNING! Resource is null: " + f.getAbsolutePath());
+			return;
+		}
+
 		FileOutputStream fos = new FileOutputStream(f);
 		InputStream in = url.openStream();
 		byte[] buffer = new byte[1024];

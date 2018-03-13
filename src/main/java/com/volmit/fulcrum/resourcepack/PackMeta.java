@@ -20,7 +20,7 @@ public class PackMeta
 
 	public PackMeta(String packDescription, int packFormat)
 	{
-		this(packDescription, packFormat, Fulcrum.class.getResource("/unknown.png"));
+		this(packDescription, packFormat, Fulcrum.class.getResource("/assets/textures/blocks/unknown.png"));
 	}
 
 	public PackMeta(String packDescription)
