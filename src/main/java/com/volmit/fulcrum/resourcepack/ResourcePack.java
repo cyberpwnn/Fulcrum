@@ -29,6 +29,23 @@ public class ResourcePack
 
 	public void setResource(String path, URL url)
 	{
+		if(path == null && url == null)
+		{
+			return;
+		}
+
+		if(path == null)
+		{
+			System.out.println("PATH IS NULL: " + url.toString());
+			return;
+		}
+
+		if(url == null)
+		{
+			System.out.println("URL IS NULL: " + path);
+			return;
+		}
+
 		copyResources.put(path, url);
 	}
 

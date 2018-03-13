@@ -22,7 +22,7 @@ import com.volmit.fulcrum.adapter.IAdapter;
 import com.volmit.fulcrum.bukkit.P;
 import com.volmit.fulcrum.bukkit.TICK;
 import com.volmit.fulcrum.bukkit.Task;
-import com.volmit.fulcrum.custom.BlockRegistry;
+import com.volmit.fulcrum.custom.ContentRegistry;
 import com.volmit.fulcrum.custom.BlockRenderType;
 import com.volmit.fulcrum.custom.CustomBlock;
 import com.volmit.fulcrum.images.ImageBakery;
@@ -46,7 +46,7 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 	public static long ms = M.ms();
 	public static SCMManager scmmgr;
 	public static ShittyWebserver server;
-	public static BlockRegistry blockRegistry;
+	public static ContentRegistry blockRegistry;
 	public static ResourcePack rsp;
 
 	@Override
@@ -56,7 +56,7 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 		cache = new MCACache();
 		adapter = new Adapter12();
 		scmmgr = new SCMManager();
-		blockRegistry = new BlockRegistry();
+		blockRegistry = new ContentRegistry();
 		server = new ShittyWebserver(8193, new File(getDataFolder(), "web"));
 
 		try
