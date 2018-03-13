@@ -25,6 +25,7 @@ import com.volmit.fulcrum.bukkit.Task;
 import com.volmit.fulcrum.images.ImageBakery;
 import com.volmit.fulcrum.images.PluginUtil;
 import com.volmit.fulcrum.lang.M;
+import com.volmit.fulcrum.webserver.ShittyWebserver;
 import com.volmit.fulcrum.world.FastBlock;
 import com.volmit.fulcrum.world.FastBlock12;
 import com.volmit.fulcrum.world.FastChunk;
@@ -40,7 +41,7 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 	public static MCACache cache;
 	public static long ms = M.ms();
 	public static SCMManager scmmgr;
-	public static MultiblockManager mbmgr;
+	public static ShittyWebserver server;
 
 	@Override
 	public void onEnable()
@@ -49,15 +50,21 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 		cache = new MCACache();
 		adapter = new Adapter12();
 		scmmgr = new SCMManager();
-		mbmgr = new MultiblockManager();
+		server = new ShittyWebserver(8193, new File(getDataFolder(), "web"));
 
 		try
 		{
 			ImageBakery.scan(new File(getDataFolder().getParentFile(), PluginUtil.getPluginFileName(getName())), "fulcrum");
 			System.out.println("Loaded images");
+			server.start();
 		}
 
 		catch(IOException e)
+		{
+			e.printStackTrace();
+		}
+
+		catch(Exception e)
 		{
 			e.printStackTrace();
 		}
@@ -78,6 +85,7 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 	@Override
 	public void onDisable()
 	{
+		server.stop();
 		flushCache();
 	}
 
@@ -176,7 +184,6 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 		TICK.tick++;
 		cache.tick();
 		scmmgr.onTick();
-		mbmgr.onTick();
 	}
 
 	public static void callEvent(Event e)

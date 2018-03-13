@@ -6,6 +6,9 @@
 	<version>1.0</version>
 	<name>Fulcrum</name>
 	<properties>
+		<project.author>cyberpwn</project.author>
+		<project.webdesign>Aeternum</project.webdesign>
+		<project.source>The Internet</project.source>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -20,6 +23,9 @@
 				<includes>
 					<include>**/*.yml</include>
 					<include>**/*.json</include>
+					<include>**/*.html</include>
+					<include>**/*.css</include>
+					<include>**/*.js</include>
 					<include>**/*.txt</include>
 				</includes>
 			</resource>
@@ -41,11 +47,20 @@
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<version>2.3.1</version>
-				<configuration>
-					<finalName>${project.name}</finalName>
-				</configuration>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>3.1.0</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+						<configuration>
+							<finalName>${project.name}</finalName>
+							<minimizeJar>true</minimizeJar>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
@@ -55,12 +70,21 @@
 			<build>
 				<plugins>
 					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-jar-plugin</artifactId>
-						<version>2.3.1</version>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>exec-maven-plugin</artifactId>
+						<version>1.2</version>
+						<executions>
+							<execution>
+								<id>runbatchfile</id>
+								<phase>package</phase>
+								<goals>
+									<goal>exec</goal>
+								</goals>
+							</execution>
+						</executions>
 						<configuration>
-							<finalName>${project.name}</finalName>
-							<outputDirectory>${fulcrum.server}</outputDirectory>
+							<executable>${project.basedir}/scripts/dev.bat</executable>
+							<arguments>${project.basedir}\target\Fulcrum.jar</arguments>
 						</configuration>
 					</plugin>
 				</plugins>
@@ -86,6 +110,21 @@
 			<scope>system</scope>
 			<systemPath>${fulcrum.libs}/craftbukkit-1.12.2.jar</systemPath>
 			<version>1.12.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-server</artifactId>
+			<version>9.4.8.v20171121</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-servlet</artifactId>
+			<version>9.4.8.v20171121</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-util</artifactId>
+			<version>9.4.8.v20171121</version>
 		</dependency>
 	</dependencies>
 </project>
