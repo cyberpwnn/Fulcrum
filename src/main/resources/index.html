@@ -1,90 +1,74 @@
 <!DOCTYPE html>
 <html lang="en" >
+
 <head>
   <meta charset="UTF-8">
   <title>Fulcrum</title>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="theme-color" content="#23272A">
-  <meta name="msapplication-navbutton-color" content="#23272A">
-  <meta name="apple-mobile-web-app-status-bar-style" content="#23272A">
-  <link href="https://fonts.googleapis.com/css?family=Lato:300|Oswald:300|Ubuntu" rel="stylesheet">
-
 </head>
 <style>
-html, body {
-  color: white;
-  margin: 0;
-  padding: 0;
+@import url("https://fonts.googleapis.com/css?family=Homenaje");
+.p-canvas-webgl {
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
 }
 
-h1, h2, h3, h4 {
-  font-family: "Ubuntu";
-}
-
-.body {
-  min-height: 100vh;
-  background-color: rgba(143,4,169, 0.9);
-  background-image: linear-gradient(to top, black 0%, rgba(0, 0, 0, 0) 90%), repeating-linear-gradient(65deg, rgba(255, 255, 255, 0) 0, rgba(255, 255, 255, 0.05) 400px);
-  overflow-x: hidden;
-}
-
-.header {
+.p-summary {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  color: #fff;
+  font-family: 'Homenaje', sans-serif;
   text-align: center;
 }
-
-.header h1 {
-  font-family: 'Ubuntu', sans-serif;
-  font-size: 75px;
+.p-summary h1 {
+  margin: 0 0 0.1em;
+  font-size: 18vh;
+  font-weight: 400;
 }
-
+.p-summary p {
+  margin: 0;
+  font-size: 3vh;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.p-summary a {
+  color: #fff;
+}
 #logo {
   padding: 0 20px 20px 0;
   width: 100px;
   height: 100px;
-  right: 0%;
+  left: 1%;
   bottom: 0%;
   position: absolute;
 }
-
-/* .content {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 60vh;
-} */
-
-.content {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  margin-right: -50%;
-  transform: translate(-50%, -50%);
-}
-
-.wrapper .row {
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  margin: 10px 0;
-}
-
-
-
-}
-</style>
+</style>>
 <body>
-  <div class="body">
-      <div class="content">
-          <div class="header">
-            <h1>Fulcrum ${project.version}</h1>
 
-          </div>
-      </div>
-      <img src="./smalllogo.png" id="logo">
+  
+<div class="p-summary">
+  <div class="p-summary__wrap">
+    <h1>Fulcrum</h1>
+    <p>This webserver locally delivers resource packs built with your plugin to players on your server.</p>
+    <img src="https://raw.githubusercontent.com/VolmitSoftware/Fulcrum/master/images/smalllogo.png" id="logo">
   </div>
-        
+</div>
+
+<canvas class="p-canvas-webgl" id="canvas-webgl"></canvas>
+<script src='canvas.js'></script>
+<script src="index.js"></script>
+
+
+
+
 </body>
 
 </html>
