@@ -9,14 +9,31 @@ import com.volmit.fulcrum.lang.JSONObject;
 public class CustomSound
 {
 	private String node;
-	private GMap<URL, String> soundPaths;
+	private GMap<String, URL> soundPaths;
 	private String subtitle;
+	private float suggestedVolume;
+	private float suggestedPitch;
 
 	public CustomSound(String node)
 	{
 		this.node = node;
-		this.soundPaths = new GMap<URL, String>();
-		this.subtitle = null;
+		this.soundPaths = new GMap<String, URL>();
+		this.subtitle = "Did you hear that?";
+		suggestedVolume = 1f;
+		suggestedPitch = 1f;
+	}
+
+	public CustomSound(String node, String bases, String urlx, Class<?> c, int max, String subtitle)
+	{
+		this(node);
+
+		for(int i = 0; i < max; i++)
+		{
+			URL url = c.getResource(urlx.replace("$", (i + 1) + ""));
+			soundPaths.put(bases.replace("$", (i + 1) + ""), url);
+		}
+
+		this.subtitle = subtitle;
 	}
 
 	public String getNode()
@@ -24,7 +41,7 @@ public class CustomSound
 		return node;
 	}
 
-	public GMap<URL, String> getSoundPaths()
+	public GMap<String, URL> getSoundPaths()
 	{
 		return soundPaths;
 	}
@@ -39,7 +56,7 @@ public class CustomSound
 		this.node = node;
 	}
 
-	public void setSoundPaths(GMap<URL, String> soundPaths)
+	public void setSoundPaths(GMap<String, URL> soundPaths)
 	{
 		this.soundPaths = soundPaths;
 	}
@@ -54,9 +71,9 @@ public class CustomSound
 		JSONObject o = new JSONObject();
 		JSONArray arr = new JSONArray();
 
-		for(String i : soundPaths.v())
+		for(String i : soundPaths.k())
 		{
-			arr.put(i);
+			arr.put(i.replace(".ogg", ""));
 		}
 
 		o.put("sounds", arr);
@@ -65,5 +82,27 @@ public class CustomSound
 		{
 			o.put("subtitle", subtitle);
 		}
+
+		sounds.put(node, o);
+	}
+
+	public float getSuggestedVolume()
+	{
+		return suggestedVolume;
+	}
+
+	public void setSuggestedVolume(float suggestedVolume)
+	{
+		this.suggestedVolume = suggestedVolume;
+	}
+
+	public float getSuggestedPitch()
+	{
+		return suggestedPitch;
+	}
+
+	public void setSuggestedPitch(float suggestedPitch)
+	{
+		this.suggestedPitch = suggestedPitch;
 	}
 }

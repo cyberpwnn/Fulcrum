@@ -87,10 +87,7 @@ public class ResourcePack
 			}
 		}
 
-		else
-		{
-			fx.delete();
-		}
+		fx.delete();
 	}
 
 	private void addToZip(File file, File root, ZipOutputStream s) throws IOException
@@ -165,7 +162,6 @@ public class ResourcePack
 
 		fos.close();
 		in.close();
-		System.out.println("Wrote " + f.getPath());
 	}
 
 	private void writePackContent(File m, String content) throws IOException
@@ -174,6 +170,5 @@ public class ResourcePack
 		PrintWriter pw = new PrintWriter(m);
 		pw.println(content);
 		pw.close();
-		System.out.println("Wrote " + m.getPath());
 	}
 }

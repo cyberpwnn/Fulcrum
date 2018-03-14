@@ -2,6 +2,27 @@ name: ${project.name}
 main: com.volmit.fulcrum.Fulcrum
 version: ${project.version}
 load: startup
+content:
+  sounds:
+    material-hardwood:
+      volume: 0.8f
+      pitch: 1f
+      subtitle: 'Hard Wood'
+      resources: 
+      - 'wood/wood_walk<1-11>'
+      - 'wood/deckwood_run3'
+    material-hardwood-step: 
+      copy: material-hardwood
+      volume: 0.3f
+      pitch: 1.2f
+  blocks:
+    hard-wood: 
+      render-mode: ALL
+      name: 'Hard Wood'
+      sounds: 
+        break: material-hardwood
+        place: material-hardwood
+        step: material-hardwood-step
 commands:
   fulcrum:
     aliases: [fu, fulc, fm]

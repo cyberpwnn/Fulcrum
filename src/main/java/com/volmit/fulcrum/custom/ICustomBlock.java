@@ -28,4 +28,6 @@ public interface ICustomBlock
 	public void set(Location location);
 
 	public BlockRenderType getRenderType();
+
+	public void breakParticles(Location l);
 }

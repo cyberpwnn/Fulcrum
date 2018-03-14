@@ -136,4 +136,15 @@ public class CustomBlock implements ICustomBlock
 	{
 		return renderType;
 	}
+
+	@Override
+	public void breakParticles(Location l)
+	{
+
+	}
+
+	public void setRenderType(BlockRenderType renderType)
+	{
+		this.renderType = renderType;
+	}
 }

@@ -102,6 +102,27 @@ public class DataCluster
 		return clusters.k();
 	}
 
+	public GList<String> tk()
+	{
+		GList<String> tk = new GList<String>();
+
+		for(String i : k())
+		{
+			if(i.contains("."))
+			{
+				tk.add(i.split("\\.")[0]);
+			}
+
+			else
+			{
+				tk.add(i);
+			}
+		}
+
+		tk.removeDuplicates();
+		return tk;
+	}
+
 	public ICluster get(String key)
 	{
 		return clusters.get(key);

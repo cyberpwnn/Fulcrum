@@ -16,9 +16,11 @@ public class Audio implements Audible
 	private Sound s;
 	private GList<Audible> a;
 	private int delay;
+	private String sound;
 
 	public Audio()
 	{
+		sound = null;
 		a = new GList<Audible>();
 		c(SoundCategory.AMBIENT).v(1f).p(1f).s(Sound.UI_BUTTON_CLICK);
 		delay = 0;
@@ -60,7 +62,15 @@ public class Audio implements Audible
 				@Override
 				public void run()
 				{
-					l.getWorld().playSound(l, getSound(), getVolume(), getPitch());
+					if(sound != null)
+					{
+						l.getWorld().playSound(l, getSoundString(), getVolume(), getPitch());
+					}
+
+					else
+					{
+						l.getWorld().playSound(l, getSound(), getVolume(), getPitch());
+					}
 
 					for(Audible i : getChildren())
 					{
@@ -72,7 +82,15 @@ public class Audio implements Audible
 
 		else
 		{
-			l.getWorld().playSound(l, getSound(), getVolume(), getPitch());
+			if(sound != null)
+			{
+				l.getWorld().playSound(l, getSoundString(), getVolume(), getPitch());
+			}
+
+			else
+			{
+				l.getWorld().playSound(l, getSound(), getVolume(), getPitch());
+			}
 
 			for(Audible i : getChildren())
 			{
@@ -91,7 +109,15 @@ public class Audio implements Audible
 				@Override
 				public void run()
 				{
-					l.playSound(pos, getSound(), getVolume(), getPitch());
+					if(sound != null)
+					{
+						l.playSound(pos, getSoundString(), getVolume(), getPitch());
+					}
+
+					else
+					{
+						l.playSound(pos, getSound(), getVolume(), getPitch());
+					}
 
 					for(Audible i : getChildren())
 					{
@@ -103,7 +129,15 @@ public class Audio implements Audible
 
 		else
 		{
-			l.playSound(pos, getSound(), getVolume(), getPitch());
+			if(sound != null)
+			{
+				l.playSound(pos, getSoundString(), getVolume(), getPitch());
+			}
+
+			else
+			{
+				l.playSound(pos, getSound(), getVolume(), getPitch());
+			}
 
 			for(Audible i : getChildren())
 			{
@@ -271,5 +305,25 @@ public class Audio implements Audible
 	public boolean hasDelay()
 	{
 		return getDelay() > 0;
+	}
+
+	@Override
+	public Audible s(String s)
+	{
+		sound = s;
+		return this;
+	}
+
+	@Override
+	public String getSoundString()
+	{
+		return sound;
+	}
+
+	@Override
+	public Audible setSound(String s)
+	{
+		sound = s;
+		return this;
 	}
 }

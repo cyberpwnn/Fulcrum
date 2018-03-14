@@ -41,6 +41,8 @@ public interface Audible extends Cloneable
 
 	public Audible s(Sound s);
 
+	public Audible s(String s);
+
 	public Audible vp(float v, float p);
 
 	public float getVolume();
@@ -57,7 +59,11 @@ public interface Audible extends Cloneable
 
 	public Sound getSound();
 
+	public String getSoundString();
+
 	public Audible setSound(Sound s);
+
+	public Audible setSound(String s);
 
 	public Audible addChildren(GList<Audible> a);
 

@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
@@ -18,6 +19,8 @@ import com.volmit.fulcrum.resourcepack.ResourcePack;
 
 public interface IAdapter extends Listener
 {
+	public boolean isMetal(Material type);
+
 	public void queueUpdate(Block b);
 
 	public void pushPhysics();
@@ -91,6 +94,8 @@ public interface IAdapter extends Listener
 	public void updateBlockData(Location block, String mojangson);
 
 	public void setSpawnerType(Location block, String type, short damage);
+
+	public short getSpawnerType(Location block);
 
 	public void sendActionBar(String s, Player p);
 

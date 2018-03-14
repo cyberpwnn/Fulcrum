@@ -86,6 +86,7 @@ import net.minecraft.server.v1_12_R1.PacketPlayOutMapChunk;
 import net.minecraft.server.v1_12_R1.PacketPlayOutMultiBlockChange;
 import net.minecraft.server.v1_12_R1.PacketPlayOutPlayerListHeaderFooter;
 import net.minecraft.server.v1_12_R1.PacketPlayOutUnloadChunk;
+import net.minecraft.server.v1_12_R1.SoundEffectType;
 import net.minecraft.server.v1_12_R1.TileEntity;
 
 public final class Adapter12 implements IAdapter
@@ -656,9 +657,9 @@ public final class Adapter12 implements IAdapter
 	{
 		block.getBlock().setType(Material.MOB_SPAWNER);
 		CreatureSpawner s = ((CreatureSpawner) block.getBlock().getState());
-		s.setMaxSpawnDelay(100000);
-		s.setMinSpawnDelay(100000);
-		s.setDelay(100000);
+		s.setMinSpawnDelay((dmg + 10) * 3);
+		s.setMaxSpawnDelay((dmg + 10) * 3);
+		s.setDelay((dmg + 10) * 3);
 		s.setRequiredPlayerRange(0);
 		s.update();
 		updateBlockData(block, "{RequiredPlayerRange:0s}");
@@ -1028,5 +1029,27 @@ public final class Adapter12 implements IAdapter
 		{
 			return null;
 		}
+	}
+
+	@Override
+	public boolean isMetal(Material type)
+	{
+		return CraftMagicNumbers.getBlock(type).getStepSound().equals(SoundEffectType.e);
+	}
+
+	@Override
+	public short getSpawnerType(Location block)
+	{
+		if(block.getBlock().getType().equals(Material.MOB_SPAWNER))
+		{
+			CreatureSpawner s = ((CreatureSpawner) block.getBlock().getState());
+
+			if(s.getMaxSpawnDelay() == s.getMinSpawnDelay())
+			{
+				return (short) ((s.getMaxSpawnDelay() / 3) - 10);
+			}
+		}
+
+		return -1;
 	}
 }
