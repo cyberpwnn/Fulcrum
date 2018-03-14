@@ -653,21 +653,6 @@ public final class Adapter12 implements IAdapter
 	}
 
 	@Override
-	public void setSpawnerType(Location block, String mat, short dmg)
-	{
-		block.getBlock().setType(Material.MOB_SPAWNER);
-		CreatureSpawner s = ((CreatureSpawner) block.getBlock().getState());
-		s.setMinSpawnDelay((dmg + 10) * 3);
-		s.setMaxSpawnDelay((dmg + 10) * 3);
-		s.setDelay((dmg + 10) * 3);
-		s.setRequiredPlayerRange(0);
-		s.update();
-		updateBlockData(block, "{RequiredPlayerRange:0s}");
-		updateBlockData(block, "{SpawnData:{id:\"minecraft:armor_stand\",Invisible:0,Marker:1}}");
-		updateBlockData(block, "{SpawnData:{Invisible:1b,NoBasePlate:1b,ShowArms:0b,ArmorItems:[{id:\"\",Count:0},{id:\"\",Count:0},{id:\"\",Count:0},{id:\"minecraft:" + mat + "\",Count:1b,Damage:" + dmg + "s,tag:{Unbreakable:1}}]}}");
-	}
-
-	@Override
 	public void sendActionBar(String s, Player player)
 	{
 		sendPacket(player, new PacketPlayOutChat(new ChatComponentText(s), ChatMessageType.GAME_INFO));
@@ -1051,5 +1036,26 @@ public final class Adapter12 implements IAdapter
 		}
 
 		return -1;
+	}
+
+	@Override
+	public void setSpawnerType(Location block, int id)
+	{
+		setSpawnerType(block, Fulcrum.contentRegistry.getBlockFromSuper(id).getMatt(), Fulcrum.contentRegistry.getBlockFromSuper(id).getDurabilityLock(), Fulcrum.contentRegistry.getBlockFromSuper(id).isEnchanted());
+	}
+
+	@Override
+	public void setSpawnerType(Location block, String mat, short dmg, boolean enchanted)
+	{
+		block.getBlock().setType(Material.MOB_SPAWNER);
+		CreatureSpawner s = ((CreatureSpawner) block.getBlock().getState());
+		s.setMinSpawnDelay((dmg + 10) * 3);
+		s.setMaxSpawnDelay((dmg + 10) * 3);
+		s.setDelay((dmg + 10) * 3);
+		s.setRequiredPlayerRange(0);
+		s.update();
+		updateBlockData(block, "{RequiredPlayerRange:0s}");
+		updateBlockData(block, "{SpawnData:{id:\"minecraft:armor_stand\",Invisible:0,Marker:1}}");
+		updateBlockData(block, "{SpawnData:{Invisible:1b,NoBasePlate:1b,ShowArms:0b,ArmorItems:[{id:\"\",Count:0},{id:\"\",Count:0},{id:\"\",Count:0},{id:\"minecraft:" + mat + "\",Count:1b,Damage:" + dmg + "s,tag:{Unbreakable:1" + (enchanted ? ",ench:[{id:0,lvl:0}]" : "") + "}}]}}");
 	}
 }

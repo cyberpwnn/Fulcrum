@@ -93,10 +93,6 @@ public interface IAdapter extends Listener
 
 	public void updateBlockData(Location block, String mojangson);
 
-	public void setSpawnerType(Location block, String type, short damage);
-
-	public short getSpawnerType(Location block);
-
 	public void sendActionBar(String s, Player p);
 
 	public void sendTitle(String title, String subtitle, int i, int s, int o, Player p);
@@ -118,4 +114,10 @@ public interface IAdapter extends Listener
 	public void sendPacket(Object packet);
 
 	public String getServerPublicAddress();
+
+	public void setSpawnerType(Location block, int superid);
+
+	public short getSpawnerType(Location block);
+
+	void setSpawnerType(Location block, String mat, short dmg, boolean enchanted);
 }

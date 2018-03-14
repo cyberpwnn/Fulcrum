@@ -2,6 +2,7 @@ package com.volmit.fulcrum.custom;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -14,16 +15,24 @@ public class CustomBlock implements ICustomBlock
 	private Audible breakSound;
 	private Audible placeSound;
 	private Audible stepSound;
-	private Audible digSound;
 	private BlockRenderType renderType;
 	private String name;
 	private final String id;
 	private short durabilityLock;
+	private Material material;
+	private boolean shaded;
+	private int sid;
+	private String matt;
+	private boolean ee;
 
 	public CustomBlock(String id)
 	{
+		ee = false;
 		this.id = id;
+		sid = 0;
 		setName("fulcrum:" + id);
+		shaded = false;
+		matt = "";
 		renderType = BlockRenderType.ALL;
 	}
 
@@ -48,11 +57,6 @@ public class CustomBlock implements ICustomBlock
 		this.stepSound = stepSound;
 	}
 
-	public void setDigSound(Audible digSound)
-	{
-		this.digSound = digSound;
-	}
-
 	public void setName(String name)
 	{
 		this.name = name;
@@ -74,12 +78,6 @@ public class CustomBlock implements ICustomBlock
 	public Audible getStepSound()
 	{
 		return stepSound;
-	}
-
-	@Override
-	public Audible getDigSound()
-	{
-		return digSound;
 	}
 
 	@Override
@@ -109,11 +107,17 @@ public class CustomBlock implements ICustomBlock
 	@Override
 	public ItemStack getItem()
 	{
-		ItemStack is = new ItemStack(Material.DIAMOND_HOE);
+		ItemStack is = new ItemStack(getType());
 		is.setDurability(getDurabilityLock());
 		ItemMeta im = is.getItemMeta();
 		im.setUnbreakable(true);
 		im.setDisplayName(getName());
+
+		if(ee)
+		{
+			im.addEnchant(Enchantment.PROTECTION_ENVIRONMENTAL, 0, true);
+		}
+
 		im.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
 		im.addItemFlags(ItemFlag.HIDE_DESTROYS);
 		im.addItemFlags(ItemFlag.HIDE_ENCHANTS);
@@ -128,7 +132,7 @@ public class CustomBlock implements ICustomBlock
 	@Override
 	public void set(Location location)
 	{
-		Fulcrum.adapter.setSpawnerType(location, "diamond_hoe", getDurabilityLock());
+		Fulcrum.adapter.setSpawnerType(location, getMatt(), getDurabilityLock(), ee);
 	}
 
 	@Override
@@ -137,14 +141,77 @@ public class CustomBlock implements ICustomBlock
 		return renderType;
 	}
 
-	@Override
-	public void breakParticles(Location l)
-	{
-
-	}
-
 	public void setRenderType(BlockRenderType renderType)
 	{
 		this.renderType = renderType;
+	}
+
+	@Override
+	public Material getType()
+	{
+		return material;
+	}
+
+	@Override
+	public void setType(Material type)
+	{
+		material = type;
+	}
+
+	@Override
+	public boolean isShaded()
+	{
+		return shaded;
+	}
+
+	public Material getMaterial()
+	{
+		return material;
+	}
+
+	public void setMaterial(Material material)
+	{
+		this.material = material;
+	}
+
+	public void setShaded(boolean shaded)
+	{
+		this.shaded = shaded;
+	}
+
+	@Override
+	public int getSuperID()
+	{
+		return sid;
+	}
+
+	@Override
+	public void setSuperID(int f)
+	{
+		sid = f;
+	}
+
+	@Override
+	public String getMatt()
+	{
+		return matt;
+	}
+
+	@Override
+	public void setMatt(String matt)
+	{
+		this.matt = matt;
+	}
+
+	@Override
+	public void setEnchanted(boolean boolean1)
+	{
+		ee = boolean1;
+	}
+
+	@Override
+	public boolean isEnchanted()
+	{
+		return ee;
 	}
 }

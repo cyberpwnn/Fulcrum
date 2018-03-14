@@ -19,6 +19,7 @@ content:
     hard-wood: 
       render-mode: ALL
       name: 'Hard Wood'
+      enchanted: true
       sounds: 
         break: material-hardwood
         place: material-hardwood

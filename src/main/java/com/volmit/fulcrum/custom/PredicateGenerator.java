@@ -34,6 +34,28 @@ public class PredicateGenerator
 		}
 	}
 
+	public int register(String model)
+	{
+		models.add(model);
+		int id = models.size();
+		return id;
+	}
+
+	public int getUse()
+	{
+		return models.size();
+	}
+
+	public int getMax()
+	{
+		return max - 1;
+	}
+
+	public boolean isFull()
+	{
+		return models.size() >= max - 1;
+	}
+
 	public Material getType()
 	{
 		return type;
@@ -47,11 +69,6 @@ public class PredicateGenerator
 	public GList<String> getModels()
 	{
 		return models;
-	}
-
-	public int getMax()
-	{
-		return max;
 	}
 
 	public JSONArray getOverrides()
@@ -80,6 +97,18 @@ public class PredicateGenerator
 		return object;
 	}
 
+	public JSONObject generateModel(String texture, String texture2)
+	{
+		JSONObject textures = new JSONObject();
+		textures.put("layer0", texture);
+		textures.put("layer1", texture2);
+		JSONObject object = new JSONObject();
+		object.put("parent", "item/handheld");
+		object.put("textures", textures);
+		object.put("overrides", getOverrides());
+		return object;
+	}
+
 	public void generate()
 	{
 		overrides = new JSONArray();
@@ -95,7 +124,7 @@ public class PredicateGenerator
 		for(int i = 0; i < max; i++)
 		{
 			boolean put = !pending.isEmpty();
-			String m = pending.isEmpty() ? modelSuperName() : pending.pop();
+			String m = i == 0 ? modelSuperName() : pending.isEmpty() ? modelSuperName() : pending.pop();
 			double raw = (double) ((float) ((double) i / (double) max));
 			raw = Double.valueOf(F.f(raw, 10));
 			JSONObject pred = new JSONObject();

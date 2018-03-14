@@ -1,6 +1,7 @@
 package com.volmit.fulcrum.custom;
 
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
 import com.volmit.fulcrum.sfx.Audible;
@@ -13,8 +14,6 @@ public interface ICustomBlock
 
 	public Audible getStepSound();
 
-	public Audible getDigSound();
-
 	public String getName();
 
 	public String getId();
@@ -23,11 +22,27 @@ public interface ICustomBlock
 
 	public short getDurabilityLock();
 
+	public Material getType();
+
+	public void setType(Material type);
+
 	public ItemStack getItem();
 
 	public void set(Location location);
 
 	public BlockRenderType getRenderType();
 
-	public void breakParticles(Location l);
+	public boolean isShaded();
+
+	public int getSuperID();
+
+	public void setSuperID(int f);
+
+	public String getMatt();
+
+	public void setMatt(String matt);
+
+	public void setEnchanted(boolean boolean1);
+
+	public boolean isEnchanted();
 }
