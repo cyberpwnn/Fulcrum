@@ -17,9 +17,9 @@ content:
       pitch: 1.2f
   blocks:
     hard-wood: 
-      render-mode: ALL
+      render-mode: PEDISTAL
       name: 'Hard Wood'
-      enchanted: true
+      shaded: true
       sounds: 
         break: material-hardwood
         place: material-hardwood

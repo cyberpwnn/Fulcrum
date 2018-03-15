@@ -571,9 +571,7 @@ public class ContentRegistry implements Listener
 		ass.allowUseForNormal(Material.CHAINMAIL_CHESTPLATE, "chainmail_chestplate", "chainmail_chestplate");
 		ass.allowUseForNormal(Material.CHAINMAIL_LEGGINGS, "chainmail_leggings", "chainmail_leggings");
 		ass.allowUseForNormal(Material.CHAINMAIL_BOOTS, "chainmail_boots", "chainmail_boots");
-		ass.allowUseForShaded(Material.LEATHER_CHESTPLATE, "leather_chestplate", "leather_chestplate", "leather_chestplate_overlay");
-		ass.allowUseForShaded(Material.LEATHER_LEGGINGS, "leather_leggings", "leather_leggings", "leather_leggings_overlay");
-		ass.allowUseForShaded(Material.LEATHER_BOOTS, "leather_boots", "leather_boots", "leather_boots_overlay");
+		ass.allowUseForShaded(Material.LEATHER_HELMET, "leather_helmet", "leather_helmet", "leather_helmet_overlay");
 
 		for(ICustomBlock i : blocks)
 		{
