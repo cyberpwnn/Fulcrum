@@ -140,7 +140,7 @@ public class AllocationSpace
 		return f;
 	}
 
-	public void allowUseForNormal(Material type, String model, String texture) throws UnsupportedOperationException
+	public void sacrificeNormal(Material type, String model, String texture) throws UnsupportedOperationException
 	{
 		normalAllocations.put(type, new PredicateGenerator(type, "item/" + model));
 		normalModelTextures.put("item/" + model, "items/" + texture);
@@ -148,7 +148,7 @@ public class AllocationSpace
 		iorda.add(type);
 	}
 
-	public void allowUseForShaded(Material type, String model, String texture, String texture2) throws UnsupportedOperationException
+	public void sacrificeShaded(Material type, String model, String texture, String texture2) throws UnsupportedOperationException
 	{
 		shadedAllocations.put(type, new PredicateGenerator(type, "item/" + model));
 		shadedModelTextures.put("item/" + model, new String[] {"items/" + texture, "items/" + texture2});

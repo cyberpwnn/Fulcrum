@@ -5,7 +5,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.UUID;
 
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -23,12 +25,14 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
 import com.volmit.fulcrum.Fulcrum;
 import com.volmit.fulcrum.bukkit.P;
 import com.volmit.fulcrum.bukkit.R;
+import com.volmit.fulcrum.bukkit.TaskLater;
 import com.volmit.fulcrum.lang.F;
 import com.volmit.fulcrum.lang.GList;
 import com.volmit.fulcrum.lang.GMap;
@@ -41,11 +45,16 @@ import com.volmit.fulcrum.sfx.Audio;
 public class ContentRegistry implements Listener
 {
 	private URL cube;
+	private URL inventoryTop;
+	private URL inventoryBottom;
 	private URL cubeAll;
 	private URL cubeBottomTop;
 	private URL cubeColumn;
 	private URL cubeTop;
 	private URL cubePedistal;
+	private URL defaultInventoryTop;
+	private URL defaultInventoryBottom;
+	private URL defaultItem;
 	private URL defaultModel;
 	private URL defaultModelAll;
 	private URL defaultModelBottomTop;
@@ -58,6 +67,9 @@ public class ContentRegistry implements Listener
 	private URL soundSilent;
 	private URL glint;
 	private URL glintMeta;
+	private String defaultInventoryContentTop;
+	private String defaultInventoryContentBottom;
+	private String defaultItemContent;
 	private String defaultModelContent;
 	private String defaultModelContentAll;
 	private String defaultModelContentTop;
@@ -65,29 +77,42 @@ public class ContentRegistry implements Listener
 	private String defaultModelContentColumn;
 	private String defaultModelContentPedistal;
 	private GList<ICustomBlock> blocks;
+	private GList<CustomInventory> inventories;
+	private GList<CustomSound> sounds;
+	private GList<CustomItem> items;
 	private GMap<String, ICustomBlock> idblocks;
 	private GMap<Integer, ICustomBlock> superBlocks;
-	private GMap<Short, String> shortid;
-	private GList<CustomSound> registerSounds;
+	private GMap<Short, String> blockid;
+	private GMap<Short, String> itemid;
 	private AllocationSpace ass;
 	private GSet<Player> offGround;
 	private GMap<Player, Integer> steps;
+	private String rid;
 
 	public ContentRegistry()
 	{
+		rid = "";
+		inventories = new GList<CustomInventory>();
 		superBlocks = new GMap<Integer, ICustomBlock>();
 		steps = new GMap<Player, Integer>();
-		registerSounds = new GList<CustomSound>();
+		sounds = new GList<CustomSound>();
+		items = new GList<CustomItem>();
 		blocks = new GList<ICustomBlock>();
 		idblocks = new GMap<String, ICustomBlock>();
-		shortid = new GMap<Short, String>();
+		blockid = new GMap<Short, String>();
+		itemid = new GMap<Short, String>();
 		Fulcrum.register(this);
 		offGround = new GSet<Player>();
 	}
 
 	public void registerSound(CustomSound s)
 	{
-		registerSounds.add(s);
+		sounds.add(s);
+	}
+
+	public void registerItem(CustomItem s)
+	{
+		items.add(s);
 	}
 
 	public void broke(Location l, String id)
@@ -131,14 +156,13 @@ public class ContentRegistry implements Listener
 		}
 	}
 
-	public ItemStack getItem(String id, int count)
+	public ItemStack getBlock(String id)
 	{
 		ICustomBlock block = idblocks.get(id);
 
 		if(block != null)
 		{
 			ItemStack is = block.getItem();
-			is.setAmount(count);
 			return is;
 		}
 
@@ -153,6 +177,8 @@ public class ContentRegistry implements Listener
 		GMap<String, CustomSound> sounds = new GMap<String, CustomSound>();
 		GMap<String, String> srmap = new GMap<String, String>();
 		GMap<String, CustomBlock> blocks = new GMap<String, CustomBlock>();
+		GMap<String, CustomItem> items = new GMap<String, CustomItem>();
+		GMap<String, CustomInventory> inventories = new GMap<String, CustomInventory>();
 		fc.loadFromString(read(yaml));
 
 		if(fc.contains("content.sounds"))
@@ -459,6 +485,19 @@ public class ContentRegistry implements Listener
 					}
 				}
 
+				if(fc.contains(key + ".stack-size"))
+				{
+					try
+					{
+						b.setStackSize(fc.getInt(key + ".stack-size"));
+					}
+
+					catch(Exception e)
+					{
+						System.out.println("   Failed to parse stack-size in " + key + ".stack-size");
+					}
+				}
+
 				if(fc.contains(key + ".enchanted"))
 				{
 					try
@@ -518,14 +557,172 @@ public class ContentRegistry implements Listener
 			}
 		}
 
+		if(fc.contains("content.inventories"))
+		{
+			GList<String> inventoryNodes = new GList<String>();
+
+			for(String i : fc.getKeys(true))
+			{
+				if(i.startsWith("content.inventories."))
+				{
+					inventoryNodes.add(i.split("\\.")[2]);
+				}
+			}
+
+			inventoryNodes.removeDuplicates();
+
+			System.out.println(" Registering " + inventoryNodes.size() + " Inventories");
+
+			for(String i : inventoryNodes)
+			{
+				String node = i.replaceAll("\\Q-\\E", "_");
+				CustomInventory b = new CustomInventory(node);
+				String key = "content.inventories." + i;
+				boolean ee = false;
+
+				if(fc.contains(key + ".enchanted.top"))
+				{
+					try
+					{
+						ee = true;
+						b.setEnchantedTop(fc.getBoolean(key + ".enchanted.top"));
+					}
+
+					catch(Exception e)
+					{
+						System.out.println("   Failed to parse enchanted in " + key + ".enchanted.top");
+					}
+				}
+
+				if(fc.contains(key + ".enchanted.bottom"))
+				{
+					try
+					{
+						ee = true;
+						b.setEnchantedTop(fc.getBoolean(key + ".enchanted.bottom"));
+					}
+
+					catch(Exception e)
+					{
+						System.out.println("   Failed to parse enchanted in " + key + ".enchanted.bottom");
+					}
+				}
+
+				if(fc.contains(key + ".enchanted") && !ee)
+				{
+					try
+					{
+						b.setEnchantedTop(fc.getBoolean(key + ".enchanted"));
+					}
+
+					catch(Exception e)
+					{
+						System.out.println("   Failed to parse enchanted in " + key + ".enchanted");
+					}
+
+					try
+					{
+						b.setEnchantedBottom(fc.getBoolean(key + ".enchanted"));
+					}
+
+					catch(Exception e)
+					{
+						System.out.println("   Failed to parse enchanted in " + key + ".enchanted");
+					}
+				}
+
+				inventories.put(node, b);
+			}
+		}
+
+		if(fc.contains("content.items"))
+		{
+			GList<String> itemNodes = new GList<String>();
+
+			for(String i : fc.getKeys(true))
+			{
+				if(i.startsWith("content.items."))
+				{
+					itemNodes.add(i.split("\\.")[2]);
+				}
+			}
+
+			itemNodes.removeDuplicates();
+
+			System.out.println(" Registering " + itemNodes.size() + " Items");
+
+			for(String i : itemNodes)
+			{
+				String node = i.replaceAll("\\Q-\\E", "_");
+				CustomItem b = new CustomItem(node);
+				String key = "content.items." + i;
+
+				if(fc.contains(key + ".name"))
+				{
+					b.setName(fc.get(key + ".name").toString());
+				}
+
+				if(fc.contains(key + ".layers"))
+				{
+					try
+					{
+						b.setLayers(fc.getInt(key + ".layers"));
+					}
+
+					catch(Exception e)
+					{
+						System.out.println("   Failed to parse layers in " + key + ".layers");
+					}
+				}
+
+				if(fc.contains(key + ".stack-size"))
+				{
+					try
+					{
+						b.setStackSize(fc.getInt(key + ".stack-size"));
+					}
+
+					catch(Exception e)
+					{
+						System.out.println("   Failed to parse stack-size in " + key + ".stack-size");
+					}
+				}
+
+				if(fc.contains(key + ".enchanted"))
+				{
+					try
+					{
+						b.setEnchanted(fc.getBoolean(key + ".enchanted"));
+					}
+
+					catch(Exception e)
+					{
+						System.out.println("   Failed to parse enchanted in " + key + ".enchanted");
+					}
+				}
+
+				items.put(node, b);
+			}
+		}
+
 		for(CustomSound i : sounds.v())
 		{
 			registerSound(i);
 		}
 
+		for(CustomItem i : items.v())
+		{
+			registerItem(i);
+		}
+
 		for(CustomBlock i : blocks.v())
 		{
 			registerBlock(i);
+		}
+
+		for(CustomInventory i : inventories.v())
+		{
+			registerInventory(i);
 		}
 	}
 
@@ -536,13 +733,18 @@ public class ContentRegistry implements Listener
 		glint = R.getURL("/assets/textures/misc/enchanted_item_glint.png");
 		glintMeta = R.getURL("/assets/textures/misc/enchanted_item_glint.png.mcmeta");
 		defaultSounds = R.getURL("/assets/sounds-default.json");
+		inventoryTop = R.getURL("/assets/models/inventory/fulcrum_top.json");
+		inventoryBottom = R.getURL("/assets/models/inventory/fulcrum_bottom.json");
 		cube = R.getURL("/assets/models/block/fulcrum_cube.json");
 		cubeAll = R.getURL("/assets/models/block/fulcrum_cube_all.json");
 		cubeBottomTop = R.getURL("/assets/models/block/fulcrum_cube_bottom_top.json");
 		cubeColumn = R.getURL("/assets/models/block/fulcrum_cube_column.json");
 		cubeTop = R.getURL("/assets/models/block/fulcrum_cube_top.json");
 		cubePedistal = R.getURL("/assets/models/block/fulcrum_pedestal.json");
+		defaultInventoryTop = R.getURL("/assets/models/inventory/default_top.json");
+		defaultInventoryBottom = R.getURL("/assets/models/inventory/default_bottom.json");
 		defaultModel = R.getURL("/assets/models/block/default_cube.json");
+		defaultItem = R.getURL("/assets/models/item/default_item.json");
 		defaultModelAll = R.getURL("/assets/models/block/default_cube_all.json");
 		defaultModelBottomTop = R.getURL("/assets/models/block/default_cube_bottom_top.json");
 		defaultModelColumn = R.getURL("/assets/models/block/default_cube_column.json");
@@ -551,8 +753,11 @@ public class ContentRegistry implements Listener
 		newSpawner = R.getURL("/assets/textures/blocks/mob_spawner.png");
 		missingTexture = R.getURL("/assets/textures/blocks/unknown.png");
 		idblocks.clear();
-		shortid.clear();
+		blockid.clear();
+		defaultInventoryContentTop = read(defaultInventoryTop);
+		defaultInventoryContentBottom = read(defaultInventoryBottom);
 		defaultModelContent = read(defaultModel);
+		defaultItemContent = read(defaultItem);
 		defaultModelContentAll = read(defaultModelAll);
 		defaultModelContentTop = read(defaultModelTop);
 		defaultModelContentBottomTop = read(defaultModelBottomTop);
@@ -565,13 +770,82 @@ public class ContentRegistry implements Listener
 		BlockRenderType.COLUMN.setMc(defaultModelContentColumn);
 		BlockRenderType.PEDISTAL.setMc(defaultModelContentPedistal);
 		ass = new AllocationSpace();
-		ass.allowUseForNormal(Material.GOLD_CHESTPLATE, "golden_chestplate", "gold_chestplate");
-		ass.allowUseForNormal(Material.GOLD_LEGGINGS, "golden_leggings", "gold_leggings");
-		ass.allowUseForNormal(Material.GOLD_BOOTS, "golden_boots", "gold_boots");
-		ass.allowUseForNormal(Material.CHAINMAIL_CHESTPLATE, "chainmail_chestplate", "chainmail_chestplate");
-		ass.allowUseForNormal(Material.CHAINMAIL_LEGGINGS, "chainmail_leggings", "chainmail_leggings");
-		ass.allowUseForNormal(Material.CHAINMAIL_BOOTS, "chainmail_boots", "chainmail_boots");
-		ass.allowUseForShaded(Material.LEATHER_HELMET, "leather_helmet", "leather_helmet", "leather_helmet_overlay");
+		ass.sacrificeNormal(Material.DIAMOND_HOE, "diamond_hoe", "diamond_hoe");
+		ass.sacrificeShaded(Material.LEATHER_HELMET, "leather_helmet", "leather_helmet", "leather_helmet_overlay");
+
+		for(CustomItem i : items)
+		{
+			JSONObject o = new JSONObject(defaultItemContent);
+			JSONObject t = o.getJSONObject("textures");
+			System.out.println("  Registering Item " + i.getId());
+
+			for(int j = 0; j < i.getLayers(); j++)
+			{
+				URL url = i.getClass().getResource("/assets/textures/items/" + i.getId() + "_" + j + ".png");
+
+				if(url == null && j == 0)
+				{
+					url = i.getClass().getResource("/assets/textures/items/" + i.getId() + ".png");
+				}
+
+				if(url == null)
+				{
+					System.out.println("   Unable to locate item texture " + i.getId() + "_" + j + ".png");
+					url = missingTexture;
+				}
+
+				pack.setResource("textures/items/" + i.getId() + "_" + j + ".png", url);
+				t.put("layer" + j, "items/" + i.getId() + "_" + j);
+				o.put("textures", t);
+			}
+
+			pack.setResource("models/item/" + i.getId() + ".json", o.toString());
+			AllocatedNode node = ass.allocateNormal("item/" + i.getId());
+			i.setType(node.getMaterial());
+			i.setDurability((short) node.getId());
+			itemid.put(i.getDurability(), i.getId());
+		}
+
+		for(CustomInventory i : inventories)
+		{
+			System.out.println("  Registering Inventory " + i.getId());
+			String ttop = "/assets/textures/inventories/" + i.getId() + "_top.png";
+			String tbottom = "/assets/textures/inventories/" + i.getId() + "_bottom.png";
+
+			URL ut = i.getClass().getResource(ttop);
+			URL ub = i.getClass().getResource(tbottom);
+
+			if(ut == null && ub == null)
+			{
+				System.out.println("   Unable to locate either inventory textures.");
+				continue;
+			}
+
+			String modelTop = new JSONObject(defaultInventoryContentTop).toString(0).replace("$id", i.getId());
+			String modelBottom = new JSONObject(defaultInventoryContentBottom).toString(0).replace("$id", i.getId());
+
+			if(ut != null)
+			{
+				i.setTop(true);
+				pack.setResource("models/inventory/" + i.getId() + "_top.json", modelTop);
+				pack.setResource("textures/inventories/" + i.getId() + "_top.png", ut);
+				AllocatedNode idx = ass.allocateNormal("inventory/" + i.getId() + "_top");
+				i.setTypeTop(idx.getMaterial());
+				i.setDurabilityTop((short) idx.getId());
+				System.out.println("   Registered Inventory TOP " + i.getId() + " as " + idx.getMaterial().toString() + ":" + idx.getId());
+			}
+
+			if(ub != null)
+			{
+				i.setBottom(true);
+				pack.setResource("models/inventory/" + i.getId() + "_bottom.json", modelBottom);
+				pack.setResource("textures/inventories/" + i.getId() + "_bottom.png", ub);
+				AllocatedNode idx = ass.allocateNormal("inventory/" + i.getId() + "_bottom");
+				i.setTypeBottom(idx.getMaterial());
+				i.setDurabilityBottom((short) idx.getId());
+				System.out.println("   Registered Inventory BOTTOM " + i.getId() + " as " + idx.getMaterial().toString() + ":" + idx.getId());
+			}
+		}
 
 		for(ICustomBlock i : blocks)
 		{
@@ -613,7 +887,7 @@ public class ContentRegistry implements Listener
 			i.setType(idx.getMaterial());
 			System.out.println("Registered BLOCK " + i.getId() + " to " + i.getType() + " @" + i.getDurabilityLock());
 			idblocks.put(i.getId(), i);
-			shortid.put(i.getDurabilityLock(), i.getId());
+			blockid.put(i.getDurabilityLock(), i.getId());
 			superBlocks.put(idx.getSuperid(), i);
 			i.setSuperID(idx.getSuperid());
 			i.setMatt(ass.getNameForMaterial(i.getType()));
@@ -644,46 +918,36 @@ public class ContentRegistry implements Listener
 			{
 				JSONObject mod = new JSONObject(desound.getJSONObject(i).toString());
 				JSONObject old = new JSONObject(desound.getJSONObject(i).toString());
-				mod.put("sounds", new JSONArray("[" + F.repeat("\"fulcrum/silent\",", 2000) + "]"));
+				mod.put("sounds", new JSONArray("[" + F.repeat("\"fulcrum/silent\",", 5000) + "]"));
 				soundx.put(i.replace("block.", "material."), old);
 				soundx.put(i, mod);
 				System.out.println("Remapped Sound " + i.replace("block.", "material."));
 			}
 
-			if(i.equalsIgnoreCase("item.armor.equip_gold"))
+			if(i.equalsIgnoreCase("item.hoe.till"))
 			{
 				JSONObject mod = new JSONObject(desound.getJSONObject(i).toString());
 				JSONObject old = new JSONObject(desound.getJSONObject(i).toString());
-				mod.put("sounds", new JSONArray("[" + F.repeat("\"fulcrum/silent\",", 2000) + "]"));
-				soundx.put("iarmor.equip_gold", old);
+				mod.put("sounds", new JSONArray("[" + F.repeat("\"fulcrum/silent\",", 5000) + "]"));
+				soundx.put("hoe.till", old);
 				soundx.put(i, mod);
-				System.out.println("Remapped Sound " + "armor.equip_gold");
-			}
-
-			if(i.equalsIgnoreCase("item.armor.equip_chain"))
-			{
-				JSONObject mod = new JSONObject(desound.getJSONObject(i).toString());
-				JSONObject old = new JSONObject(desound.getJSONObject(i).toString());
-				mod.put("sounds", new JSONArray("[" + F.repeat("\"fulcrum/silent\",", 2000) + "]"));
-				soundx.put("armor.equip_chain", old);
-				soundx.put(i, mod);
-				System.out.println("Remapped Sound " + "armor.equip_chain");
+				System.out.println("Remapped Sound " + "hoe.till");
 			}
 
 			if(i.equalsIgnoreCase("item.armor.equip_leather"))
 			{
 				JSONObject mod = new JSONObject(desound.getJSONObject(i).toString());
 				JSONObject old = new JSONObject(desound.getJSONObject(i).toString());
-				mod.put("sounds", new JSONArray("[" + F.repeat("\"fulcrum/silent\",", 2000) + "]"));
+				mod.put("sounds", new JSONArray("[" + F.repeat("\"fulcrum/silent\",", 5000) + "]"));
 				soundx.put("armor.equip_leather", old);
 				soundx.put(i, mod);
 				System.out.println("Remapped Sound " + "armor.equip_leather");
 			}
 		}
 
-		System.out.println("Registering " + F.f(registerSounds.size()) + " custom sounds");
+		System.out.println("Registering " + F.f(sounds.size()) + " custom sounds");
 
-		for(CustomSound i : registerSounds)
+		for(CustomSound i : sounds)
 		{
 			System.out.println("Registering Sound: " + i.getNode());
 			for(String j : i.getSoundPaths().k())
@@ -696,7 +960,8 @@ public class ContentRegistry implements Listener
 
 		pack.setResource("sounds.json", soundx.toString());
 		pack.setResource("sounds/fulcrum/silent.ogg", soundSilent);
-		pack.setResource("models/block/fulcrum_cube.json", new JSONObject(read(cube)).toString());
+		pack.setResource("models/inventory/fulcrum_top.json", new JSONObject(read(inventoryTop)).toString());
+		pack.setResource("models/inventory/fulcrum_bottom.json", new JSONObject(read(inventoryBottom)).toString());
 		pack.setResource("models/block/fulcrum_cube.json", new JSONObject(read(cube)).toString());
 		pack.setResource("models/block/fulcrum_cube_all.json", new JSONObject(read(cubeAll)).toString());
 		pack.setResource("models/block/fulcrum_cube_top.json", new JSONObject(read(cubeTop)).toString());
@@ -708,12 +973,13 @@ public class ContentRegistry implements Listener
 		pack.setResource("textures/blocks/mob_spawner.png", newSpawner);
 		pack.setResource("textures/blocks/unknown.png", missingTexture);
 		pack.setResource("textures/items/unknown.png", missingTexture);
-		File fpack = new File(Fulcrum.server.getRoot(), "pack.zip");
+		rid = UUID.randomUUID().toString().replaceAll("-", "");
+		File fpack = new File(Fulcrum.server.getRoot(), rid + ".zip");
 		pack.writeToArchive(fpack);
 		System.out.println("RESULTS:\n" + ass.toString());
 		for(Player i : P.onlinePlayers())
 		{
-			Fulcrum.adapter.sendResourcePackWeb(i, "pack.zip");
+			Fulcrum.adapter.sendResourcePackWeb(i, rid + ".zip");
 		}
 	}
 
@@ -738,10 +1004,22 @@ public class ContentRegistry implements Listener
 		blocks.add(block);
 	}
 
+	public void registerInventory(CustomInventory i)
+	{
+		inventories.add(i);
+	}
+
 	@EventHandler
 	public void on(PlayerJoinEvent e)
 	{
-		Fulcrum.adapter.sendResourcePackWeb(e.getPlayer(), "pack.zip");
+		new TaskLater(5)
+		{
+			@Override
+			public void run()
+			{
+				Fulcrum.adapter.sendResourcePackWeb(e.getPlayer(), rid + ".zip");
+			}
+		};
 	}
 
 	@EventHandler
@@ -766,7 +1044,7 @@ public class ContentRegistry implements Listener
 		if(e.getBlock().getType().equals(Material.MOB_SPAWNER))
 		{
 			short d = Fulcrum.adapter.getSpawnerType(e.getBlock().getLocation());
-			broke(e.getBlock().getLocation(), shortid.get(d));
+			broke(e.getBlock().getLocation(), blockid.get(d));
 		}
 
 		else if(Fulcrum.adapter.isMetal(e.getBlock().getType()))
@@ -794,7 +1072,7 @@ public class ContentRegistry implements Listener
 					if(e.getPlayer().getLocation().clone().add(0, -0.2, 0).getBlock().getType().equals(Material.MOB_SPAWNER))
 					{
 						short d = Fulcrum.adapter.getSpawnerType(e.getPlayer().getLocation().clone().add(0, -0.2, 0).getBlock().getLocation());
-						stepped(e.getPlayer().getLocation(), shortid.get(d));
+						stepped(e.getPlayer().getLocation(), blockid.get(d));
 					}
 
 					else if(Fulcrum.adapter.isMetal(e.getPlayer().getLocation().clone().add(0, -0.2, 0).getBlock().getType()))
@@ -809,7 +1087,7 @@ public class ContentRegistry implements Listener
 				if(e.getPlayer().getLocation().clone().add(0, -0.2, 0).getBlock().getType().equals(Material.MOB_SPAWNER))
 				{
 					short d = Fulcrum.adapter.getSpawnerType(e.getPlayer().getLocation().clone().add(0, -0.2, 0).getBlock().getLocation());
-					stepped(e.getPlayer().getLocation(), shortid.get(d));
+					stepped(e.getPlayer().getLocation(), blockid.get(d));
 				}
 
 				else if(Fulcrum.adapter.isMetal(e.getPlayer().getLocation().clone().add(0, -0.2, 0).getBlock().getType()))
@@ -828,7 +1106,7 @@ public class ContentRegistry implements Listener
 				if(e.getPlayer().getLocation().clone().add(0, -0.2, 0).getBlock().getType().equals(Material.MOB_SPAWNER))
 				{
 					short d = Fulcrum.adapter.getSpawnerType(e.getPlayer().getLocation().clone().add(0, -0.2, 0).getBlock().getLocation());
-					stepped(e.getPlayer().getLocation(), shortid.get(d));
+					stepped(e.getPlayer().getLocation(), blockid.get(d));
 				}
 
 				else if(Fulcrum.adapter.isMetal(e.getPlayer().getLocation().clone().add(0, -0.2, 0).getBlock().getType()))
@@ -855,12 +1133,51 @@ public class ContentRegistry implements Listener
 
 		if(ass.getMattx().k().contains(e.getItem().getType()))
 		{
-			if(e.getAction().equals(Action.RIGHT_CLICK_BLOCK))
+			if(itemid.containsKey(e.getItem().getDurability()))
 			{
-				if(shortid.containsKey(e.getItem().getDurability()))
+				if(!e.getItem().getItemMeta().isUnbreakable())
+				{
+					return;
+				}
+
+				if(e.getAction().equals(Action.RIGHT_CLICK_BLOCK))
 				{
 					e.setCancelled(true);
-					set(e.getClickedBlock().getRelative(e.getBlockFace()).getLocation(), shortid.get(e.getItem().getDurability()));
+				}
+
+				return;
+			}
+
+			if(e.getAction().equals(Action.RIGHT_CLICK_BLOCK))
+			{
+				if(blockid.containsKey(e.getItem().getDurability()))
+				{
+					if(!e.getItem().getItemMeta().isUnbreakable())
+					{
+						return;
+					}
+
+					e.setCancelled(true);
+
+					if(e.getClickedBlock().getRelative(e.getBlockFace()).getLocation().clone().add(0.5, 0.5, 0.5).distance(e.getPlayer().getEyeLocation()) < 0.75)
+					{
+						return;
+					}
+
+					if(e.getClickedBlock().getRelative(e.getBlockFace()).getLocation().clone().add(0.5, 0.5, 0.5).distance(e.getPlayer().getLocation().clone().add(0, 0.5, 0)) < 0.75)
+					{
+						return;
+					}
+
+					if(e.getClickedBlock().getType().isSolid())
+					{
+						set(e.getClickedBlock().getRelative(e.getBlockFace()).getLocation(), blockid.get(e.getItem().getDurability()));
+					}
+
+					else
+					{
+						set(e.getClickedBlock().getLocation(), blockid.get(e.getItem().getDurability()));
+					}
 
 					if(!e.getPlayer().getGameMode().equals(GameMode.CREATIVE))
 					{
@@ -960,7 +1277,7 @@ public class ContentRegistry implements Listener
 
 	public GMap<Short, String> getShortid()
 	{
-		return shortid;
+		return blockid;
 	}
 
 	public String getDefaultModelContent()
@@ -1150,12 +1467,12 @@ public class ContentRegistry implements Listener
 
 	public GList<CustomSound> getRegisterSounds()
 	{
-		return registerSounds;
+		return sounds;
 	}
 
 	public void setRegisterSounds(GList<CustomSound> registerSounds)
 	{
-		this.registerSounds = registerSounds;
+		this.sounds = registerSounds;
 	}
 
 	public AllocationSpace getAss()
@@ -1220,7 +1537,7 @@ public class ContentRegistry implements Listener
 
 	public void setShortid(GMap<Short, String> shortid)
 	{
-		this.shortid = shortid;
+		this.blockid = shortid;
 	}
 
 	public GMap<Integer, ICustomBlock> getSuperBlocks()
@@ -1236,5 +1553,164 @@ public class ContentRegistry implements Listener
 	public ICustomBlock getBlockFromSuper(int superId)
 	{
 		return superBlocks.get(superId);
+	}
+
+	public void showInventory(String string, Player p)
+	{
+		for(CustomInventory i : inventories)
+		{
+			if(i.getId().equalsIgnoreCase(string))
+			{
+				Inventory inv = Bukkit.createInventory(null, 3 * 9, "");
+				inv.setItem(0, i.getTop());
+				inv.setItem(18, i.getBottom());
+				p.openInventory(inv);
+
+				return;
+			}
+		}
+	}
+
+	public ItemStack getItem(String string)
+	{
+		for(CustomItem i : items)
+		{
+			if(i.getId().equalsIgnoreCase(string))
+			{
+				return i.getItem();
+			}
+		}
+
+		return new ItemStack(Material.STONE);
+	}
+
+	public URL getInventoryTop()
+	{
+		return inventoryTop;
+	}
+
+	public void setInventoryTop(URL inventoryTop)
+	{
+		this.inventoryTop = inventoryTop;
+	}
+
+	public URL getInventoryBottom()
+	{
+		return inventoryBottom;
+	}
+
+	public void setInventoryBottom(URL inventoryBottom)
+	{
+		this.inventoryBottom = inventoryBottom;
+	}
+
+	public URL getDefaultInventoryTop()
+	{
+		return defaultInventoryTop;
+	}
+
+	public void setDefaultInventoryTop(URL defaultInventoryTop)
+	{
+		this.defaultInventoryTop = defaultInventoryTop;
+	}
+
+	public URL getDefaultInventoryBottom()
+	{
+		return defaultInventoryBottom;
+	}
+
+	public void setDefaultInventoryBottom(URL defaultInventoryBottom)
+	{
+		this.defaultInventoryBottom = defaultInventoryBottom;
+	}
+
+	public URL getDefaultItem()
+	{
+		return defaultItem;
+	}
+
+	public void setDefaultItem(URL defaultItem)
+	{
+		this.defaultItem = defaultItem;
+	}
+
+	public URL getGlint()
+	{
+		return glint;
+	}
+
+	public void setGlint(URL glint)
+	{
+		this.glint = glint;
+	}
+
+	public URL getGlintMeta()
+	{
+		return glintMeta;
+	}
+
+	public void setGlintMeta(URL glintMeta)
+	{
+		this.glintMeta = glintMeta;
+	}
+
+	public String getDefaultInventoryContentTop()
+	{
+		return defaultInventoryContentTop;
+	}
+
+	public void setDefaultInventoryContentTop(String defaultInventoryContentTop)
+	{
+		this.defaultInventoryContentTop = defaultInventoryContentTop;
+	}
+
+	public String getDefaultInventoryContentBottom()
+	{
+		return defaultInventoryContentBottom;
+	}
+
+	public void setDefaultInventoryContentBottom(String defaultInventoryContentBottom)
+	{
+		this.defaultInventoryContentBottom = defaultInventoryContentBottom;
+	}
+
+	public String getDefaultItemContent()
+	{
+		return defaultItemContent;
+	}
+
+	public void setDefaultItemContent(String defaultItemContent)
+	{
+		this.defaultItemContent = defaultItemContent;
+	}
+
+	public GList<CustomInventory> getInventories()
+	{
+		return inventories;
+	}
+
+	public void setInventories(GList<CustomInventory> inventories)
+	{
+		this.inventories = inventories;
+	}
+
+	public GList<CustomSound> getSounds()
+	{
+		return sounds;
+	}
+
+	public void setSounds(GList<CustomSound> sounds)
+	{
+		this.sounds = sounds;
+	}
+
+	public GList<CustomItem> getItems()
+	{
+		return items;
+	}
+
+	public void setItems(GList<CustomItem> items)
+	{
+		this.items = items;
 	}
 }

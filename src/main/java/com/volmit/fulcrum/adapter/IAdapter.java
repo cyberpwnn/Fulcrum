@@ -120,4 +120,6 @@ public interface IAdapter extends Listener
 	public short getSpawnerType(Location block);
 
 	void setSpawnerType(Location block, String mat, short dmg, boolean enchanted);
+
+	void sendResourcePackPacket(Player p, String url, byte[] hash);
 }

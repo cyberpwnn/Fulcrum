@@ -24,9 +24,11 @@ public class CustomBlock implements ICustomBlock
 	private int sid;
 	private String matt;
 	private boolean ee;
+	private int stackSize;
 
 	public CustomBlock(String id)
 	{
+		stackSize = 64;
 		ee = false;
 		this.id = id;
 		sid = 0;
@@ -213,5 +215,17 @@ public class CustomBlock implements ICustomBlock
 	public boolean isEnchanted()
 	{
 		return ee;
+	}
+
+	@Override
+	public void setStackSize(int size)
+	{
+		this.stackSize = size;
+	}
+
+	@Override
+	public int getStackSize()
+	{
+		return stackSize;
 	}
 }

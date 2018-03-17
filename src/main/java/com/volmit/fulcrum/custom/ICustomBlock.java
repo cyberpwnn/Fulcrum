@@ -45,4 +45,8 @@ public interface ICustomBlock
 	public void setEnchanted(boolean boolean1);
 
 	public boolean isEnchanted();
+
+	public void setStackSize(int size);
+
+	public int getStackSize();
 }

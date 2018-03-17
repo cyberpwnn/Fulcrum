@@ -11,7 +11,6 @@ import java.util.Arrays;
 import java.util.UUID;
 
 import org.bukkit.Chunk;
-import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -741,6 +740,12 @@ public final class Adapter12 implements IAdapter
 	}
 
 	@Override
+	public void sendResourcePackPacket(Player p, String url, byte[] hash)
+	{
+		p.setResourcePack(url, hash);
+	}
+
+	@Override
 	public void sendResourcePack(Player p, String url)
 	{
 		sendResourcePackPrepare(p, new Runnable()
@@ -773,33 +778,32 @@ public final class Adapter12 implements IAdapter
 				}
 
 				String url = uurl;
-
 				try
 				{
 					pack.writeToArchive(f);
+
+					new S()
+					{
+						@Override
+						public void run()
+						{
+							sendResourcePackPrepare(p, new Runnable()
+							{
+								@Override
+								public void run()
+								{
+									sendResourcePackPacket(p, "http://" + url + ":" + Fulcrum.server.getPort() + "/" + fn);
+									System.out.println("Sending " + p + " DYNAMIC pack @ " + "http://" + url + ":" + Fulcrum.server.getPort() + "/" + fn);
+								}
+							});
+						}
+					};
 				}
 
 				catch(IOException e)
 				{
 					e.printStackTrace();
 				}
-
-				new S()
-				{
-					@Override
-					public void run()
-					{
-						sendResourcePackPrepare(p, new Runnable()
-						{
-							@Override
-							public void run()
-							{
-								sendResourcePackPacket(p, "http://" + url + ":" + Fulcrum.server.getPort() + "/" + fn);
-								System.out.println("Sending " + p + " DYNAMIC pack @ " + "http://" + url + ":" + Fulcrum.server.getPort() + "/" + fn);
-							}
-						});
-					}
-				};
 			}
 		};
 	}
@@ -822,22 +826,30 @@ public final class Adapter12 implements IAdapter
 				}
 				String url = uurl;
 
-				new S()
+				try
 				{
-					@Override
-					public void run()
+					new S()
 					{
-						sendResourcePackPrepare(p, new Runnable()
+						@Override
+						public void run()
 						{
-							@Override
-							public void run()
+							sendResourcePackPrepare(p, new Runnable()
 							{
-								sendResourcePackPacket(p, "http://" + url + ":" + Fulcrum.server.getPort() + "/" + pack);
-								System.out.println("Sending " + p + " DYNAMIC pack @ " + "http://" + url + ":" + Fulcrum.server.getPort() + "/" + pack);
-							}
-						});
-					}
-				};
+								@Override
+								public void run()
+								{
+									sendResourcePackPacket(p, "http://" + url + ":" + Fulcrum.server.getPort() + "/" + pack);
+									System.out.println("Sending " + p + " DYNAMIC pack @ " + "http://" + url + ":" + Fulcrum.server.getPort() + "/" + pack);
+								}
+							});
+						}
+					};
+				}
+
+				catch(Exception e)
+				{
+					e.printStackTrace();
+				}
 			}
 		};
 	}
@@ -854,9 +866,10 @@ public final class Adapter12 implements IAdapter
 		lx.setDirection(new Vector(0, 1, 0));
 		boolean[] fx = {false};
 		boolean[] fa = {false};
-		GameMode g = p.getGameMode();
-		p.setGameMode(GameMode.ADVENTURE);
-
+		boolean f = p.isFlying();
+		boolean faf = p.getAllowFlight();
+		p.setFlying(true);
+		p.setAllowFlight(true);
 		Cuboid c = new Cuboid(lx);
 		c = c.expand(CuboidDirection.Up, 1);
 		c = c.expand(CuboidDirection.Down, 1);
@@ -920,7 +933,8 @@ public final class Adapter12 implements IAdapter
 						p.sendTitle("    ", C.RED + "Resources Failed to Load", 2, 20, 5);
 					}
 
-					p.setGameMode(g);
+					p.setFlying(f);
+					p.setAllowFlight(faf);
 
 					for(Block i : new GList<Block>(cx.iterator()))
 					{

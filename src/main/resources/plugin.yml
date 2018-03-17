@@ -15,15 +15,24 @@ content:
       copy: material-hardwood
       volume: 0.3f
       pitch: 1.2f
+  items: 
+    metal-plate:
+      name: 'Metal Plate'
+      enchanted: false
+      stack-size: 64
   blocks:
     hard-wood: 
       render-mode: PEDISTAL
       name: 'Hard Wood'
-      shaded: true
+      enchanted: false
+      stack-size: 64
       sounds: 
         break: material-hardwood
         place: material-hardwood
         step: material-hardwood-step
+  inventories:
+    smeltery:
+      enchanted: false
 commands:
   fulcrum:
     aliases: [fu, fulc, fm]

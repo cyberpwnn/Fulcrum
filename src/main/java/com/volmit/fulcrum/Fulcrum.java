@@ -22,6 +22,9 @@ import com.volmit.fulcrum.bukkit.TICK;
 import com.volmit.fulcrum.bukkit.Task;
 import com.volmit.fulcrum.bukkit.TaskLater;
 import com.volmit.fulcrum.custom.ContentRegistry;
+import com.volmit.fulcrum.custom.CustomInventory;
+import com.volmit.fulcrum.custom.CustomItem;
+import com.volmit.fulcrum.custom.CustomSound;
 import com.volmit.fulcrum.lang.M;
 import com.volmit.fulcrum.webserver.ShittyWebserver;
 import com.volmit.fulcrum.world.FastBlock;
@@ -158,9 +161,24 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 					adapter.sendResourcePack((Player) sender, args[1]);
 				}
 
-				else if(args.length == 2 && args[0].equalsIgnoreCase("give"))
+				else if(args.length == 2 && args[0].equalsIgnoreCase("block"))
 				{
-					p.getInventory().addItem(contentRegistry.getItem(args[1], 64));
+					p.getInventory().addItem(contentRegistry.getBlock(args[1]));
+				}
+
+				else if(args.length == 2 && args[0].equalsIgnoreCase("sound"))
+				{
+					p.playSound(p.getLocation(), args[1], 1f, 1f);
+				}
+
+				else if(args.length == 2 && args[0].equalsIgnoreCase("item"))
+				{
+					p.getInventory().addItem(contentRegistry.getItem(args[1]));
+				}
+
+				else if(args.length == 2 && args[0].equalsIgnoreCase("inventory"))
+				{
+					contentRegistry.showInventory(args[1], p);
 				}
 
 				else if(args[0].equalsIgnoreCase("dur"))
@@ -170,9 +188,24 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 
 				else if(args[0].equalsIgnoreCase("list"))
 				{
+					for(CustomInventory i : contentRegistry.getInventories())
+					{
+						sender.sendMessage("INVENTORY: " + i.getId());
+					}
+
 					for(String i : contentRegistry.getIdblocks().k())
 					{
-						sender.sendMessage(i);
+						sender.sendMessage("BLOCK: " + i);
+					}
+
+					for(CustomItem i : contentRegistry.getItems())
+					{
+						sender.sendMessage("ITEM: " + i.getId());
+					}
+
+					for(CustomSound i : contentRegistry.getSounds())
+					{
+						sender.sendMessage("SOUND: " + i.getNode());
 					}
 				}
 			}

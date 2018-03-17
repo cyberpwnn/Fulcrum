@@ -13,6 +13,7 @@ import java.util.zip.ZipOutputStream;
 
 import com.volmit.fulcrum.Fulcrum;
 import com.volmit.fulcrum.lang.GMap;
+import com.volmit.fulcrum.lang.M;
 
 public class ResourcePack
 {
@@ -75,6 +76,7 @@ public class ResourcePack
 
 		zos.close();
 		delete(fx);
+		f.setLastModified(M.ms());
 	}
 
 	private void delete(File fx)

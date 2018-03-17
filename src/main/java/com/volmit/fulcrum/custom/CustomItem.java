@@ -1,0 +1,121 @@
+package com.volmit.fulcrum.custom;
+
+import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.ItemFlag;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+
+public class CustomItem
+{
+	private Material type;
+	private short durability;
+	private String id;
+	private String name;
+	private boolean enchanted;
+	private int layers;
+	private int stackSize;
+
+	public CustomItem(String id)
+	{
+		layers = 1;
+		this.id = id;
+		this.name = "";
+		this.enchanted = false;
+		this.stackSize = 64;
+	}
+
+	public int getStackSize()
+	{
+		return stackSize;
+	}
+
+	public void setStackSize(int stackSize)
+	{
+		this.stackSize = stackSize;
+	}
+
+	public int getLayers()
+	{
+		return layers;
+	}
+
+	public void setLayers(int layers)
+	{
+		this.layers = layers;
+	}
+
+	public ItemStack getItem()
+	{
+		ItemStack is = new ItemStack(getType());
+		is.setDurability(getDurability());
+		ItemMeta im = is.getItemMeta();
+		im.setUnbreakable(true);
+		im.setDisplayName(getName());
+
+		if(enchanted)
+		{
+			im.addEnchant(Enchantment.PROTECTION_ENVIRONMENTAL, 0, true);
+		}
+
+		im.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+		im.addItemFlags(ItemFlag.HIDE_DESTROYS);
+		im.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+		im.addItemFlags(ItemFlag.HIDE_PLACED_ON);
+		im.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
+		im.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
+		is.setItemMeta(im);
+
+		return is;
+	}
+
+	public Material getType()
+	{
+		return type;
+	}
+
+	public void setType(Material type)
+	{
+		this.type = type;
+	}
+
+	public short getDurability()
+	{
+		return durability;
+	}
+
+	public void setDurability(short durability)
+	{
+		this.durability = durability;
+	}
+
+	public String getId()
+	{
+		return id;
+	}
+
+	public void setId(String id)
+	{
+		this.id = id;
+	}
+
+	public String getName()
+	{
+		return name;
+	}
+
+	public void setName(String name)
+	{
+		this.name = name;
+	}
+
+	public boolean isEnchanted()
+	{
+		return enchanted;
+	}
+
+	public void setEnchanted(boolean enchanted)
+	{
+		this.enchanted = enchanted;
+	}
+}
