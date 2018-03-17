@@ -12,6 +12,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -21,11 +22,35 @@ import com.volmit.fulcrum.adapter.IAdapter;
 import com.volmit.fulcrum.bukkit.TICK;
 import com.volmit.fulcrum.bukkit.Task;
 import com.volmit.fulcrum.bukkit.TaskLater;
+import com.volmit.fulcrum.custom.ContentHandler;
+import com.volmit.fulcrum.custom.ContentManager;
 import com.volmit.fulcrum.custom.ContentRegistry;
+import com.volmit.fulcrum.custom.CustomBlock;
 import com.volmit.fulcrum.custom.CustomInventory;
 import com.volmit.fulcrum.custom.CustomItem;
 import com.volmit.fulcrum.custom.CustomSound;
+import com.volmit.fulcrum.custom.legit.BlockMud;
+import com.volmit.fulcrum.custom.legit.BlockRubble;
+import com.volmit.fulcrum.custom.legit.BlockSteel;
+import com.volmit.fulcrum.custom.legit.BlockThiccWood;
+import com.volmit.fulcrum.custom.legit.InventorySmeltery;
+import com.volmit.fulcrum.custom.legit.ItemPageFragment;
+import com.volmit.fulcrum.custom.legit.SoundMud;
+import com.volmit.fulcrum.custom.legit.SoundMudPickup;
+import com.volmit.fulcrum.custom.legit.SoundMudStep;
+import com.volmit.fulcrum.custom.legit.SoundPickupPaper;
+import com.volmit.fulcrum.custom.legit.SoundPickupWood;
+import com.volmit.fulcrum.custom.legit.SoundRubble;
+import com.volmit.fulcrum.custom.legit.SoundRubbleDig;
+import com.volmit.fulcrum.custom.legit.SoundRubbleStep;
+import com.volmit.fulcrum.custom.legit.SoundSteel;
+import com.volmit.fulcrum.custom.legit.SoundSteelDig;
+import com.volmit.fulcrum.custom.legit.SoundSteelStep;
+import com.volmit.fulcrum.custom.legit.SoundThiccWood;
+import com.volmit.fulcrum.custom.legit.SoundThiccWoodStep;
+import com.volmit.fulcrum.event.ContentRegistryEvent;
 import com.volmit.fulcrum.lang.M;
+import com.volmit.fulcrum.net.NetworkManager;
 import com.volmit.fulcrum.webserver.ShittyWebserver;
 import com.volmit.fulcrum.world.FastBlock;
 import com.volmit.fulcrum.world.FastBlock12;
@@ -44,15 +69,19 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 	public static SCMManager scmmgr;
 	public static ShittyWebserver server;
 	public static ContentRegistry contentRegistry;
+	public static ContentHandler contentHandler;
+	public static NetworkManager net;
 
 	@Override
 	public void onEnable()
 	{
 		instance = this;
+		net = new NetworkManager();
 		cache = new MCACache();
 		adapter = new Adapter12();
 		scmmgr = new SCMManager();
 		contentRegistry = new ContentRegistry();
+		contentHandler = new ContentHandler();
 		server = new ShittyWebserver(8193, new File(getDataFolder(), "web"));
 
 		try
@@ -65,7 +94,7 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 			e.printStackTrace();
 		}
 
-		getServer().getPluginManager().registerEvents(this, this);
+		register(this);
 		getCommand("fulcrum").setExecutor(this);
 
 		new Task(0)
@@ -77,14 +106,13 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 			}
 		};
 
-		new TaskLater(5)
+		new TaskLater()
 		{
 			@Override
 			public void run()
 			{
 				try
 				{
-					contentRegistry.register(Fulcrum.instance);
 					contentRegistry.compileResources();
 				}
 
@@ -96,9 +124,39 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 		};
 	}
 
+	@EventHandler
+	public void on(ContentRegistryEvent e)
+	{
+		e.register(new BlockThiccWood());
+		e.register(new SoundPickupPaper());
+		e.register(new SoundPickupWood());
+		e.register(new SoundThiccWood());
+		e.register(new SoundThiccWoodStep());
+
+		e.register(new SoundMud());
+		e.register(new SoundMudStep());
+		e.register(new SoundMudPickup());
+		e.register(new BlockMud());
+
+		e.register(new SoundRubble());
+		e.register(new SoundRubbleStep());
+		e.register(new SoundRubbleDig());
+		e.register(new BlockRubble());
+
+		e.register(new SoundSteel());
+		e.register(new SoundSteelStep());
+		e.register(new SoundSteelDig());
+		e.register(new BlockSteel());
+
+		e.register(new ItemPageFragment());
+
+		e.register(new InventorySmeltery());
+	}
+
 	@Override
 	public void onDisable()
 	{
+		net.close();
 		server.stop();
 		flushCache();
 	}
@@ -163,7 +221,7 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 
 				else if(args.length == 2 && args[0].equalsIgnoreCase("block"))
 				{
-					p.getInventory().addItem(contentRegistry.getBlock(args[1]));
+					p.getInventory().addItem(ContentManager.getBlock(args[1]).getItem());
 				}
 
 				else if(args.length == 2 && args[0].equalsIgnoreCase("sound"))
@@ -173,12 +231,12 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 
 				else if(args.length == 2 && args[0].equalsIgnoreCase("item"))
 				{
-					p.getInventory().addItem(contentRegistry.getItem(args[1]));
+					p.getInventory().addItem(ContentManager.getItem(args[1]).getItem());
 				}
 
 				else if(args.length == 2 && args[0].equalsIgnoreCase("inventory"))
 				{
-					contentRegistry.showInventory(args[1], p);
+					p.openInventory(ContentManager.createInventory(args[1]));
 				}
 
 				else if(args[0].equalsIgnoreCase("dur"))
@@ -188,17 +246,17 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 
 				else if(args[0].equalsIgnoreCase("list"))
 				{
-					for(CustomInventory i : contentRegistry.getInventories())
+					for(CustomInventory i : ContentManager.getInventories())
 					{
 						sender.sendMessage("INVENTORY: " + i.getId());
 					}
 
-					for(String i : contentRegistry.getIdblocks().k())
+					for(CustomBlock i : ContentManager.getBlocks())
 					{
-						sender.sendMessage("BLOCK: " + i);
+						sender.sendMessage("BLOCK: " + i.getId());
 					}
 
-					for(CustomItem i : contentRegistry.getItems())
+					for(CustomItem i : ContentManager.getItems())
 					{
 						sender.sendMessage("ITEM: " + i.getId());
 					}

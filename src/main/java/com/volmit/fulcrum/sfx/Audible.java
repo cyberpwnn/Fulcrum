@@ -68,4 +68,6 @@ public interface Audible extends Cloneable
 	public Audible addChildren(GList<Audible> a);
 
 	public boolean hasDelay();
+
+	public Audible osc(double d);
 }

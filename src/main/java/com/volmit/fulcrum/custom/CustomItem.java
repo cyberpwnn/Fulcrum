@@ -6,15 +6,20 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-public class CustomItem
+import com.volmit.fulcrum.sfx.Audible;
+import com.volmit.fulcrum.sfx.Audio;
+
+public class CustomItem implements ICustom
 {
 	private Material type;
 	private short durability;
 	private String id;
 	private String name;
+	private Audible pickupSound;
 	private boolean enchanted;
 	private int layers;
 	private int stackSize;
+	private int superID;
 
 	public CustomItem(String id)
 	{
@@ -23,6 +28,32 @@ public class CustomItem
 		this.name = "";
 		this.enchanted = false;
 		this.stackSize = 64;
+		this.pickupSound = ContentManager.getPickupSound();
+	}
+
+	public Audible getPickupSound()
+	{
+		return pickupSound;
+	}
+
+	public void setPickupSound(Audible pickupSound)
+	{
+		this.pickupSound = pickupSound;
+	}
+
+	public void setPickupSound(CustomSound pickupSound)
+	{
+		setPickupSound(new Audio(pickupSound));
+	}
+
+	public int getSuperID()
+	{
+		return superID;
+	}
+
+	public void setSuperID(int superID)
+	{
+		this.superID = superID;
 	}
 
 	public int getStackSize()

@@ -149,4 +149,14 @@ public class PredicateGenerator
 	{
 		return parenter;
 	}
+
+	public boolean isUsed(short durability)
+	{
+		if(durability == 0)
+		{
+			return false;
+		}
+
+		return durability <= models.size();
+	}
 }

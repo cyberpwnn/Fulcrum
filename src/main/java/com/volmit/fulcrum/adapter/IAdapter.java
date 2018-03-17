@@ -117,9 +117,23 @@ public interface IAdapter extends Listener
 
 	public void setSpawnerType(Location block, int superid);
 
-	public short getSpawnerType(Location block);
+	public int getSpawnerType(Location block);
 
 	void setSpawnerType(Location block, String mat, short dmg, boolean enchanted);
 
 	void sendResourcePackPacket(Player p, String url, byte[] hash);
+
+	public void pickup(Entity who, Entity item);
+
+	public void damageBlock(Block b, double percent);
+
+	public void brokedBlock(Block b);
+
+	public boolean shouldBeBroken(Block b);
+
+	public boolean isBeingBroken(Block b);
+
+	public double getBreakProgress(Block b);
+
+	public void sendCrack(Block b, double progress);
 }

@@ -69,7 +69,7 @@ public class AllocationSpace
 			if(!normalAllocations.get(i).isFull())
 			{
 				int id = normalAllocations.get(i).register(model);
-				superIds.put(model, superIds.size());
+				superIds.put(model, superIds.size() + 100);
 				return new AllocatedNode(i, id, superIds.get(model));
 			}
 		}

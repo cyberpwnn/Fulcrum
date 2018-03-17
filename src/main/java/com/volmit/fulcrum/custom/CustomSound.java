@@ -2,11 +2,12 @@ package com.volmit.fulcrum.custom;
 
 import java.net.URL;
 
+import com.volmit.fulcrum.bukkit.R;
 import com.volmit.fulcrum.lang.GMap;
 import com.volmit.fulcrum.lang.JSONArray;
 import com.volmit.fulcrum.lang.JSONObject;
 
-public class CustomSound
+public class CustomSound implements ICustom
 {
 	private String node;
 	private GMap<String, URL> soundPaths;
@@ -34,6 +35,27 @@ public class CustomSound
 		}
 
 		this.subtitle = subtitle;
+	}
+
+	public void addSound(String packLocation, String resource)
+	{
+		getSoundPaths().put(packLocation + ".ogg", R.getURL(getClass(), "/assets/sounds/" + resource + ".ogg"));
+	}
+
+	public void addSound(String packLocation, String resource, int from, int to)
+	{
+		for(int i = Math.min(from, to); i <= Math.max(from, to); i++)
+		{
+			URL l = R.getURL(getClass(), ("/assets/sounds/" + resource + ".ogg").replace("$", i + ""));
+
+			if(l == null)
+			{
+				System.out.println("Cant find " + ("/assets/sounds/" + resource + ".ogg").replace("$", i + ""));
+				continue;
+			}
+
+			getSoundPaths().put((packLocation + ".ogg").replace("$", i + ""), l);
+		}
 	}
 
 	public String getNode()

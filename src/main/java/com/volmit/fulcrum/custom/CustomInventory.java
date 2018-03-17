@@ -6,7 +6,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-public class CustomInventory
+public class CustomInventory implements ICustom
 {
 	private Material typeTop;
 	private Material typeBottom;
@@ -17,6 +17,8 @@ public class CustomInventory
 	private boolean enchantedBottom;
 	private boolean top;
 	private boolean bottom;
+	private int superIDTop;
+	private int superIDBottom;
 
 	public CustomInventory(String id)
 	{
@@ -25,6 +27,26 @@ public class CustomInventory
 		enchantedBottom = false;
 		top = false;
 		bottom = false;
+	}
+
+	public int getSuperIDTop()
+	{
+		return superIDTop;
+	}
+
+	public void setSuperIDTop(int superIDTop)
+	{
+		this.superIDTop = superIDTop;
+	}
+
+	public int getSuperIDBottom()
+	{
+		return superIDBottom;
+	}
+
+	public void setSuperIDBottom(int superIDBottom)
+	{
+		this.superIDBottom = superIDBottom;
 	}
 
 	public ItemStack getBottom()

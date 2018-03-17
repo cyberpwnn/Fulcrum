@@ -23,6 +23,7 @@ import org.bukkit.craftbukkit.v1_12_R1.block.CraftBlock;
 import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_12_R1.util.CraftMagicNumbers;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -59,6 +60,8 @@ import com.volmit.fulcrum.bukkit.PE;
 import com.volmit.fulcrum.bukkit.S;
 import com.volmit.fulcrum.bukkit.Task;
 import com.volmit.fulcrum.bukkit.TaskLater;
+import com.volmit.fulcrum.custom.ContentManager;
+import com.volmit.fulcrum.custom.CustomBlock;
 import com.volmit.fulcrum.lang.C;
 import com.volmit.fulcrum.lang.F;
 import com.volmit.fulcrum.lang.GList;
@@ -78,8 +81,11 @@ import net.minecraft.server.v1_12_R1.IBlockData;
 import net.minecraft.server.v1_12_R1.MojangsonParseException;
 import net.minecraft.server.v1_12_R1.MojangsonParser;
 import net.minecraft.server.v1_12_R1.NBTTagCompound;
+import net.minecraft.server.v1_12_R1.NBTTagList;
 import net.minecraft.server.v1_12_R1.Packet;
+import net.minecraft.server.v1_12_R1.PacketPlayOutBlockBreakAnimation;
 import net.minecraft.server.v1_12_R1.PacketPlayOutChat;
+import net.minecraft.server.v1_12_R1.PacketPlayOutCollect;
 import net.minecraft.server.v1_12_R1.PacketPlayOutEntity;
 import net.minecraft.server.v1_12_R1.PacketPlayOutMapChunk;
 import net.minecraft.server.v1_12_R1.PacketPlayOutMultiBlockChange;
@@ -94,6 +100,7 @@ public final class Adapter12 implements IAdapter
 	private GMap<Chunk, GSet<Location>> update;
 	private GMap<Chunk, GSet<Integer>> dirty;
 	private GList<Block> physics;
+	private GMap<Block, Double> blockDamage;
 	private GSet<Chunk> drop;
 	private GSet<Chunk> udrop;
 	private long processed = 0;
@@ -109,6 +116,7 @@ public final class Adapter12 implements IAdapter
 		push = false;
 		drop = new GSet<Chunk>();
 		udrop = new GSet<Chunk>();
+		blockDamage = new GMap<Block, Double>();
 
 		new Task(0)
 		{
@@ -868,8 +876,8 @@ public final class Adapter12 implements IAdapter
 		boolean[] fa = {false};
 		boolean f = p.isFlying();
 		boolean faf = p.getAllowFlight();
-		p.setFlying(true);
 		p.setAllowFlight(true);
+		p.setFlying(true);
 		Cuboid c = new Cuboid(lx);
 		c = c.expand(CuboidDirection.Up, 1);
 		c = c.expand(CuboidDirection.Down, 1);
@@ -1037,16 +1045,11 @@ public final class Adapter12 implements IAdapter
 	}
 
 	@Override
-	public short getSpawnerType(Location block)
+	public int getSpawnerType(Location block)
 	{
 		if(block.getBlock().getType().equals(Material.MOB_SPAWNER))
 		{
-			CreatureSpawner s = ((CreatureSpawner) block.getBlock().getState());
-
-			if(s.getMaxSpawnDelay() == s.getMinSpawnDelay())
-			{
-				return (short) ((s.getMaxSpawnDelay() / 3) - 10);
-			}
+			return getBlockData(block);
 		}
 
 		return -1;
@@ -1055,7 +1058,56 @@ public final class Adapter12 implements IAdapter
 	@Override
 	public void setSpawnerType(Location block, int id)
 	{
-		setSpawnerType(block, Fulcrum.contentRegistry.getBlockFromSuper(id).getMatt(), Fulcrum.contentRegistry.getBlockFromSuper(id).getDurabilityLock(), Fulcrum.contentRegistry.getBlockFromSuper(id).isEnchanted());
+		setSpawnerType(block, ContentManager.getBlock(id).getMatt(), ContentManager.getBlock(id).getDurabilityLock(), ContentManager.getBlock(id).isEnchanted());
+	}
+
+	public int getBlockData(Location block)
+	{
+		try
+		{
+			BlockPosition pos = new BlockPosition(block.getBlockX(), block.getBlockY(), block.getBlockZ());
+			net.minecraft.server.v1_12_R1.World nmsworld = ((CraftWorld) block.getWorld()).getHandle();
+			TileEntity tile = nmsworld.getTileEntity(pos);
+			NBTTagCompound nbt = tile.save(new NBTTagCompound());
+			nbt.g();
+			NBTTagCompound nbtsd = nbt.getCompound("SpawnData");
+			nbtsd.g();
+			NBTTagList list = nbtsd.getList("ArmorItems", 10);
+			NBTTagCompound f = list.get(3);
+			f.g();
+
+			short d = f.getShort("Damage");
+			String mat = f.getString("id");
+			Material m = null;
+
+			for(Material i : ContentManager.r().ass().getMattx().k())
+			{
+				if(("minecraft:" + ContentManager.r().ass().getMattx().get(i)).equals(mat))
+				{
+					m = i;
+				}
+			}
+
+			if(m == null)
+			{
+				return -3;
+			}
+
+			for(CustomBlock i : ContentManager.getBlocks())
+			{
+				if(i.getType().equals(m) && i.getDurabilityLock() == d)
+				{
+					return i.getSuperID();
+				}
+			}
+		}
+
+		catch(Exception e)
+		{
+
+		}
+
+		return -2;
 	}
 
 	@Override
@@ -1063,13 +1115,70 @@ public final class Adapter12 implements IAdapter
 	{
 		block.getBlock().setType(Material.MOB_SPAWNER);
 		CreatureSpawner s = ((CreatureSpawner) block.getBlock().getState());
-		s.setMinSpawnDelay((dmg + 10) * 3);
-		s.setMaxSpawnDelay((dmg + 10) * 3);
-		s.setDelay((dmg + 10) * 3);
+		s.setMinSpawnDelay((dmg) * 3);
+		s.setMaxSpawnDelay((dmg) * 3);
+		s.setDelay((dmg) * 3);
 		s.setRequiredPlayerRange(0);
 		s.update();
 		updateBlockData(block, "{RequiredPlayerRange:0s}");
 		updateBlockData(block, "{SpawnData:{id:\"minecraft:armor_stand\",Invisible:0,Marker:1}}");
 		updateBlockData(block, "{SpawnData:{Invisible:1b,NoBasePlate:1b,ShowArms:0b,ArmorItems:[{id:\"\",Count:0},{id:\"\",Count:0},{id:\"\",Count:0},{id:\"minecraft:" + mat + "\",Count:1b,Damage:" + dmg + "s,tag:{Unbreakable:1" + (enchanted ? ",ench:[{id:0,lvl:0}]" : "") + "}}]}}");
+	}
+
+	@Override
+	public void pickup(Entity who, Entity item)
+	{
+		int c = 1;
+
+		if(item instanceof Item)
+		{
+			c = ((Item) item).getItemStack().getAmount();
+		}
+
+		PacketPlayOutCollect p = new PacketPlayOutCollect(item.getEntityId(), who.getEntityId(), c);
+		sendPacket(item.getLocation(), p);
+	}
+
+	@Override
+	public void sendCrack(Block b, double progress)
+	{
+		BlockPosition bp = new BlockPosition(b.getX(), b.getY(), b.getZ());
+		PacketPlayOutBlockBreakAnimation bx = new PacketPlayOutBlockBreakAnimation(0, bp, (byte) (progress * 9.0));
+		sendPacket(b.getLocation(), bx);
+	}
+
+	@Override
+	public void damageBlock(Block b, double percent)
+	{
+		if(!blockDamage.containsKey(b))
+		{
+			blockDamage.put(b, percent);
+		}
+
+		blockDamage.put(b, blockDamage.get(b) + percent);
+	}
+
+	@Override
+	public void brokedBlock(Block b)
+	{
+		blockDamage.remove(b);
+	}
+
+	@Override
+	public boolean shouldBeBroken(Block b)
+	{
+		return isBeingBroken(b) && getBreakProgress(b) > 1;
+	}
+
+	@Override
+	public boolean isBeingBroken(Block b)
+	{
+		return blockDamage.containsKey(b);
+	}
+
+	@Override
+	public double getBreakProgress(Block b)
+	{
+		return isBeingBroken(b) ? blockDamage.get(b) : -1;
 	}
 }

@@ -6,6 +6,7 @@ import org.bukkit.SoundCategory;
 import org.bukkit.entity.Player;
 
 import com.volmit.fulcrum.bukkit.TaskLater;
+import com.volmit.fulcrum.custom.CustomSound;
 import com.volmit.fulcrum.lang.GList;
 
 public class Audio implements Audible
@@ -24,6 +25,25 @@ public class Audio implements Audible
 		a = new GList<Audible>();
 		c(SoundCategory.AMBIENT).v(1f).p(1f).s(Sound.UI_BUTTON_CLICK);
 		delay = 0;
+	}
+
+	public Audio(Audible ax)
+	{
+		v = ax.getVolume();
+		p = ax.getPitch();
+		c = ax.getCategory();
+		s = ax.getSound();
+		a = ax.getChildren().copy();
+		delay = ax.getDelay();
+		sound = ax.getSoundString();
+
+	}
+
+	public Audio(CustomSound sounds)
+	{
+		this();
+		sound = sounds.getNode();
+		vp(sounds.getSuggestedVolume(), sounds.getSuggestedPitch());
 	}
 
 	@Override
@@ -325,5 +345,11 @@ public class Audio implements Audible
 	{
 		sound = s;
 		return this;
+	}
+
+	@Override
+	public Audible osc(double d)
+	{
+		return new Audio(this).v((float) (Math.sin(Math.random()) * d));
 	}
 }

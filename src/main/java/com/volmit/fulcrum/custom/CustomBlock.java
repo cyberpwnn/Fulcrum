@@ -9,11 +9,14 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import com.volmit.fulcrum.Fulcrum;
 import com.volmit.fulcrum.sfx.Audible;
+import com.volmit.fulcrum.sfx.Audio;
 
-public class CustomBlock implements ICustomBlock
+public class CustomBlock implements ICustom
 {
 	private Audible breakSound;
 	private Audible placeSound;
+	private Audible digSound;
+	private Audible pickupSound;
 	private Audible stepSound;
 	private BlockRenderType renderType;
 	private String name;
@@ -25,9 +28,15 @@ public class CustomBlock implements ICustomBlock
 	private String matt;
 	private boolean ee;
 	private int stackSize;
+	private String toolType;
+	private int minimumToolLevel;
+	private double hardness;
 
 	public CustomBlock(String id)
 	{
+		hardness = 0.5;
+		toolType = ToolType.HAND;
+		minimumToolLevel = ToolLevel.HAND;
 		stackSize = 64;
 		ee = false;
 		this.id = id;
@@ -36,6 +45,67 @@ public class CustomBlock implements ICustomBlock
 		shaded = false;
 		matt = "";
 		renderType = BlockRenderType.ALL;
+		pickupSound = ContentManager.getPickupSound();
+	}
+
+	public String getToolType()
+	{
+		return toolType;
+	}
+
+	public void setToolType(String toolType)
+	{
+		this.toolType = toolType;
+	}
+
+	public int getMinimumToolLevel()
+	{
+		return minimumToolLevel;
+	}
+
+	public void setMinimumToolLevel(int minimumToolLevel)
+	{
+		this.minimumToolLevel = minimumToolLevel;
+	}
+
+	public double getHardness()
+	{
+		return hardness;
+	}
+
+	public void setHardness(double hardness)
+	{
+		this.hardness = hardness;
+	}
+
+	public Audible getDigSound()
+	{
+		return digSound;
+	}
+
+	public void setDigSound(Audible digSound)
+	{
+		this.digSound = digSound;
+	}
+
+	public void setDigSound(CustomSound s)
+	{
+		setDigSound(new Audio(s));
+	}
+
+	public Audible getPickupSound()
+	{
+		return pickupSound;
+	}
+
+	public void setPickupSound(Audible pickupSound)
+	{
+		this.pickupSound = pickupSound;
+	}
+
+	public void setPickupSound(CustomSound pickupSound)
+	{
+		setPickupSound(new Audio(pickupSound));
 	}
 
 	public CustomBlock(String id, BlockRenderType renderType)
@@ -59,54 +129,61 @@ public class CustomBlock implements ICustomBlock
 		this.stepSound = stepSound;
 	}
 
+	public void setBreakSound(CustomSound breakSound)
+	{
+		setBreakSound(new Audio(breakSound));
+	}
+
+	public void setPlaceSound(CustomSound placeSound)
+	{
+		setPlaceSound(new Audio(placeSound));
+	}
+
+	public void setStepSound(CustomSound stepSound)
+	{
+		setStepSound(new Audio(stepSound));
+	}
+
 	public void setName(String name)
 	{
 		this.name = name;
 	}
 
-	@Override
 	public Audible getBreakSound()
 	{
 		return breakSound;
 	}
 
-	@Override
 	public Audible getPlaceSound()
 	{
 		return placeSound;
 	}
 
-	@Override
 	public Audible getStepSound()
 	{
 		return stepSound;
 	}
 
-	@Override
 	public String getName()
 	{
 		return name;
 	}
 
-	@Override
 	public String getId()
 	{
 		return id;
 	}
 
-	@Override
 	public void setDurabilityLock(short d)
 	{
 		this.durabilityLock = d;
 	}
 
-	@Override
 	public short getDurabilityLock()
 	{
 		return durabilityLock;
 	}
 
-	@Override
 	public ItemStack getItem()
 	{
 		ItemStack is = new ItemStack(getType());
@@ -131,13 +208,11 @@ public class CustomBlock implements ICustomBlock
 		return is;
 	}
 
-	@Override
 	public void set(Location location)
 	{
 		Fulcrum.adapter.setSpawnerType(location, getMatt(), getDurabilityLock(), ee);
 	}
 
-	@Override
 	public BlockRenderType getRenderType()
 	{
 		return renderType;
@@ -148,19 +223,16 @@ public class CustomBlock implements ICustomBlock
 		this.renderType = renderType;
 	}
 
-	@Override
 	public Material getType()
 	{
 		return material;
 	}
 
-	@Override
 	public void setType(Material type)
 	{
 		material = type;
 	}
 
-	@Override
 	public boolean isShaded()
 	{
 		return shaded;
@@ -181,49 +253,41 @@ public class CustomBlock implements ICustomBlock
 		this.shaded = shaded;
 	}
 
-	@Override
 	public int getSuperID()
 	{
 		return sid;
 	}
 
-	@Override
 	public void setSuperID(int f)
 	{
 		sid = f;
 	}
 
-	@Override
 	public String getMatt()
 	{
 		return matt;
 	}
 
-	@Override
 	public void setMatt(String matt)
 	{
 		this.matt = matt;
 	}
 
-	@Override
 	public void setEnchanted(boolean boolean1)
 	{
 		ee = boolean1;
 	}
 
-	@Override
 	public boolean isEnchanted()
 	{
 		return ee;
 	}
 
-	@Override
 	public void setStackSize(int size)
 	{
 		this.stackSize = size;
 	}
 
-	@Override
 	public int getStackSize()
 	{
 		return stackSize;
