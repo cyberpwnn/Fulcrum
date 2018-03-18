@@ -14,6 +14,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 
 import com.volmit.fulcrum.bukkit.BlockType;
+import com.volmit.fulcrum.custom.CustomBlock;
 import com.volmit.fulcrum.lang.GList;
 import com.volmit.fulcrum.resourcepack.ResourcePack;
 
@@ -93,6 +94,8 @@ public interface IAdapter extends Listener
 
 	public void updateBlockData(Location block, String mojangson);
 
+	public void updateBlockData(Location block, String mojangson, boolean notify);
+
 	public void sendActionBar(String s, Player p);
 
 	public void sendTitle(String title, String subtitle, int i, int s, int o, Player p);
@@ -136,4 +139,12 @@ public interface IAdapter extends Listener
 	public double getBreakProgress(Block b);
 
 	public void sendCrack(Block b, double progress);
+
+	public boolean canPlace(Player player, Block target);
+
+	public void notifySpawner(Block block, CustomBlock c);
+
+	public void setBlockNoPacket(Location l, BlockType m);
+
+	void fixSpawner(Location i, Player p);
 }

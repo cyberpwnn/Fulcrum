@@ -3,7 +3,6 @@ package com.volmit.fulcrum.custom;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -133,6 +132,7 @@ public class ContentHandler implements Listener
 
 			digging.put(e.getBlock(), speed);
 			lastDug.put(e.getBlock(), e.getPlayer());
+			ContentManager.a().notifySpawner(e.getBlock(), cb);
 		}
 	}
 
@@ -309,7 +309,7 @@ public class ContentHandler implements Listener
 					target = clicked;
 				}
 
-				if(e.getPlayer().getEyeLocation().getBlock().equals(target) || e.getPlayer().getLocation().getBlock().equals(target) || e.getPlayer().getLocation().getBlock().getRelative(BlockFace.UP).equals(target))
+				if(!ContentManager.a().canPlace(e.getPlayer(), target))
 				{
 					e.setCancelled(true);
 					return;

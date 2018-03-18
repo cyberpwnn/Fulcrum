@@ -272,6 +272,7 @@ public class ContentManager
 	public static void setBlock(Block block, CustomBlock c)
 	{
 		a().setSpawnerType(block.getLocation(), c.getSuperID());
+		a().notifySpawner(block, c);
 	}
 
 	public static void setBlock(Block block, int superId)

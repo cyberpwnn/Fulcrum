@@ -24,6 +24,7 @@ import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_12_R1.util.CraftMagicNumbers;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -101,6 +102,7 @@ public final class Adapter12 implements IAdapter
 	private GMap<Chunk, GSet<Integer>> dirty;
 	private GList<Block> physics;
 	private GMap<Block, Double> blockDamage;
+	private GMap<Block, Integer> not;
 	private GSet<Chunk> drop;
 	private GSet<Chunk> udrop;
 	private long processed = 0;
@@ -117,6 +119,7 @@ public final class Adapter12 implements IAdapter
 		drop = new GSet<Chunk>();
 		udrop = new GSet<Chunk>();
 		blockDamage = new GMap<Block, Double>();
+		not = new GMap<Block, Integer>();
 
 		new Task(0)
 		{
@@ -244,6 +247,37 @@ public final class Adapter12 implements IAdapter
 		udrop.clear();
 		drop.clear();
 
+		for(Block i : not.k())
+		{
+			if(M.r(0.8))
+			{
+				not.put(i, not.get(i) - (int) (Math.random() * 24));
+			}
+
+			if(not.get(i) < 0)
+			{
+				not.remove(i);
+			}
+		}
+
+		for(Player i : P.onlinePlayers())
+		{
+			Location l = P.targetBlock(i, 4);
+
+			if(not.contains(l.getBlock()))
+			{
+				if(M.r((double) not.get(l.getBlock()) / 100.0))
+				{
+					fixSpawner(l, i);
+				}
+			}
+
+			else if(M.r(0.05))
+			{
+				fixSpawner(l, i);
+			}
+		}
+
 		for(Chunk i : update.k())
 		{
 			if(update.get(i).size() > 24)
@@ -312,6 +346,23 @@ public final class Adapter12 implements IAdapter
 	}
 
 	@Override
+	public void fixSpawner(Location i, Player p)
+	{
+		if(!i.getBlock().getType().equals(Material.MOB_SPAWNER))
+		{
+			return;
+		}
+
+		CustomBlock cb = ContentManager.getBlock(i.getBlock());
+
+		if(cb != null)
+		{
+			sendBlockChange(i, new BlockType(Material.STONE, (byte) 0), p);
+			setSpawnerType(i, cb.getSuperID());
+		}
+	}
+
+	@Override
 	public int getBiomeId(Biome biome)
 	{
 		BiomeBase mcBiome = CraftBlock.biomeToBiomeBase((Biome) biome);
@@ -346,6 +397,21 @@ public final class Adapter12 implements IAdapter
 		chunk.a(bp, ibd);
 		makeDirty(l);
 		processed++;
+	}
+
+	@Override
+	@SuppressWarnings("deprecation")
+	public void setBlockNoPacket(Location l, BlockType m)
+	{
+		int x = l.getBlockX();
+		int y = l.getBlockY();
+		int z = l.getBlockZ();
+		net.minecraft.server.v1_12_R1.World w = ((CraftWorld) l.getWorld()).getHandle();
+		net.minecraft.server.v1_12_R1.Chunk chunk = w.getChunkAt(x >> 4, z >> 4);
+		BlockPosition bp = new BlockPosition(x, y, z);
+		int combined = m.getMaterial().getId() + (m.getData() << 12);
+		IBlockData ibd = net.minecraft.server.v1_12_R1.Block.getByCombinedId(combined);
+		chunk.a(bp, ibd);
 	}
 
 	@Override
@@ -627,7 +693,7 @@ public final class Adapter12 implements IAdapter
 	}
 
 	@Override
-	public void updateBlockData(Location block, String mojangson)
+	public void updateBlockData(Location block, String mojangson, boolean notify)
 	{
 		try
 		{
@@ -644,8 +710,12 @@ public final class Adapter12 implements IAdapter
 			nbt.setInt("y", pos.getY());
 			nbt.setInt("z", pos.getZ());
 			tile.load(nbt);
-			tile.update();
-			nmsworld.notify(pos, blockData, blockData, 3);
+
+			if(notify)
+			{
+				tile.update();
+				nmsworld.notify(pos, blockData, blockData, 3);
+			}
 		}
 
 		catch(MojangsonParseException e)
@@ -657,6 +727,12 @@ public final class Adapter12 implements IAdapter
 		{
 
 		}
+	}
+
+	@Override
+	public void updateBlockData(Location block, String mojangson)
+	{
+		updateBlockData(block, mojangson, false);
 	}
 
 	@Override
@@ -1113,16 +1189,12 @@ public final class Adapter12 implements IAdapter
 	@Override
 	public void setSpawnerType(Location block, String mat, short dmg, boolean enchanted)
 	{
-		block.getBlock().setType(Material.MOB_SPAWNER);
+		setBlockNoPacket(block, new BlockType(Material.MOB_SPAWNER));
 		CreatureSpawner s = ((CreatureSpawner) block.getBlock().getState());
-		s.setMinSpawnDelay((dmg) * 3);
-		s.setMaxSpawnDelay((dmg) * 3);
-		s.setDelay((dmg) * 3);
 		s.setRequiredPlayerRange(0);
-		s.update();
 		updateBlockData(block, "{RequiredPlayerRange:0s}");
 		updateBlockData(block, "{SpawnData:{id:\"minecraft:armor_stand\",Invisible:0,Marker:1}}");
-		updateBlockData(block, "{SpawnData:{Invisible:1b,NoBasePlate:1b,ShowArms:0b,ArmorItems:[{id:\"\",Count:0},{id:\"\",Count:0},{id:\"\",Count:0},{id:\"minecraft:" + mat + "\",Count:1b,Damage:" + dmg + "s,tag:{Unbreakable:1" + (enchanted ? ",ench:[{id:0,lvl:0}]" : "") + "}}]}}");
+		updateBlockData(block, "{SpawnData:{Invisible:1b,NoBasePlate:1b,ShowArms:0b,ArmorItems:[{id:\"\",Count:0},{id:\"\",Count:0},{id:\"\",Count:0},{id:\"minecraft:" + mat + "\",Count:1b,Damage:" + dmg + "s,tag:{Unbreakable:1" + (enchanted ? ",ench:[{id:0,lvl:0}]" : "") + "}}]}}", true);
 	}
 
 	@Override
@@ -1180,5 +1252,27 @@ public final class Adapter12 implements IAdapter
 	public double getBreakProgress(Block b)
 	{
 		return isBeingBroken(b) ? blockDamage.get(b) : -1;
+	}
+
+	@Override
+	public boolean canPlace(Player player, Block target)
+	{
+		Location center = target.getLocation().clone().add(0.5, 0.5, 0.5);
+
+		for(Entity i : center.getWorld().getNearbyEntities(center, 0.5, 0.5, 0.5))
+		{
+			if(i instanceof LivingEntity)
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	@Override
+	public void notifySpawner(Block block, CustomBlock c)
+	{
+		not.put(block, 40 + (int) (Math.random() * 10));
 	}
 }
