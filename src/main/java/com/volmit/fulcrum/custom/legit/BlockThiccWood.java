@@ -17,7 +17,6 @@ public class BlockThiccWood extends CustomBlock
 		setDigSound(new SoundThiccWoodStep());
 		setPickupSound(new SoundPickupWood());
 		setHardness(2);
-		setMinimumToolLevel(1);
 		setToolType(ToolType.AXE);
 	}
 }

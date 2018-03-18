@@ -16,8 +16,7 @@ public class BlockRubble extends CustomBlock
 		setStepSound(new SoundRubbleStep());
 		setDigSound(new SoundRubbleDig());
 		setPickupSound(new SoundRubbleStep());
-		setHardness(0.5);
-		setMinimumToolLevel(1);
+		setHardness(0.7);
 		setToolType(ToolType.SHOVEL);
 	}
 }

@@ -17,7 +17,6 @@ public class BlockMud extends CustomBlock
 		setDigSound(new SoundMudStep());
 		setPickupSound(new SoundMudPickup());
 		setHardness(0.5);
-		setMinimumToolLevel(1);
 		setToolType(ToolType.SHOVEL);
 	}
 }

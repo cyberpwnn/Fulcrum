@@ -122,25 +122,16 @@ public class ContentHandler implements Listener
 
 		if(cb != null)
 		{
-			double dmg = 0D;
-			String type = ToolType.HAND;
-			int level = ToolLevel.HAND;
-			double hardness = cb.getHardness();
 			ItemStack is = e.getPlayer().getInventory().getItemInMainHand();
-
-			if(is != null && !is.getType().equals(Material.AIR))
-			{
-				type = ToolType.getType(is);
-				level = ToolLevel.getToolLevel(is);
-			}
+			String type = ToolType.getType(is);
+			double speed = ToolLevel.getMiningSpeed(cb, is);
 
 			if(!type.equals(cb.getToolType()))
 			{
-				level = ToolLevel.HAND;
+				speed = ToolLevel.getMiningSpeed(cb, null);
 			}
 
-			dmg = ToolLevel.getMiningSpeed(hardness, level);
-			digging.put(e.getBlock(), (1D / dmg) / 20D);
+			digging.put(e.getBlock(), speed);
 			lastDug.put(e.getBlock(), e.getPlayer());
 		}
 	}
@@ -227,7 +218,6 @@ public class ContentHandler implements Listener
 		}
 	}
 
-	@SuppressWarnings("deprecation")
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void on(BlockBreakEvent e)
 	{
@@ -241,17 +231,42 @@ public class ContentHandler implements Listener
 		if(cb != null)
 		{
 			stopped.add(e.getBlock());
-			ContentManager.breakBlock(e.getBlock(), !e.getPlayer().getGameMode().equals(GameMode.CREATIVE));
+			ItemStack is = e.getPlayer().getInventory().getItemInMainHand();
+			double hardness = cb.getHardness();
+			String toolType = ToolType.getType(is);
+			int level = ToolLevel.getToolLevel(is);
+			double speed = ToolLevel.getMiningSpeed(cb, is);
+			boolean shouldDrop = !e.getPlayer().getGameMode().equals(GameMode.CREATIVE);
+			boolean instantBreak = false;
+			boolean toolsMatch = toolType.equals(cb.getToolType());
+
+			if(level < cb.getMinimumToolLevel())
+			{
+				shouldDrop = false;
+			}
+
+			if(cb.getMinimumToolLevel() > ToolLevel.HAND && !toolsMatch)
+			{
+				shouldDrop = false;
+			}
+
+			if((speed / 20D) * 30D > hardness && toolsMatch)
+			{
+				instantBreak = true;
+			}
+
+			ContentManager.breakBlock(e.getBlock(), shouldDrop);
 			e.setDropItems(false);
 			e.setExpToDrop(0);
-			vdel.put(e.getPlayer(), 5);
 
-			if(e.getPlayer().getItemInHand() != null)
+			if(!instantBreak)
 			{
-				if(ToolLevel.getToolLevel(e.getPlayer().getItemInHand()) == ToolLevel.GOLD)
-				{
-					vdel.remove(e.getPlayer());
-				}
+				vdel.put(e.getPlayer(), 5);
+			}
+
+			else
+			{
+				vdel.put(e.getPlayer(), 1);
 			}
 		}
 
@@ -336,26 +351,29 @@ public class ContentHandler implements Listener
 					}
 				}
 
-				ItemStack result = is.clone();
-
-				if(is.getAmount() <= 1)
+				if(!e.getPlayer().getGameMode().equals(GameMode.CREATIVE))
 				{
-					result = new ItemStack(Material.AIR);
-				}
+					ItemStack result = is.clone();
 
-				else
-				{
-					result.setAmount(is.getAmount() - 1);
-				}
+					if(is.getAmount() <= 1)
+					{
+						result = new ItemStack(Material.AIR);
+					}
 
-				if(hand.equals(EquipmentSlot.HAND))
-				{
-					e.getPlayer().getInventory().setItemInMainHand(result);
-				}
+					else
+					{
+						result.setAmount(is.getAmount() - 1);
+					}
 
-				else
-				{
-					e.getPlayer().getInventory().setItemInOffHand(result);
+					if(hand.equals(EquipmentSlot.HAND))
+					{
+						e.getPlayer().getInventory().setItemInMainHand(result);
+					}
+
+					else
+					{
+						e.getPlayer().getInventory().setItemInOffHand(result);
+					}
 				}
 			}
 		}

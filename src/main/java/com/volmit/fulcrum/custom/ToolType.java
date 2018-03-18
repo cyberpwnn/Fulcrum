@@ -14,6 +14,11 @@ public class ToolType
 
 	public static String getType(ItemStack is)
 	{
+		if(is == null)
+		{
+			return HAND;
+		}
+
 		switch(is.getType())
 		{
 			case DIAMOND_SWORD:
