@@ -1,7 +1,13 @@
 package com.volmit.fulcrum.custom;
 
 import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Item;
+import org.bukkit.entity.Player;
+import org.bukkit.event.block.Action;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -9,7 +15,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import com.volmit.fulcrum.sfx.Audible;
 import com.volmit.fulcrum.sfx.Audio;
 
-public class CustomItem implements ICustom
+public abstract class CustomItem implements ICustom
 {
 	private Material type;
 	private short durability;
@@ -30,6 +36,10 @@ public class CustomItem implements ICustom
 		this.stackSize = 64;
 		this.pickupSound = ContentManager.getPickupSound();
 	}
+
+	public abstract void onPickedUp(Player p, Item item, boolean cancelled);
+
+	public abstract void onUsed(Player p, EquipmentSlot hand, Action action, Block block, BlockFace face, boolean cancelled);
 
 	public Audible getPickupSound()
 	{
