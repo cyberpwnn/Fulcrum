@@ -190,7 +190,7 @@ public class ContentHandler implements Listener
 
 			digging.put(e.getBlock(), speed);
 			lastDug.put(e.getBlock(), e.getPlayer());
-			ContentManager.a().notifySpawner(e.getBlock(), cb);
+			ContentManager.a().resetSpawnerRotation(e.getBlock().getLocation());
 		}
 	}
 

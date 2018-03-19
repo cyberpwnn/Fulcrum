@@ -54,8 +54,6 @@ import com.volmit.fulcrum.Fulcrum;
 import com.volmit.fulcrum.bukkit.A;
 import com.volmit.fulcrum.bukkit.Base64;
 import com.volmit.fulcrum.bukkit.BlockType;
-import com.volmit.fulcrum.bukkit.Cuboid;
-import com.volmit.fulcrum.bukkit.Cuboid.CuboidDirection;
 import com.volmit.fulcrum.bukkit.P;
 import com.volmit.fulcrum.bukkit.PE;
 import com.volmit.fulcrum.bukkit.S;
@@ -91,6 +89,7 @@ import net.minecraft.server.v1_12_R1.PacketPlayOutEntity;
 import net.minecraft.server.v1_12_R1.PacketPlayOutMapChunk;
 import net.minecraft.server.v1_12_R1.PacketPlayOutMultiBlockChange;
 import net.minecraft.server.v1_12_R1.PacketPlayOutPlayerListHeaderFooter;
+import net.minecraft.server.v1_12_R1.PacketPlayOutTileEntityData;
 import net.minecraft.server.v1_12_R1.PacketPlayOutUnloadChunk;
 import net.minecraft.server.v1_12_R1.SoundEffectType;
 import net.minecraft.server.v1_12_R1.TileEntity;
@@ -102,7 +101,6 @@ public final class Adapter12 implements IAdapter
 	private GMap<Chunk, GSet<Integer>> dirty;
 	private GList<Block> physics;
 	private GMap<Block, Double> blockDamage;
-	private GMap<Block, Integer> not;
 	private GSet<Chunk> drop;
 	private GSet<Chunk> udrop;
 	private long processed = 0;
@@ -119,7 +117,6 @@ public final class Adapter12 implements IAdapter
 		drop = new GSet<Chunk>();
 		udrop = new GSet<Chunk>();
 		blockDamage = new GMap<Block, Double>();
-		not = new GMap<Block, Integer>();
 
 		new Task(0)
 		{
@@ -312,23 +309,6 @@ public final class Adapter12 implements IAdapter
 		dirty.clear();
 		update.clear();
 		popPhysics();
-	}
-
-	@Override
-	public void fixSpawner(Location i, Player p)
-	{
-		if(!i.getBlock().getType().equals(Material.MOB_SPAWNER))
-		{
-			return;
-		}
-
-		CustomBlock cb = ContentManager.getBlock(i.getBlock());
-
-		if(cb != null)
-		{
-			sendBlockChange(i, new BlockType(Material.STONE, (byte) 0), p);
-			setSpawnerType(i, cb.getSuperID());
-		}
 	}
 
 	@Override
@@ -684,6 +664,7 @@ public final class Adapter12 implements IAdapter
 			{
 				tile.update();
 				nmsworld.notify(pos, blockData, blockData, 3);
+				resetSpawnerRotation(block);
 			}
 		}
 
@@ -907,7 +888,6 @@ public final class Adapter12 implements IAdapter
 		};
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
 	public void sendResourcePackPrepare(Player p, Runnable r)
 	{
@@ -923,44 +903,6 @@ public final class Adapter12 implements IAdapter
 		boolean faf = p.getAllowFlight();
 		p.setAllowFlight(true);
 		p.setFlying(true);
-		Cuboid c = new Cuboid(lx);
-		c = c.expand(CuboidDirection.Up, 1);
-		c = c.expand(CuboidDirection.Down, 1);
-		c = c.expand(CuboidDirection.East, 1);
-		c = c.expand(CuboidDirection.West, 1);
-		c = c.expand(CuboidDirection.North, 1);
-		c = c.expand(CuboidDirection.South, 1);
-		Cuboid cx = c;
-
-		for(Block i : new GList<Block>(c.iterator()))
-		{
-			p.sendBlockChange(i.getLocation(), Material.AIR, (byte) 0);
-		}
-
-		for(Block i : new GList<Block>(c.getFace(CuboidDirection.Up).iterator()))
-		{
-			p.sendBlockChange(i.getLocation(), Material.CONCRETE, (byte) 15);
-		}
-
-		for(Block i : new GList<Block>(c.getFace(CuboidDirection.North).iterator()))
-		{
-			p.sendBlockChange(i.getLocation(), Material.CONCRETE, (byte) 15);
-		}
-
-		for(Block i : new GList<Block>(c.getFace(CuboidDirection.South).iterator()))
-		{
-			p.sendBlockChange(i.getLocation(), Material.CONCRETE, (byte) 15);
-		}
-
-		for(Block i : new GList<Block>(c.getFace(CuboidDirection.East).iterator()))
-		{
-			p.sendBlockChange(i.getLocation(), Material.CONCRETE, (byte) 15);
-		}
-
-		for(Block i : new GList<Block>(c.getFace(CuboidDirection.West).iterator()))
-		{
-			p.sendBlockChange(i.getLocation(), Material.CONCRETE, (byte) 15);
-		}
 
 		new Task(0)
 		{
@@ -988,12 +930,6 @@ public final class Adapter12 implements IAdapter
 
 					p.setFlying(f);
 					p.setAllowFlight(faf);
-
-					for(Block i : new GList<Block>(cx.iterator()))
-					{
-						Fulcrum.adapter.makeDirty(i.getLocation());
-					}
-
 					cancel();
 					p.teleport(la);
 					p.resetPlayerTime();
@@ -1005,7 +941,7 @@ public final class Adapter12 implements IAdapter
 			}
 		};
 
-		p.sendTitle(C.GRAY + "Please Wait", C.GRAY + "Applying Resources", 0, 100000, 100);
+		p.sendTitle(C.GRAY + "Please Wait", C.GRAY + "Applying Resources " + C.WHITE + (int) (Math.random() * 30) + "%", 0, 100000, 100);
 
 		new TaskLater(20)
 		{
@@ -1022,7 +958,16 @@ public final class Adapter12 implements IAdapter
 						{
 							if(e.getStatus().equals(Status.ACCEPTED))
 							{
+								p.sendTitle(C.GRAY + "Please Wait", C.GRAY + "Applying Resources " + C.WHITE + (30 + (int) (Math.random() * 30)) + "%", 0, 100000, 100);
 
+								new TaskLater(20)
+								{
+									@Override
+									public void run()
+									{
+										p.sendTitle(C.GRAY + "Please Wait", C.GRAY + "Applying Resources " + C.WHITE + (60 + (int) (Math.random() * 30)) + "%", 0, 100000, 100);
+									}
+								};
 							}
 
 							if(e.getStatus().equals(Status.FAILED_DOWNLOAD))
@@ -1047,6 +992,8 @@ public final class Adapter12 implements IAdapter
 							if(e.getStatus().equals(Status.SUCCESSFULLY_LOADED))
 							{
 								Fulcrum.unregister(this);
+								p.sendTitle(C.GRAY + "Please Wait", C.GRAY + "Applying Resources " + C.WHITE + "95%", 0, 100000, 100);
+
 								new TaskLater(5)
 								{
 									@Override
@@ -1167,6 +1114,26 @@ public final class Adapter12 implements IAdapter
 	}
 
 	@Override
+	public void resetSpawnerRotation(Location block)
+	{
+		BlockPosition pos = new BlockPosition(block.getBlockX(), block.getBlockY(), block.getBlockZ());
+		net.minecraft.server.v1_12_R1.World nmsworld = ((CraftWorld) block.getWorld()).getHandle();
+		TileEntity tile = nmsworld.getTileEntity(pos);
+		NBTTagCompound nbt = tile.save(new NBTTagCompound());
+		NBTTagCompound ee = new NBTTagCompound();
+
+		nbt.g();
+		ee.g();
+
+		PacketPlayOutTileEntityData bc = new PacketPlayOutTileEntityData(pos, 1, nbt);
+
+		sendBlockChange(block, new BlockType(Material.AIR), P.getAnyPlayer());
+		sendBlockChange(block, new BlockType(Material.MOB_SPAWNER), P.getAnyPlayer());
+		sendPacket(bc);
+
+	}
+
+	@Override
 	public void pickup(Entity who, Entity item)
 	{
 		int c = 1;
@@ -1237,11 +1204,5 @@ public final class Adapter12 implements IAdapter
 		}
 
 		return true;
-	}
-
-	@Override
-	public void notifySpawner(Block block, CustomBlock c)
-	{
-		not.put(block, 40 + (int) (Math.random() * 10));
 	}
 }

@@ -19,6 +19,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import com.volmit.fulcrum.adapter.Adapter12;
 import com.volmit.fulcrum.adapter.IAdapter;
+import com.volmit.fulcrum.bukkit.P;
 import com.volmit.fulcrum.bukkit.TICK;
 import com.volmit.fulcrum.bukkit.Task;
 import com.volmit.fulcrum.bukkit.TaskLater;
@@ -225,6 +226,11 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 				else if(args[0].equalsIgnoreCase("dur"))
 				{
 					p.sendMessage(p.getItemInHand().getDurability() + " dur dur");
+				}
+
+				else if(args[0].equalsIgnoreCase("fix"))
+				{
+					adapter.resetSpawnerRotation(P.targetBlock(p, 8));
 				}
 
 				else if(args[0].equalsIgnoreCase("list"))
