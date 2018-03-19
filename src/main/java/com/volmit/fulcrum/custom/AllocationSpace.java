@@ -64,7 +64,7 @@ public class AllocationSpace
 
 	public AllocatedNode allocateNormal(String model)
 	{
-		for(Material i : normalAllocations.k())
+		for(Material i : iorda)
 		{
 			if(!normalAllocations.get(i).isFull())
 			{
@@ -79,7 +79,7 @@ public class AllocationSpace
 
 	public AllocatedNode allocateShaded(String model)
 	{
-		for(Material i : shadedAllocations.k())
+		for(Material i : iordb)
 		{
 			if(!shadedAllocations.get(i).isFull())
 			{
