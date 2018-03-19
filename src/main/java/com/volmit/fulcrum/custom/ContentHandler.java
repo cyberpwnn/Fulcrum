@@ -172,6 +172,14 @@ public class ContentHandler implements Listener
 
 		if(cb != null)
 		{
+			boolean cancel = false;
+			cb.onStartDig(e.getPlayer(), e.getBlock(), cancel);
+
+			if(cancel)
+			{
+				return;
+			}
+
 			Audible aa = cb.getDigSound();
 
 			if(aa != null)
@@ -212,6 +220,7 @@ public class ContentHandler implements Listener
 
 		if(cb != null)
 		{
+			cb.onCancelDig(e.getPlayer(), e.getBlock());
 			stopped.add(e.getBlock());
 		}
 	}
@@ -225,6 +234,7 @@ public class ContentHandler implements Listener
 
 			if(ContentManager.isCustom(e.getItem()))
 			{
+				boolean cancel = false;
 				ItemStack is = e.getItem().getItemStack().clone();
 				e.setCancelled(true);
 				Audible picksound = ContentManager.getPickupSound();
@@ -233,11 +243,25 @@ public class ContentHandler implements Listener
 
 				if(ci != null)
 				{
+					ci.onPickedUp(p, e.getItem(), cancel);
+
+					if(cancel)
+					{
+						return;
+					}
+
 					picksound = ci.getPickupSound();
 				}
 
 				if(cb != null)
 				{
+					cb.onPickedUp(p, e.getItem(), cancel);
+
+					if(cancel)
+					{
+						return;
+					}
+
 					picksound = cb.getPickupSound();
 				}
 
@@ -298,6 +322,15 @@ public class ContentHandler implements Listener
 			boolean instantBreak = false;
 			boolean toolsMatch = toolType.equals(cb.getToolType());
 
+			boolean cancel = false;
+			cb.onBroke(e.getPlayer(), e.getBlock(), cancel);
+
+			if(cancel)
+			{
+				e.setCancelled(true);
+				return;
+			}
+
 			if(level < cb.getMinimumToolLevel())
 			{
 				shouldDrop = false;
@@ -347,10 +380,33 @@ public class ContentHandler implements Listener
 			return;
 		}
 
+		ItemStack is = e.getItem();
+		EquipmentSlot hand = is.equals(e.getPlayer().getInventory().getItemInMainHand()) ? EquipmentSlot.HAND : EquipmentSlot.OFF_HAND;
+		CustomItem ci = ContentManager.getItem(is);
+
 		if(e.getAction().equals(Action.RIGHT_CLICK_BLOCK))
 		{
-			ItemStack is = e.getItem();
 			CustomBlock cb = ContentManager.getBlock(is);
+
+			if(ci != null)
+			{
+				boolean cancel = false;
+
+				ci.onUsed(e.getPlayer(), hand, e.getAction(), e.getClickedBlock(), e.getBlockFace(), cancel);
+
+				if(cancel)
+				{
+					e.setCancelled(true);
+					return;
+				}
+
+				if(e.getClickedBlock().getType().equals(Material.GRASS) || e.getClickedBlock().getType().equals(Material.DIRT) || e.getClickedBlock().getType().equals(Material.GRASS_PATH))
+				{
+					e.setCancelled(true);
+				}
+
+				return;
+			}
 
 			if(cb != null)
 			{
@@ -373,7 +429,6 @@ public class ContentHandler implements Listener
 					return;
 				}
 
-				EquipmentSlot hand = is.equals(e.getPlayer().getInventory().getItemInMainHand()) ? EquipmentSlot.HAND : EquipmentSlot.OFF_HAND;
 				BlockState state = target.getState();
 				ContentManager.setBlock(target, cb);
 				BlockPlaceEvent bp = new BlockPlaceEvent(target, state, clicked, is, e.getPlayer(), true, hand);
@@ -433,6 +488,18 @@ public class ContentHandler implements Listener
 						e.getPlayer().getInventory().setItemInOffHand(result);
 					}
 				}
+			}
+		}
+
+		else
+		{
+			boolean cancel = false;
+			ci.onUsed(e.getPlayer(), hand, e.getAction(), e.getClickedBlock(), e.getBlockFace(), cancel);
+
+			if(cancel)
+			{
+				e.setCancelled(true);
+				return;
 			}
 		}
 	}

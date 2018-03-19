@@ -2,7 +2,11 @@ package com.volmit.fulcrum.custom;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Item;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -11,7 +15,7 @@ import com.volmit.fulcrum.Fulcrum;
 import com.volmit.fulcrum.sfx.Audible;
 import com.volmit.fulcrum.sfx.Audio;
 
-public class CustomBlock implements ICustom
+public abstract class CustomBlock implements ICustom
 {
 	private Audible breakSound;
 	private Audible placeSound;
@@ -47,6 +51,16 @@ public class CustomBlock implements ICustom
 		renderType = BlockRenderType.ALL;
 		pickupSound = ContentManager.getPickupSound();
 	}
+
+	public abstract void onPickedUp(Player player, Item item, boolean cancel);
+
+	public abstract void onPlaced(Player player, Block block, Block against, BlockFace on, boolean cancel);
+
+	public abstract void onBroke(Player player, Block block, boolean cancel);
+
+	public abstract void onStartDig(Player player, Block block, boolean cancel);
+
+	public abstract void onCancelDig(Player player, Block block);
 
 	public void setSound(MultiCustomSound s)
 	{
