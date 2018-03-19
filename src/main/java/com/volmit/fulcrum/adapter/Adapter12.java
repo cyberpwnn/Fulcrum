@@ -247,37 +247,6 @@ public final class Adapter12 implements IAdapter
 		udrop.clear();
 		drop.clear();
 
-		for(Block i : not.k())
-		{
-			if(M.r(0.8))
-			{
-				not.put(i, not.get(i) - (int) (Math.random() * 24));
-			}
-
-			if(not.get(i) < 0)
-			{
-				not.remove(i);
-			}
-		}
-
-		for(Player i : P.onlinePlayers())
-		{
-			Location l = P.targetBlock(i, 4);
-
-			if(not.contains(l.getBlock()))
-			{
-				if(M.r((double) not.get(l.getBlock()) / 100.0))
-				{
-					fixSpawner(l, i);
-				}
-			}
-
-			else if(M.r(0.05))
-			{
-				fixSpawner(l, i);
-			}
-		}
-
 		for(Chunk i : update.k())
 		{
 			if(update.get(i).size() > 24)

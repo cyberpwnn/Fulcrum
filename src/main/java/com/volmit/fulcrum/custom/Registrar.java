@@ -1,14 +1,14 @@
 package com.volmit.fulcrum.custom;
 
-import com.volmit.fulcrum.lang.GSet;
+import com.volmit.fulcrum.lang.GList;
 
 public class Registrar
 {
-	private GSet<ICustom> customs;
+	private GList<ICustom> customs;
 
 	public Registrar()
 	{
-		customs = new GSet<ICustom>();
+		customs = new GList<ICustom>();
 	}
 
 	public void register(ICustom custom)
@@ -19,6 +19,17 @@ public class Registrar
 	public boolean connect(ContentRegistry r)
 	{
 		boolean m = false;
+
+		for(ICustom i : customs.copy())
+		{
+			if(i instanceof MultiCustomSound)
+			{
+				for(CustomSound j : ((MultiCustomSound) i).getSounds().v())
+				{
+					register(j);
+				}
+			}
+		}
 
 		for(ICustom i : customs)
 		{

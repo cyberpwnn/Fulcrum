@@ -350,6 +350,6 @@ public class Audio implements Audible
 	@Override
 	public Audible osc(double d)
 	{
-		return new Audio(this).v((float) (Math.sin(Math.random()) * d));
+		return new Audio(this).p((float) (Math.sin(Math.random()) * d));
 	}
 }

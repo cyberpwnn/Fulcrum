@@ -12,11 +12,7 @@ public class BlockSteel extends CustomBlock
 		super("steel");
 		setName("Steel");
 		setRenderType(BlockRenderType.ALL);
-		setBreakSound(new SoundSteel());
-		setPlaceSound(new SoundSteel());
-		setStepSound(new SoundSteelStep());
-		setDigSound(new SoundSteelDig());
-		setPickupSound(new SoundSteelStep());
+		setSound(new SoundSteel());
 		setHardness(3);
 		setMinimumToolLevel(ToolLevel.IRON);
 		setToolType(ToolType.PICKAXE);

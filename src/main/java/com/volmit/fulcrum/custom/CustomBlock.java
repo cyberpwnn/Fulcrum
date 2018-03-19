@@ -48,6 +48,11 @@ public class CustomBlock implements ICustom
 		pickupSound = ContentManager.getPickupSound();
 	}
 
+	public void setSound(MultiCustomSound s)
+	{
+		s.applyToBlock(this);
+	}
+
 	public String getToolType()
 	{
 		return toolType;

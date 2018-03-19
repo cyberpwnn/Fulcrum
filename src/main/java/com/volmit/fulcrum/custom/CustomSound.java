@@ -14,6 +14,7 @@ public class CustomSound implements ICustom
 	private String subtitle;
 	private float suggestedVolume;
 	private float suggestedPitch;
+	private Object inst;
 
 	public CustomSound(String node)
 	{
@@ -22,6 +23,7 @@ public class CustomSound implements ICustom
 		this.subtitle = "Did you hear that?";
 		suggestedVolume = 1f;
 		suggestedPitch = 1f;
+		setInstance(this);
 	}
 
 	public CustomSound(String node, String bases, String urlx, Class<?> c, int max, String subtitle)
@@ -37,16 +39,42 @@ public class CustomSound implements ICustom
 		this.subtitle = subtitle;
 	}
 
+	public void setInstance(Object inst)
+	{
+		this.inst = inst;
+	}
+
+	public void addSound(String resource)
+	{
+		getSoundPaths().put(resource + ".ogg", R.getURL(inst.getClass(), "/assets/sounds/" + resource + ".ogg"));
+	}
+
 	public void addSound(String packLocation, String resource)
 	{
-		getSoundPaths().put(packLocation + ".ogg", R.getURL(getClass(), "/assets/sounds/" + resource + ".ogg"));
+		getSoundPaths().put(packLocation + ".ogg", R.getURL(inst.getClass(), "/assets/sounds/" + resource + ".ogg"));
+	}
+
+	public void addSound(String resource, int from, int to)
+	{
+		for(int i = Math.min(from, to); i <= Math.max(from, to); i++)
+		{
+			URL l = R.getURL(inst.getClass(), ("/assets/sounds/" + resource + ".ogg").replace("$", i + ""));
+
+			if(l == null)
+			{
+				System.out.println("Cant find " + ("/assets/sounds/" + resource + ".ogg").replace("$", i + ""));
+				continue;
+			}
+
+			getSoundPaths().put((resource + ".ogg").replace("$", i + ""), l);
+		}
 	}
 
 	public void addSound(String packLocation, String resource, int from, int to)
 	{
 		for(int i = Math.min(from, to); i <= Math.max(from, to); i++)
 		{
-			URL l = R.getURL(getClass(), ("/assets/sounds/" + resource + ".ogg").replace("$", i + ""));
+			URL l = R.getURL(inst.getClass(), ("/assets/sounds/" + resource + ".ogg").replace("$", i + ""));
 
 			if(l == null)
 			{

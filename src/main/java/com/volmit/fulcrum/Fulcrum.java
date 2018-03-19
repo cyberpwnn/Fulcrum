@@ -36,18 +36,10 @@ import com.volmit.fulcrum.custom.legit.BlockThiccWood;
 import com.volmit.fulcrum.custom.legit.InventorySmeltery;
 import com.volmit.fulcrum.custom.legit.ItemPageFragment;
 import com.volmit.fulcrum.custom.legit.SoundMud;
-import com.volmit.fulcrum.custom.legit.SoundMudPickup;
-import com.volmit.fulcrum.custom.legit.SoundMudStep;
 import com.volmit.fulcrum.custom.legit.SoundPickupPaper;
-import com.volmit.fulcrum.custom.legit.SoundPickupWood;
 import com.volmit.fulcrum.custom.legit.SoundRubble;
-import com.volmit.fulcrum.custom.legit.SoundRubbleDig;
-import com.volmit.fulcrum.custom.legit.SoundRubbleStep;
 import com.volmit.fulcrum.custom.legit.SoundSteel;
-import com.volmit.fulcrum.custom.legit.SoundSteelDig;
-import com.volmit.fulcrum.custom.legit.SoundSteelStep;
 import com.volmit.fulcrum.custom.legit.SoundThiccWood;
-import com.volmit.fulcrum.custom.legit.SoundThiccWoodStep;
 import com.volmit.fulcrum.event.ContentRegistryEvent;
 import com.volmit.fulcrum.lang.M;
 import com.volmit.fulcrum.net.NetworkManager;
@@ -128,25 +120,16 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 	public void on(ContentRegistryEvent e)
 	{
 		e.register(new BlockThiccWood());
-		e.register(new SoundPickupPaper());
-		e.register(new SoundPickupWood());
-		e.register(new SoundThiccWood());
-		e.register(new SoundThiccWoodStep());
 
-		e.register(new SoundMud());
-		e.register(new SoundMudStep());
-		e.register(new SoundMudPickup());
+		e.register(new BlockSteel());
 		e.register(new BlockMud());
-
-		e.register(new SoundRubble());
-		e.register(new SoundRubbleStep());
-		e.register(new SoundRubbleDig());
 		e.register(new BlockRubble());
 
+		e.register(new SoundPickupPaper());
 		e.register(new SoundSteel());
-		e.register(new SoundSteelStep());
-		e.register(new SoundSteelDig());
-		e.register(new BlockSteel());
+		e.register(new SoundThiccWood());
+		e.register(new SoundRubble());
+		e.register(new SoundMud());
 
 		e.register(new ItemPageFragment());
 

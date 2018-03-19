@@ -11,11 +11,7 @@ public class BlockMud extends CustomBlock
 		super("mud");
 		setName("Mud");
 		setRenderType(BlockRenderType.ALL);
-		setBreakSound(new SoundMud());
-		setPlaceSound(new SoundMud());
-		setStepSound(new SoundMudStep());
-		setDigSound(new SoundMudStep());
-		setPickupSound(new SoundMudPickup());
+		setSound(new SoundMud());
 		setHardness(0.5);
 		setToolType(ToolType.SHOVEL);
 	}

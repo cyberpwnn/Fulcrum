@@ -1,15 +1,14 @@
 package com.volmit.fulcrum.custom.legit;
 
-import com.volmit.fulcrum.custom.CustomSound;
+import com.volmit.fulcrum.custom.MultiCustomSound;
 
-public class SoundRubble extends CustomSound
+public class SoundRubble extends MultiCustomSound
 {
 	public SoundRubble()
 	{
 		super("material.rubble");
-		setSuggestedVolume(1f);
-		setSuggestedPitch(1f);
-		setSubtitle("Rubble");
-		addSound("blocks/rubble$", "gravel/gravel_walk$", 1, 11);
+		addHard("gravel/gravel_walk$", 1, 11);
+		addSoft("gravel/gravel_wander$", 1, 3);
+		expandToBlock();
 	}
 }

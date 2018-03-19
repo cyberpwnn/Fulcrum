@@ -7,6 +7,5 @@ public class InventorySmeltery extends CustomInventory
 	public InventorySmeltery()
 	{
 		super("smeltery");
-		setEnchantedTop(true);
 	}
 }

@@ -13,10 +13,12 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 import com.volmit.fulcrum.Fulcrum;
+import com.volmit.fulcrum.bukkit.P;
 import com.volmit.fulcrum.bukkit.TICK;
 import com.volmit.fulcrum.bukkit.Task;
 import com.volmit.fulcrum.event.CustomBlockPlaceEvent;
@@ -34,10 +36,16 @@ public class ContentHandler implements Listener
 	public GMap<Block, Double> digging;
 	public GMap<Block, Player> lastDug;
 	public GMap<Player, Integer> vdel;
+	private GMap<Player, Boolean> ground;
+	private GMap<Player, Double> dist;
+	private GMap<Player, Integer> steps;
 	public GList<Block> stopped;
 
 	public ContentHandler()
 	{
+		steps = new GMap<Player, Integer>();
+		dist = new GMap<Player, Double>();
+		ground = new GMap<Player, Boolean>();
 		digging = new GMap<Block, Double>();
 		lastDug = new GMap<Block, Player>();
 		stopped = new GList<Block>();
@@ -56,6 +64,27 @@ public class ContentHandler implements Listener
 
 	public void tick()
 	{
+		for(Player i : P.onlinePlayers())
+		{
+			if(!ground.containsKey(i))
+			{
+				ground.put(i, i.isOnGround());
+			}
+
+			if(ground.get(i) != i.isOnGround() && i.isOnGround())
+			{
+				Block b = i.getLocation().clone().add(0, -0.5, 0).getBlock();
+				CustomBlock cb = ContentManager.getBlock(b);
+
+				if(cb != null && cb.getStepSound() != null)
+				{
+					cb.getStepSound().play(i.getLocation());
+				}
+			}
+
+			ground.put(i, i.isOnGround());
+		}
+
 		for(Player i : vdel.k())
 		{
 			vdel.put(i, vdel.get(i) - 1);
@@ -115,12 +144,41 @@ public class ContentHandler implements Listener
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void on(PlayerMoveEvent e)
+	{
+		if(e.getPlayer().isOnGround() && (e.getFrom().getX() != e.getTo().getX() || e.getFrom().getZ() != e.getTo().getZ()))
+		{
+			int factor = e.getPlayer().isSneaking() ? 20 : e.getPlayer().isSprinting() ? 5 : 7;
+			double dd = Math.abs(e.getFrom().getX() - e.getTo().getX()) + Math.abs(e.getFrom().getZ() - e.getTo().getZ());
+			dist.put(e.getPlayer(), dd + (dist.containsKey(e.getPlayer()) ? dist.get(e.getPlayer()) : 0.0));
+			steps.put(e.getPlayer(), 1 + (steps.containsKey(e.getPlayer()) ? steps.get(e.getPlayer()) : 0));
+
+			if(steps.get(e.getPlayer()) % factor == 0)
+			{
+				CustomBlock cb = ContentManager.getBlock(e.getPlayer().getLocation().getBlock().getLocation().clone().add(0, -0.5, 0).getBlock());
+
+				if(cb != null && cb.getStepSound() != null)
+				{
+					cb.getStepSound().play(e.getPlayer().getLocation());
+				}
+			}
+		}
+	}
+
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void on(PlayerStartDiggingEvent e)
 	{
 		CustomBlock cb = ContentManager.getBlock(e.getBlock());
 
 		if(cb != null)
 		{
+			Audible aa = cb.getDigSound();
+
+			if(aa != null)
+			{
+				aa.osc(0.35).play(e.getBlock().getLocation().clone().add(0.5, 0.5, 0.5));
+			}
+
 			ItemStack is = e.getPlayer().getInventory().getItemInMainHand();
 			String type = ToolType.getType(is);
 			double speed = ToolLevel.getMiningSpeed(cb, is);

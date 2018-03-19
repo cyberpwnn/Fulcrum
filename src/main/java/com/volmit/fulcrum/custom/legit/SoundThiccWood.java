@@ -1,15 +1,14 @@
 package com.volmit.fulcrum.custom.legit;
 
-import com.volmit.fulcrum.custom.CustomSound;
+import com.volmit.fulcrum.custom.MultiCustomSound;
 
-public class SoundThiccWood extends CustomSound
+public class SoundThiccWood extends MultiCustomSound
 {
 	public SoundThiccWood()
 	{
 		super("material.hardwood");
-		setSuggestedVolume(1f);
-		setSuggestedPitch(1f);
-		setSubtitle("Hard Wood");
-		addSound("blocks/hardwood$", "wood/wood_walk$", 1, 11);
+		addHard("wood/wood_walk$", 1, 11);
+		addSoft("wood/deckwood_run$", 1, 11);
+		expandToBlock();
 	}
 }

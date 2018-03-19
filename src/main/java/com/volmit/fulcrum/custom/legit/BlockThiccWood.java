@@ -11,11 +11,7 @@ public class BlockThiccWood extends CustomBlock
 		super("thicc_wood");
 		setName("Thicc Wood");
 		setRenderType(BlockRenderType.ALL);
-		setBreakSound(new SoundThiccWood());
-		setPlaceSound(new SoundThiccWood());
-		setStepSound(new SoundThiccWoodStep());
-		setDigSound(new SoundThiccWoodStep());
-		setPickupSound(new SoundPickupWood());
+		setSound(new SoundThiccWood());
 		setHardness(2);
 		setToolType(ToolType.AXE);
 	}

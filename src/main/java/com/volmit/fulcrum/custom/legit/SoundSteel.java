@@ -1,15 +1,14 @@
 package com.volmit.fulcrum.custom.legit;
 
-import com.volmit.fulcrum.custom.CustomSound;
+import com.volmit.fulcrum.custom.MultiCustomSound;
 
-public class SoundSteel extends CustomSound
+public class SoundSteel extends MultiCustomSound
 {
 	public SoundSteel()
 	{
 		super("material.steel");
-		setSuggestedVolume(1f);
-		setSuggestedPitch(1f);
-		setSubtitle("Steel");
-		addSound("blocks/steel$", "metal/metalbar_walk$", 1, 11);
+		addHard("metal/metalbar_walk$", 1, 11);
+		addSoft("metal/metalbar_wander$", 1, 6);
+		expandToBlock();
 	}
 }

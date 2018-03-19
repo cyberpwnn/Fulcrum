@@ -1,15 +1,14 @@
 package com.volmit.fulcrum.custom.legit;
 
-import com.volmit.fulcrum.custom.CustomSound;
+import com.volmit.fulcrum.custom.MultiCustomSound;
 
-public class SoundMud extends CustomSound
+public class SoundMud extends MultiCustomSound
 {
 	public SoundMud()
 	{
 		super("material.mud");
-		setSuggestedVolume(1f);
-		setSuggestedPitch(1f);
-		setSubtitle("Mud");
-		addSound("blocks/mud$", "dirt/mud_walk$", 1, 6);
+		add("h", "dirt/mud_walk$", 1, 6);
+		add("s", "dirt/mud_wander$", 1, 4);
+		expandToBlock("h", "s");
 	}
 }

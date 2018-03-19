@@ -11,11 +11,7 @@ public class BlockRubble extends CustomBlock
 		super("rubble");
 		setName("Rubble");
 		setRenderType(BlockRenderType.ALL);
-		setBreakSound(new SoundRubble());
-		setPlaceSound(new SoundRubble());
-		setStepSound(new SoundRubbleStep());
-		setDigSound(new SoundRubbleDig());
-		setPickupSound(new SoundRubbleStep());
+		setSound(new SoundRubble());
 		setHardness(0.7);
 		setToolType(ToolType.SHOVEL);
 	}
