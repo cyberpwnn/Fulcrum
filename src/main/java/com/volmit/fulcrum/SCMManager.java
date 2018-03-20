@@ -154,7 +154,6 @@ public class SCMManager implements Listener, CommandExecutor
 				}
 
 				sender.sendMessage("Updated " + volumes.size() + " SCM Volumes");
-
 			}
 
 			else if(args.length >= 1)

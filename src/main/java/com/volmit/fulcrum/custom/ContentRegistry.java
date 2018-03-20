@@ -6,10 +6,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.net.URL;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.apache.commons.codec.binary.Hex;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -21,13 +24,13 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.ShapelessRecipe;
 
+import com.google.common.io.Files;
 import com.volmit.fulcrum.Fulcrum;
 import com.volmit.fulcrum.bukkit.P;
 import com.volmit.fulcrum.bukkit.R;
 import com.volmit.fulcrum.bukkit.TaskLater;
 import com.volmit.fulcrum.event.ContentRecipeRegistryEvent;
 import com.volmit.fulcrum.event.ContentRegistryEvent;
-import com.volmit.fulcrum.lang.C;
 import com.volmit.fulcrum.lang.F;
 import com.volmit.fulcrum.lang.GList;
 import com.volmit.fulcrum.lang.GMap;
@@ -59,8 +62,6 @@ public class ContentRegistry implements Listener
 	private URL defaultSounds;
 	private URL newSpawner;
 	private URL soundSilent;
-	private URL glint;
-	private URL glintMeta;
 	private String defaultInventoryContentTop;
 	private String defaultInventoryContentBottom;
 	private String defaultItemContent;
@@ -122,7 +123,7 @@ public class ContentRegistry implements Listener
 	}
 
 	@SuppressWarnings("unchecked")
-	public void compileResources() throws IOException
+	public void compileResources() throws IOException, NoSuchAlgorithmException
 	{
 		Registrar rr = new Registrar();
 		ContentRegistryEvent e = new ContentRegistryEvent(rr);
@@ -139,12 +140,40 @@ public class ContentRegistry implements Listener
 
 			rid = UUID.randomUUID().toString().replaceAll("-", "");
 			File fpack = new File(Fulcrum.server.getRoot(), rid + ".zip");
-			pack.writeToArchive(fpack);
+			byte[] hash = pack.writeToArchive(fpack);
 			System.out.println("RESULTS:\n" + ass.toString());
+			File hasf = new File(Fulcrum.server.getRoot(), "latest-hash.md5");
+			boolean needsToUpdate = true;
+
+			if(hasf.exists())
+			{
+				byte[] oldHash = Files.toByteArray(hasf);
+				System.out.println("New Hash: " + Hex.encodeHexString(hash));
+				System.out.println("Old Hash: " + Hex.encodeHexString(oldHash));
+
+				if(Arrays.equals(hash, oldHash))
+				{
+					System.out.println("Last hash is identical to the current hash. Not sending to players.");
+					needsToUpdate = false;
+				}
+			}
+
+			System.out.println("Writing latest hash");
+			Files.write(hash, hasf);
+
 			for(Player i : P.onlinePlayers())
 			{
-				i.sendMessage(C.GRAY + "Branch Changed. Use " + C.WHITE + " /fu pull " + C.GRAY + "to update.");
+				if(needsToUpdate)
+				{
+					Fulcrum.adapter.sendResourcePackWeb(i, rid + ".zip");
+				}
+
+				else
+				{
+					i.sendMessage("Merged with New Hash: " + Hex.encodeHexString(hash));
+				}
 			}
+
 		}
 
 		ContentRecipeRegistryEvent er = new ContentRecipeRegistryEvent(recipes);
@@ -229,8 +258,6 @@ public class ContentRegistry implements Listener
 	{
 		pack = new ResourcePack();
 		soundSilent = R.getURL("/assets/sounds/fulcrum/silent.ogg");
-		glint = R.getURL("/assets/textures/misc/enchanted_item_glint.png");
-		glintMeta = R.getURL("/assets/textures/misc/enchanted_item_glint.png.mcmeta");
 		defaultSounds = R.getURL("/assets/sounds-default.json");
 		inventoryTop = R.getURL("/assets/models/inventory/fulcrum_top.json");
 		inventoryBottom = R.getURL("/assets/models/inventory/fulcrum_bottom.json");
@@ -282,8 +309,6 @@ public class ContentRegistry implements Listener
 		pack.setResource("models/block/fulcrum_cube_bottom_top.json", new JSONObject(read(cubeBottomTop)).toString());
 		pack.setResource("models/block/fulcrum_cube_column.json", new JSONObject(read(cubeColumn)).toString());
 		pack.setResource("models/block/fulcrum_pedistal.json", new JSONObject(read(cubePedistal)).toString());
-		pack.setResource("textures/misc/enchanted_item_glint.png", glint);
-		pack.setResource("textures/misc/enchanted_item_glint.png.mcmeta", glintMeta);
 		pack.setResource("textures/blocks/mob_spawner.png", newSpawner);
 		pack.setResource("textures/blocks/unknown.png", missingTexture);
 		pack.setResource("textures/items/unknown.png", missingTexture);
@@ -304,7 +329,7 @@ public class ContentRegistry implements Listener
 				mod.put("sounds", new JSONArray("[" + F.repeat("\"fulcrum/silent\",", 5000) + "]"));
 				soundx.put(i.replace("block.", "m.block."), old);
 				soundx.put(i, mod);
-				System.out.println("Remapped Sound " + i.replace("block.", "m.block."));
+				System.out.println("  Remapped Sound " + i.replace("block.", "m.block."));
 			}
 
 			if(i.equalsIgnoreCase("item.hoe.till"))
@@ -314,7 +339,7 @@ public class ContentRegistry implements Listener
 				mod.put("sounds", new JSONArray("[" + F.repeat("\"fulcrum/silent\",", 5000) + "]"));
 				soundx.put("m.item.hoe.till", old);
 				soundx.put(i, mod);
-				System.out.println("Remapped Sound " + "m.item.hoe.till");
+				System.out.println("  Remapped Sound " + "m.item.hoe.till");
 			}
 
 			if(i.equalsIgnoreCase("entity.item.pickup"))
@@ -324,7 +349,7 @@ public class ContentRegistry implements Listener
 				mod.put("sounds", new JSONArray("[" + F.repeat("\"fulcrum/silent\",", 5000) + "]"));
 				soundx.put("m.entity.item.pickup", old);
 				soundx.put(i, mod);
-				System.out.println("Remapped Sound " + "m.entity.item.pickup");
+				System.out.println("  Remapped Sound " + "m.entity.item.pickup");
 			}
 
 			if(i.equalsIgnoreCase("item.armor.equip_leather"))
@@ -334,7 +359,7 @@ public class ContentRegistry implements Listener
 				mod.put("sounds", new JSONArray("[" + F.repeat("\"fulcrum/silent\",", 5000) + "]"));
 				soundx.put("m.item.armor.equip_leather", old);
 				soundx.put(i, mod);
-				System.out.println("Remapped Sound " + "m.item.armor.equip_leather");
+				System.out.println("  Remapped Sound " + "m.item.armor.equip_leather");
 			}
 		}
 
@@ -342,7 +367,7 @@ public class ContentRegistry implements Listener
 
 		for(CustomSound i : sounds)
 		{
-			System.out.println("Registering Sound: " + i.getNode());
+			System.out.println("  Registering Sound: " + i.getNode());
 			for(String j : i.getSoundPaths().k())
 			{
 				pack.setResource("sounds/" + j, i.getSoundPaths().get(j));

@@ -43,6 +43,18 @@ public class ShittyWebserver
 
 		try
 		{
+			if(root.exists())
+			{
+				for(File i : root.listFiles())
+				{
+					if(i.getName().endsWith(".zip"))
+					{
+						System.out.println("Marked outdated resourcepack for deletion on exit: " + i.getName());
+						i.deleteOnExit();
+					}
+				}
+			}
+
 			writeResource(Fulcrum.class.getResource("/web/index.html"), new File(root, "index.html"));
 			writeResource(Fulcrum.class.getResource("/web/smalllogo.png"), new File(root, "smalllogo.png"));
 			writeResource(Fulcrum.class.getResource("/web/canvas.js"), new File(root, "canvas.js"));

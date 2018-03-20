@@ -2,7 +2,6 @@ package com.volmit.fulcrum.adapter;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -834,7 +833,7 @@ public final class Adapter12 implements IAdapter
 					};
 				}
 
-				catch(IOException e)
+				catch(Exception e)
 				{
 					e.printStackTrace();
 				}
