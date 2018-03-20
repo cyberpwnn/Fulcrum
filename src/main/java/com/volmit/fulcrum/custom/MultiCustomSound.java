@@ -44,6 +44,31 @@ public class MultiCustomSound implements ICustom
 		register("pickup").setSuggestedPitch(1.5f);
 	}
 
+	public CustomSound getStep()
+	{
+		return get("step");
+	}
+
+	public CustomSound getBreak()
+	{
+		return get("break");
+	}
+
+	public CustomSound getPlace()
+	{
+		return get("place");
+	}
+
+	public CustomSound getPickup()
+	{
+		return get("pickup");
+	}
+
+	public CustomSound getDig()
+	{
+		return get("dig");
+	}
+
 	public void applyToBlock(CustomBlock block)
 	{
 		block.setStepSound(get("step"));

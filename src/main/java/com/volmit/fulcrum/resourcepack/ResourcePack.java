@@ -165,18 +165,27 @@ public class ResourcePack
 			return;
 		}
 
-		FileOutputStream fos = new FileOutputStream(f);
-		InputStream in = url.openStream();
-		byte[] buffer = new byte[1024];
-		int read = 0;
-
-		while((read = in.read(buffer)) != -1)
+		try
 		{
-			fos.write(buffer, 0, read);
+			FileOutputStream fos = new FileOutputStream(f);
+			InputStream in = url.openStream();
+			byte[] buffer = new byte[1024];
+			int read = 0;
+
+			while((read = in.read(buffer)) != -1)
+			{
+				fos.write(buffer, 0, read);
+			}
+
+			fos.close();
+			in.close();
 		}
 
-		fos.close();
-		in.close();
+		catch(Exception e)
+		{
+			System.out.println("FAILED TO PACK RESOURCE: " + e.getMessage());
+		}
+
 	}
 
 	private void writePackContent(File m, String content) throws IOException

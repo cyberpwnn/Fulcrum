@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.volmit</groupId>
 	<artifactId>Fulcrum</artifactId>
-	<version>1.0</version>
+	<version>E1</version>
 	<name>Fulcrum</name>
 	<properties>
 		<project.author>cyberpwn</project.author>

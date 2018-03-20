@@ -5,7 +5,6 @@ import java.io.IOException;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
-import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.command.Command;
@@ -30,21 +29,7 @@ import com.volmit.fulcrum.custom.ContentRegistry;
 import com.volmit.fulcrum.custom.CustomBlock;
 import com.volmit.fulcrum.custom.CustomInventory;
 import com.volmit.fulcrum.custom.CustomItem;
-import com.volmit.fulcrum.custom.CustomShapedRecipe;
-import com.volmit.fulcrum.custom.CustomShapelessRecipe;
 import com.volmit.fulcrum.custom.CustomSound;
-import com.volmit.fulcrum.custom.legit.BlockMud;
-import com.volmit.fulcrum.custom.legit.BlockRubble;
-import com.volmit.fulcrum.custom.legit.BlockSteel;
-import com.volmit.fulcrum.custom.legit.BlockThiccWood;
-import com.volmit.fulcrum.custom.legit.InventorySmeltery;
-import com.volmit.fulcrum.custom.legit.ItemPageFragment;
-import com.volmit.fulcrum.custom.legit.ItemSteelIngot;
-import com.volmit.fulcrum.custom.legit.SoundMud;
-import com.volmit.fulcrum.custom.legit.SoundPickupPaper;
-import com.volmit.fulcrum.custom.legit.SoundRubble;
-import com.volmit.fulcrum.custom.legit.SoundSteel;
-import com.volmit.fulcrum.custom.legit.SoundThiccWood;
 import com.volmit.fulcrum.event.ContentRecipeRegistryEvent;
 import com.volmit.fulcrum.event.ContentRegistryEvent;
 import com.volmit.fulcrum.lang.M;
@@ -125,29 +110,13 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 	@EventHandler
 	public void on(ContentRegistryEvent e)
 	{
-		e.register(new BlockThiccWood());
 
-		e.register(new BlockSteel());
-		e.register(new BlockMud());
-		e.register(new BlockRubble());
-
-		e.register(new SoundPickupPaper());
-		e.register(new SoundSteel());
-		e.register(new SoundThiccWood());
-		e.register(new SoundRubble());
-		e.register(new SoundMud());
-
-		e.register(new ItemSteelIngot());
-		e.register(new ItemPageFragment());
-
-		e.register(new InventorySmeltery());
 	}
 
 	@EventHandler
 	public void on(ContentRecipeRegistryEvent e)
 	{
-		e.register(new CustomShapelessRecipe(new ItemSteelIngot()).addIngredient(Material.IRON_INGOT).addIngredient(Material.COAL));
-		e.register(new CustomShapedRecipe(new BlockSteel(), "AAA", "AAA", "AAA").addIngredient("A", new ItemSteelIngot()));
+
 	}
 
 	@Override
@@ -246,6 +215,26 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 					String rid = contentRegistry.getRid();
 					p.sendMessage("Merging with #" + rid);
 					Fulcrum.adapter.sendResourcePackWeb(p, rid + ".zip");
+				}
+
+				else if(args[0].equalsIgnoreCase("pop"))
+				{
+					new TaskLater()
+					{
+						@Override
+						public void run()
+						{
+							try
+							{
+								contentRegistry.compileResources();
+							}
+
+							catch(Exception e)
+							{
+								e.printStackTrace();
+							}
+						}
+					};
 				}
 
 				else if(args[0].equalsIgnoreCase("fix"))
