@@ -121,9 +121,9 @@ public interface IAdapter extends Listener
 
 	public int getSpawnerType(Location block);
 
-	void setSpawnerType(Location block, String mat, short dmg, boolean enchanted);
+	public void setSpawnerType(Location block, String mat, short dmg, boolean enchanted);
 
-	void sendResourcePackPacket(Player p, String url, byte[] hash);
+	public void sendResourcePackPacket(Player p, String url, byte[] hash);
 
 	public void pickup(Entity who, Entity item);
 

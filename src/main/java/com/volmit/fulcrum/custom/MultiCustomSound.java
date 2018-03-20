@@ -35,8 +35,8 @@ public class MultiCustomSound implements ICustom
 		register("step").setSuggestedVolume(0.4f);
 		register("break").setSuggestedVolume(1f);
 		register("place").setSuggestedVolume(1f);
-		register("dig").setSuggestedVolume(0.4f);
-		register("pickup").setSuggestedVolume(0.7f);
+		register("dig").setSuggestedVolume(0.6f);
+		register("pickup").setSuggestedVolume(0.6f);
 		register("step").setSuggestedPitch(1.3f);
 		register("break").setSuggestedPitch(1f);
 		register("place").setSuggestedPitch(1f);
