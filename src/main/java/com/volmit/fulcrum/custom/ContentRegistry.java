@@ -4,20 +4,30 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Field;
 import java.net.URL;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.inventory.ShapelessRecipe;
 
 import com.volmit.fulcrum.Fulcrum;
 import com.volmit.fulcrum.bukkit.P;
 import com.volmit.fulcrum.bukkit.R;
 import com.volmit.fulcrum.bukkit.TaskLater;
+import com.volmit.fulcrum.event.ContentRecipeRegistryEvent;
 import com.volmit.fulcrum.event.ContentRegistryEvent;
+import com.volmit.fulcrum.lang.C;
 import com.volmit.fulcrum.lang.F;
 import com.volmit.fulcrum.lang.GList;
 import com.volmit.fulcrum.lang.GMap;
@@ -64,6 +74,7 @@ public class ContentRegistry implements Listener
 	private GList<CustomInventory> inventories;
 	private GList<CustomSound> sounds;
 	private GList<CustomItem> items;
+	private GList<ICustomRecipe> recipes;
 	private GMap<Integer, CustomBlock> superBlocks;
 	private GMap<Integer, CustomItem> superItems;
 	private GMap<Integer, CustomInventory> superInventories;
@@ -81,7 +92,13 @@ public class ContentRegistry implements Listener
 		sounds = new GList<CustomSound>();
 		items = new GList<CustomItem>();
 		blocks = new GList<CustomBlock>();
+		recipes = new GList<ICustomRecipe>();
 		Fulcrum.register(this);
+	}
+
+	public void registerRecipe(ICustomRecipe r)
+	{
+		recipes.add(r);
 	}
 
 	public void registerSound(CustomSound s)
@@ -104,32 +121,91 @@ public class ContentRegistry implements Listener
 		inventories.add(i);
 	}
 
+	@SuppressWarnings("unchecked")
 	public void compileResources() throws IOException
 	{
 		Registrar rr = new Registrar();
 		ContentRegistryEvent e = new ContentRegistryEvent(rr);
 		Fulcrum.callEvent(e);
 
-		if(!rr.connect(this))
+		if(rr.connect(this))
 		{
-			return;
+			loadResources();
+			processItems();
+			processBlocks();
+			processInventories();
+			processSounds();
+			buildPredicates();
+
+			rid = UUID.randomUUID().toString().replaceAll("-", "");
+			File fpack = new File(Fulcrum.server.getRoot(), rid + ".zip");
+			pack.writeToArchive(fpack);
+			System.out.println("RESULTS:\n" + ass.toString());
+			for(Player i : P.onlinePlayers())
+			{
+				i.sendMessage(C.GRAY + "Branch Changed. Use " + C.WHITE + " /fu pull " + C.GRAY + "to update.");
+			}
 		}
 
-		loadResources();
-		processItems();
-		processBlocks();
-		processInventories();
-		processSounds();
-		buildPredicates();
+		ContentRecipeRegistryEvent er = new ContentRecipeRegistryEvent(recipes);
+		Fulcrum.callEvent(er);
+		int v = 0;
 
-		rid = UUID.randomUUID().toString().replaceAll("-", "");
-		File fpack = new File(Fulcrum.server.getRoot(), rid + ".zip");
-		pack.writeToArchive(fpack);
-		System.out.println("RESULTS:\n" + ass.toString());
-		for(Player i : P.onlinePlayers())
+		Bukkit.resetRecipes();
+
+		for(ICustomRecipe i : recipes)
 		{
-			Fulcrum.adapter.sendResourcePackWeb(i, rid + ".zip");
+			v++;
+			NamespacedKey n = new NamespacedKey(Fulcrum.instance, "recipe-" + v);
+
+			if(i instanceof CustomShapelessRecipe)
+			{
+				CustomShapelessRecipe s = (CustomShapelessRecipe) i;
+				ShapelessRecipe r = new ShapelessRecipe(n, i.getResult());
+				List<ItemStack> isx = s.getIngredients().copy();
+
+				try
+				{
+					Field f = r.getClass().getDeclaredField("ingredients");
+					f.setAccessible(true);
+					((List<ItemStack>) f.get(r)).addAll(isx);
+					Bukkit.getServer().addRecipe(r);
+				}
+
+				catch(Exception e1)
+				{
+					e1.printStackTrace();
+				}
+			}
+
+			if(i instanceof CustomShapedRecipe)
+			{
+				CustomShapedRecipe s = (CustomShapedRecipe) i;
+				ShapedRecipe r = new ShapedRecipe(n, s.getResult());
+				r.shape(s.getPattern());
+				GMap<Character, ItemStack> isx = s.getIngredients().copy();
+
+				try
+				{
+					Field f = r.getClass().getDeclaredField("ingredients");
+					f.setAccessible(true);
+					((Map<Character, ItemStack>) f.get(r)).putAll(isx);
+					Bukkit.getServer().addRecipe(r);
+				}
+
+				catch(Exception e1)
+				{
+					e1.printStackTrace();
+				}
+			}
 		}
+
+		System.out.println("Registered " + getRecipes().size() + " recipes");
+	}
+
+	public String getRid()
+	{
+		return rid;
 	}
 
 	private void buildPredicates()
@@ -457,6 +533,11 @@ public class ContentRegistry implements Listener
 	public GList<CustomItem> getItems()
 	{
 		return items;
+	}
+
+	public GList<ICustomRecipe> getRecipes()
+	{
+		return recipes;
 	}
 
 	public GMap<Integer, CustomBlock> getSuperBlocks()

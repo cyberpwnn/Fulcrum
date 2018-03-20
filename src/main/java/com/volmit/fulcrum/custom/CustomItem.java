@@ -35,6 +35,15 @@ public abstract class CustomItem implements ICustom
 		this.enchanted = false;
 		this.stackSize = 64;
 		this.pickupSound = ContentManager.getPickupSound();
+
+		CustomItem ci = ContentManager.getItem(id);
+
+		if(ci != null)
+		{
+			setType(ci.getType());
+			setDurability(ci.getDurability());
+			setSuperID(ci.getSuperID());
+		}
 	}
 
 	public abstract void onPickedUp(Player p, Item item, boolean cancelled);
@@ -86,9 +95,10 @@ public abstract class CustomItem implements ICustom
 		this.layers = layers;
 	}
 
-	public ItemStack getItem()
+	public ItemStack getItem(int count)
 	{
 		ItemStack is = new ItemStack(getType());
+		is.setAmount(count);
 		is.setDurability(getDurability());
 		ItemMeta im = is.getItemMeta();
 		im.setUnbreakable(true);
@@ -108,6 +118,11 @@ public abstract class CustomItem implements ICustom
 		is.setItemMeta(im);
 
 		return is;
+	}
+
+	public ItemStack getItem()
+	{
+		return getItem(1);
 	}
 
 	public Material getType()

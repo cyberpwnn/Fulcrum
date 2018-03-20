@@ -50,6 +50,15 @@ public abstract class CustomBlock implements ICustom
 		matt = "";
 		renderType = BlockRenderType.ALL;
 		pickupSound = ContentManager.getPickupSound();
+
+		CustomBlock ci = ContentManager.getBlock(id);
+
+		if(ci != null)
+		{
+			setType(ci.getType());
+			setDurabilityLock(ci.getDurabilityLock());
+			setSuperID(ci.getSuperID());
+		}
 	}
 
 	public abstract void onPickedUp(Player player, Item item, boolean cancel);
@@ -205,7 +214,13 @@ public abstract class CustomBlock implements ICustom
 
 	public ItemStack getItem()
 	{
+		return getItem(1);
+	}
+
+	public ItemStack getItem(int count)
+	{
 		ItemStack is = new ItemStack(getType());
+		is.setAmount(count);
 		is.setDurability(getDurabilityLock());
 		ItemMeta im = is.getItemMeta();
 		im.setUnbreakable(true);

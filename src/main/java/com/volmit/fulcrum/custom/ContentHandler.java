@@ -12,6 +12,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
+import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -144,6 +145,20 @@ public class ContentHandler implements Listener
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void on(PrepareItemCraftEvent e)
+	{
+		if(e.isRepair())
+		{
+			ItemStack is = e.getRecipe().getResult();
+
+			if(!is.getItemMeta().isUnbreakable() && ContentManager.isUsed(is.getType()))
+			{
+				e.getInventory().setResult(new ItemStack(Material.AIR));
+			}
+		}
+	}
+
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void on(PlayerMoveEvent e)
 	{
 		if(e.getPlayer().isOnGround() && (e.getFrom().getX() != e.getTo().getX() || e.getFrom().getZ() != e.getTo().getZ()))
@@ -198,7 +213,6 @@ public class ContentHandler implements Listener
 
 			digging.put(e.getBlock(), speed);
 			lastDug.put(e.getBlock(), e.getPlayer());
-			ContentManager.a().resetSpawnerRotation(e.getBlock().getLocation());
 		}
 	}
 
@@ -494,6 +508,12 @@ public class ContentHandler implements Listener
 		else
 		{
 			boolean cancel = false;
+
+			if(ci == null)
+			{
+				return;
+			}
+
 			ci.onUsed(e.getPlayer(), hand, e.getAction(), e.getClickedBlock(), e.getBlockFace(), cancel);
 
 			if(cancel)
