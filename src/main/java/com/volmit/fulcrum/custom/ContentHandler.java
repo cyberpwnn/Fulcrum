@@ -12,8 +12,11 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
+import org.bukkit.event.inventory.ClickType;
+import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -25,6 +28,7 @@ import com.volmit.fulcrum.Fulcrum;
 import com.volmit.fulcrum.bukkit.P;
 import com.volmit.fulcrum.bukkit.TICK;
 import com.volmit.fulcrum.bukkit.Task;
+import com.volmit.fulcrum.bukkit.TaskLater;
 import com.volmit.fulcrum.event.CustomBlockPlaceEvent;
 import com.volmit.fulcrum.event.PlayerCancelledDiggingEvent;
 import com.volmit.fulcrum.event.PlayerFinishedDiggingEvent;
@@ -153,86 +157,249 @@ public class ContentHandler implements Listener
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void on(CraftItemEvent e)
+	{
+		ItemStack is = e.getCurrentItem().clone();
+
+		if(e.getClick().equals(ClickType.SHIFT_LEFT))
+		{
+			if(ContentManager.isCustom(is))
+			{
+				new TaskLater(0)
+				{
+					@Override
+					public void run()
+					{
+						ContentManager.stack(is, e.getWhoClicked().getInventory(), e.getWhoClicked(), 0);
+					}
+				};
+			}
+		}
+	}
+
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void on(InventoryDragEvent e)
+	{
+		ItemStack is = e.getOldCursor();
+
+		if(is != null && ContentManager.isCustom(is))
+		{
+			int count = ContentManager.getBlock(is) != null ? ContentManager.getBlock(is).getStackSize() : ContentManager.getItem(is).getStackSize();
+			int left = e.getOldCursor().getAmount();
+			int div = e.getInventorySlots().size();
+			int f = left / div;
+			int r = left % div;
+
+			if(f <= 1)
+			{
+				return;
+			}
+
+			e.setCancelled(true);
+			for(int i : e.getInventorySlots())
+			{
+				int place = Math.min(f, count);
+				ItemStack ix = e.getInventory().getItem(i);
+
+				if(ix == null || ix.getType().equals(Material.AIR))
+				{
+					ItemStack iv = is.clone();
+					iv.setAmount(place);
+					e.getInventory().setItem(i, iv);
+					left -= place;
+				}
+			}
+
+			int ll = left;
+
+			new TaskLater(0)
+			{
+				@Override
+				public void run()
+				{
+					if(ll == 0)
+					{
+						e.getWhoClicked().setItemOnCursor(null);
+					}
+
+					else
+					{
+						ItemStack ss = e.getWhoClicked().getItemOnCursor().clone();
+						ss.setAmount(ll);
+						e.getWhoClicked().setItemOnCursor(ss);
+					}
+				}
+			};
+		}
+	}
+
+	@SuppressWarnings("deprecation")
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void on(InventoryClickEvent e)
 	{
-		ItemStack is = e.getCurrentItem();
+		ItemStack is = e.getCurrentItem().clone();
 		ItemStack cursor = e.getCursor();
 		Inventory top = e.getView().getTopInventory();
 		Inventory bottom = e.getView().getBottomInventory();
 		Inventory clickedInventory = e.getClickedInventory();
-		Inventory otherInventory = clickedInventory.equals(top) ? bottom : top;
 		int clickedSlot = e.getSlot();
 
 		if(e.getAction().equals(InventoryAction.MOVE_TO_OTHER_INVENTORY))
 		{
-			ContentManager.transfer(clickedInventory, otherInventory, clickedSlot);
-			ContentManager.addToInventory(otherInventory, is);
-			e.setCancelled(true);
-			// TODO Test
-		}
-
-		if(e.getAction().equals(InventoryAction.COLLECT_TO_CURSOR))
-		{
-
-		}
-
-		if(e.getAction().equals(InventoryAction.PICKUP_ALL) || e.getAction().equals(InventoryAction.PICKUP_ONE) || e.getAction().equals(InventoryAction.PICKUP_HALF) || e.getAction().equals(InventoryAction.PICKUP_SOME))
-		{
-			if(ContentManager.isCustom(cursor))
+			if(bottom != null && top != null)
 			{
-				CustomItem item = ContentManager.getItem(cursor);
-				CustomBlock block = ContentManager.getBlock(cursor);
+				Inventory other = bottom.equals(clickedInventory) ? top : bottom;
 
-				if(item != null && block != null)
+				if(is != null && ContentManager.isCustom(is))
 				{
-					return;
-				}
-
-				int maxStack = -1;
-
-				if(item != null)
-				{
-					CustomItem tItem = ContentManager.getItem(is);
-
-					if(tItem != null && tItem.getSuperID() == item.getSuperID())
+					new TaskLater(0)
 					{
-						maxStack = tItem.getStackSize();
-					}
-				}
-
-				if(block != null)
-				{
-					CustomBlock tBlock= ContentManager.getBlock(is);
-
-					if(tBlock != null && tBlock.getSuperID() == block.getSuperID())
-					{
-						maxStack = tBlock.getStackSize();
-					}
-				}
-
-				if(maxStack > 0)
-				{
-
+						@Override
+						public void run()
+						{
+							ContentManager.stack(is, other, e.getWhoClicked(), 0);
+						}
+					};
 				}
 			}
 		}
 
-		switch(e.getAction())
+		if(e.getAction().equals(InventoryAction.COLLECT_TO_CURSOR))
 		{
-			case PICKUP_ALL:
-			case PICKUP_HALF:
-			case PICKUP_ONE:
-			case PICKUP_SOME:
-				break;
-			case PLACE_ALL:
-			case PLACE_ONE:
-			case PLACE_SOME:
-				break;
-			case SWAP_WITH_CURSOR:
-				break;
-			default:
-				break;
+			if(cursor != null && ContentManager.isCustom(cursor))
+			{
+				int stack = ContentManager.getBlock(cursor) != null ? ContentManager.getBlock(cursor).getStackSize() : ContentManager.getItem(cursor).getStackSize();
 
+				ItemStack[] isx = e.getClickedInventory().getContents();
+
+				for(int i = 0; i < isx.length; i++)
+				{
+					ItemStack isv = isx[i];
+
+					if(isv != null && isv.getType().equals(cursor.getType()) && isv.getDurability() == cursor.getDurability() && cursor.getItemMeta().isUnbreakable() == true && cursor.getItemMeta().isUnbreakable() == isv.getItemMeta().isUnbreakable())
+					{
+						if(cursor.getAmount() < stack)
+						{
+							if(cursor.getAmount() + isv.getAmount() <= stack)
+							{
+								cursor.setAmount(cursor.getAmount() + isv.getAmount());
+								e.getClickedInventory().setItem(i, new ItemStack(Material.AIR));
+								e.setCursor(cursor.clone());
+							}
+						}
+
+						else
+						{
+							break;
+						}
+					}
+				}
+
+				if(cursor.getAmount() < stack && bottom != null && top != null)
+				{
+					Inventory other = bottom.equals(clickedInventory) ? top : bottom;
+
+					isx = other.getContents();
+
+					for(int i = 0; i < isx.length; i++)
+					{
+						ItemStack isv = isx[i];
+
+						if(isv != null && isv.getType().equals(cursor.getType()) && isv.getDurability() == cursor.getDurability() && cursor.getItemMeta().isUnbreakable() == true && cursor.getItemMeta().isUnbreakable() == isv.getItemMeta().isUnbreakable())
+						{
+							if(cursor.getAmount() < stack)
+							{
+								if(cursor.getAmount() + isv.getAmount() <= stack)
+								{
+									cursor.setAmount(cursor.getAmount() + isv.getAmount());
+									other.setItem(i, new ItemStack(Material.AIR));
+									e.setCursor(cursor.clone());
+								}
+							}
+
+							else
+							{
+								break;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		if(e.getAction().equals(InventoryAction.NOTHING) || e.getAction().equals(InventoryAction.PICKUP_SOME) || e.getAction().equals(InventoryAction.PICKUP_ONE))
+		{
+			if(e.getClick().equals(ClickType.RIGHT))
+			{
+				if(cursor != null && ContentManager.isCustom(cursor))
+				{
+					if(is != null && cursor.getType().equals(is.getType()) && cursor.getDurability() == is.getDurability() && cursor.getItemMeta().isUnbreakable() && is.getItemMeta().isUnbreakable())
+					{
+						e.setCancelled(true);
+
+						if(cursor != null && ContentManager.isCustom(cursor))
+						{
+							if(is != null && cursor.getType().equals(is.getType()) && cursor.getDurability() == is.getDurability() && cursor.getItemMeta().isUnbreakable() && is.getItemMeta().isUnbreakable())
+							{
+								int count = ContentManager.getBlock(cursor) != null ? ContentManager.getBlock(cursor).getStackSize() : ContentManager.getItem(cursor).getStackSize();
+								int maxPull = count - is.getAmount();
+
+								if(cursor.getAmount() == 1 && is.getAmount() < count)
+								{
+									is.setAmount(is.getAmount() + 1);
+									clickedInventory.setItem(clickedSlot, is.clone());
+									e.setCursor(new ItemStack(Material.AIR));
+								}
+
+								else if(maxPull > 0 && cursor.getAmount() > 1)
+								{
+									cursor.setAmount(cursor.getAmount() - 1);
+									e.setCursor(cursor.clone());
+									is.setAmount(is.getAmount() + 1);
+									clickedInventory.setItem(clickedSlot, is.clone());
+								}
+							}
+						}
+
+					}
+				}
+			}
+
+			if(e.getClick().equals(ClickType.LEFT))
+			{
+				if(cursor != null && ContentManager.isCustom(cursor))
+				{
+					if(is != null && cursor.getType().equals(is.getType()) && cursor.getDurability() == is.getDurability() && cursor.getItemMeta().isUnbreakable() && is.getItemMeta().isUnbreakable())
+					{
+						e.setCancelled(true);
+
+						if(cursor != null && ContentManager.isCustom(cursor))
+						{
+							if(is != null && cursor.getType().equals(is.getType()) && cursor.getDurability() == is.getDurability() && cursor.getItemMeta().isUnbreakable() && is.getItemMeta().isUnbreakable())
+							{
+								int count = ContentManager.getBlock(cursor) != null ? ContentManager.getBlock(cursor).getStackSize() : ContentManager.getItem(cursor).getStackSize();
+								int maxPull = count - is.getAmount();
+
+								while(maxPull > 0 && cursor.getAmount() > 1)
+								{
+									cursor.setAmount(cursor.getAmount() - 1);
+									e.setCursor(cursor.clone());
+									is.setAmount(is.getAmount() + 1);
+									clickedInventory.setItem(clickedSlot, is.clone());
+								}
+
+								if(cursor.getAmount() == 1 && is.getAmount() < count)
+								{
+									is.setAmount(is.getAmount() + 1);
+									clickedInventory.setItem(clickedSlot, is.clone());
+									e.setCursor(new ItemStack(Material.AIR));
+								}
+							}
+						}
+
+					}
+				}
+			}
 		}
 	}
 
@@ -467,11 +634,10 @@ public class ContentHandler implements Listener
 			}
 		}
 
-		else
-			if(ContentManager.a().isMetal(e.getBlock().getType()))
-			{
-				ContentManager.getMetalBreakSound().play(e.getBlock().getLocation().clone().add(0.5, 0.5, 0.5));
-			}
+		else if(ContentManager.a().isMetal(e.getBlock().getType()))
+		{
+			ContentManager.getMetalBreakSound().play(e.getBlock().getLocation().clone().add(0.5, 0.5, 0.5));
+		}
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

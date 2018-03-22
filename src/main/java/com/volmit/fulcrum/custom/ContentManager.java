@@ -5,9 +5,10 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Item;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
+
 import com.volmit.fulcrum.Fulcrum;
 import com.volmit.fulcrum.adapter.IAdapter;
 import com.volmit.fulcrum.lang.GList;
@@ -16,6 +17,13 @@ import com.volmit.fulcrum.sfx.Audio;
 
 public class ContentManager
 {
+	public static boolean reload = false;
+
+	public static void reloadContentManager()
+	{
+		reload = true;
+	}
+
 	public static ContentRegistry r()
 	{
 		return Fulcrum.contentRegistry;
@@ -24,6 +32,38 @@ public class ContentManager
 	public static IAdapter a()
 	{
 		return Fulcrum.adapter;
+	}
+
+	public static void stack(ItemStack ist, Inventory inv, HumanEntity e, int hintSlot)
+	{
+		int count = 0;
+		ItemStack[] isx = inv.getContents();
+		ItemStack demo = ist.clone();
+
+		for(int i = 0; i < isx.length; i++)
+		{
+			ItemStack is = isx[i];
+
+			if(is != null && is.getType().equals(ist.getType()) && is.getDurability() == ist.getDurability() && ist.getItemMeta().isUnbreakable() && is.getItemMeta().isUnbreakable())
+			{
+				count += is.getAmount();
+				inv.setItem(i, new ItemStack(Material.AIR));
+			}
+		}
+
+		while(count > 0)
+		{
+			int a = Math.min(count, 64);
+			demo.setAmount(a);
+			count -= a;
+			addToInventory(inv, demo.clone(), hintSlot);
+		}
+
+		if(e instanceof Player)
+		{
+			((Player) e).updateInventory();
+		}
+
 	}
 
 	public static boolean isUsed(Material m)
@@ -94,6 +134,11 @@ public class ContentManager
 
 	public static void addToInventory(Inventory inv, ItemStack is)
 	{
+		addToInventory(inv, is, 0);
+	}
+
+	public static void addToInventory(Inventory inv, ItemStack is, int hint)
+	{
 		ItemStack[] iss = inv.getContents();
 		CustomItem it = getItem(is);
 		CustomBlock bt = getBlock(is);
@@ -112,7 +157,6 @@ public class ContentManager
 
 		if(it == null && bt == null)
 		{
-			System.out.println("??? What not custom?");
 			inv.addItem(is);
 			return;
 		}
@@ -148,7 +192,16 @@ public class ContentManager
 			ItemStack ix = is.clone();
 			ix.setAmount(Math.min(left, z));
 			left = left - Math.min(left, z);
-			inv.addItem(ix);
+
+			if(inv.getContents()[hint] == null)
+			{
+				inv.setItem(hint, ix);
+			}
+
+			else
+			{
+				inv.addItem(ix);
+			}
 		}
 	}
 
@@ -170,6 +223,11 @@ public class ContentManager
 	public static boolean isCustom(ItemStack item)
 	{
 		if(item == null)
+		{
+			return false;
+		}
+
+		if(item.getItemMeta() == null)
 		{
 			return false;
 		}
@@ -413,7 +471,7 @@ public class ContentManager
 	public static void transfer(Inventory clickedInventory, Inventory move, int clickedSlot)
 	{
 		ItemStack is = clickedInventory.getItem(clickedSlot).clone();
-		clickedInventory.setItem(clickedSlot, new ItemStack(Material.AIR));
 		addToInventory(move, is);
+		clickedInventory.setItem(clickedSlot, new ItemStack(Material.AIR));
 	}
 }
