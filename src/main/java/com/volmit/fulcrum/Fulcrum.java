@@ -19,6 +19,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import com.volmit.fulcrum.adapter.Adapter12;
 import com.volmit.fulcrum.adapter.IAdapter;
+import com.volmit.fulcrum.bukkit.A;
 import com.volmit.fulcrum.bukkit.P;
 import com.volmit.fulcrum.bukkit.TICK;
 import com.volmit.fulcrum.bukkit.Task;
@@ -54,6 +55,7 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 	public static ContentRegistry contentRegistry;
 	public static ContentHandler contentHandler;
 	public static NetworkManager net;
+	private int icd = 10;
 
 	@Override
 	public void onEnable()
@@ -66,7 +68,7 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 		contentRegistry = new ContentRegistry();
 		contentHandler = new ContentHandler();
 		server = new ShittyWebserver(8193, new File(getDataFolder(), "web"));
-
+		icd = 10;
 		try
 		{
 			server.start();
@@ -86,6 +88,11 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 			public void run()
 			{
 				onTick();
+
+				if(icd > 0)
+				{
+					icd--;
+				}
 			}
 		};
 
@@ -94,15 +101,7 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 			@Override
 			public void run()
 			{
-				try
-				{
-					contentRegistry.compileResources();
-				}
-
-				catch(Exception e)
-				{
-					e.printStackTrace();
-				}
+				ContentManager.reloadContentManager();
 			}
 		};
 	}
@@ -287,6 +286,29 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 		TICK.tick++;
 		cache.tick();
 		scmmgr.onTick();
+
+		if(ContentManager.reload && icd <= 0)
+		{
+			ContentManager.reload = false;
+			icd = 10;
+
+			new A()
+			{
+				@Override
+				public void run()
+				{
+					try
+					{
+						contentRegistry.compileResources();
+					}
+
+					catch(Exception e)
+					{
+						e.printStackTrace();
+					}
+				}
+			};
+		}
 	}
 
 	public static void callEvent(Event e)

@@ -35,6 +35,11 @@ public class ResourcePack
 		ow = new GList<String>();
 	}
 
+	public int size()
+	{
+		return copyResources.size() + writeResources.size() + 3;
+	}
+
 	public void setResource(String path, URL url)
 	{
 		if(path == null && url == null)

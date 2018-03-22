@@ -37,6 +37,7 @@ import com.volmit.fulcrum.lang.GMap;
 import com.volmit.fulcrum.lang.JSONArray;
 import com.volmit.fulcrum.lang.JSONException;
 import com.volmit.fulcrum.lang.JSONObject;
+import com.volmit.fulcrum.lang.Profiler;
 import com.volmit.fulcrum.resourcepack.ResourcePack;
 
 public class ContentRegistry implements Listener
@@ -122,9 +123,10 @@ public class ContentRegistry implements Listener
 		inventories.add(i);
 	}
 
-	@SuppressWarnings("unchecked")
 	public void compileResources() throws IOException, NoSuchAlgorithmException
 	{
+		Profiler pr = new Profiler();
+		pr.begin();
 		Registrar rr = new Registrar();
 		ContentRegistryEvent e = new ContentRegistryEvent(rr);
 		Fulcrum.callEvent(e);
@@ -137,45 +139,60 @@ public class ContentRegistry implements Listener
 			processInventories();
 			processSounds();
 			buildPredicates();
-
-			rid = UUID.randomUUID().toString().replaceAll("-", "");
-			File fpack = new File(Fulcrum.server.getRoot(), rid + ".zip");
-			byte[] hash = pack.writeToArchive(fpack);
-			System.out.println("RESULTS:\n" + ass.toString());
-			File hasf = new File(Fulcrum.server.getRoot(), "latest-hash.md5");
-			boolean needsToUpdate = true;
-
-			if(hasf.exists())
-			{
-				byte[] oldHash = Files.toByteArray(hasf);
-				System.out.println("New Hash: " + Hex.encodeHexString(hash));
-				System.out.println("Old Hash: " + Hex.encodeHexString(oldHash));
-
-				if(Arrays.equals(hash, oldHash))
-				{
-					System.out.println("Last hash is identical to the current hash. Not sending to players.");
-					needsToUpdate = false;
-				}
-			}
-
-			System.out.println("Writing latest hash");
-			Files.write(hash, hasf);
-
-			for(Player i : P.onlinePlayers())
-			{
-				if(needsToUpdate)
-				{
-					Fulcrum.adapter.sendResourcePackWeb(i, rid + ".zip");
-				}
-
-				else
-				{
-					i.sendMessage("Merged with New Hash: " + Hex.encodeHexString(hash));
-				}
-			}
-
+			mergeResources();
 		}
 
+		processRecipes();
+		pr.end();
+		System.out.println("Items: " + F.f(items.size()));
+		System.out.println("Blocks: " + F.f(blocks.size()));
+		System.out.println("Sounds: " + F.f(sounds.size()));
+		System.out.println("Inventories: " + F.f(inventories.size()));
+		System.out.println(F.f(pack.size()) + " Resources compiled in " + F.time(pr.getMilliseconds(), 0));
+	}
+
+	private void mergeResources() throws IOException, NoSuchAlgorithmException
+	{
+		rid = UUID.randomUUID().toString().replaceAll("-", "");
+		File fpack = new File(Fulcrum.server.getRoot(), rid + ".zip");
+		byte[] hash = pack.writeToArchive(fpack);
+		System.out.println("RESULTS:\n" + ass.toString());
+		File hasf = new File(Fulcrum.server.getRoot(), "latest-hash.md5");
+		boolean needsToUpdate = true;
+
+		if(hasf.exists())
+		{
+			byte[] oldHash = Files.toByteArray(hasf);
+			System.out.println("New Hash: " + Hex.encodeHexString(hash));
+			System.out.println("Old Hash: " + Hex.encodeHexString(oldHash));
+
+			if(Arrays.equals(hash, oldHash))
+			{
+				System.out.println("Last hash is identical to the current hash. Not sending to players.");
+				needsToUpdate = false;
+			}
+		}
+
+		System.out.println("Writing latest hash");
+		Files.write(hash, hasf);
+
+		for(Player i : P.onlinePlayers())
+		{
+			if(needsToUpdate)
+			{
+				Fulcrum.adapter.sendResourcePackWeb(i, rid + ".zip");
+			}
+
+			else
+			{
+				i.sendMessage("Merged with New Hash: " + Hex.encodeHexString(hash));
+			}
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private void processRecipes()
+	{
 		ContentRecipeRegistryEvent er = new ContentRecipeRegistryEvent(recipes);
 		Fulcrum.callEvent(er);
 		int v = 0;
