@@ -12,12 +12,13 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
+import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import com.volmit.fulcrum.Fulcrum;
@@ -149,6 +150,90 @@ public class ContentHandler implements Listener
 	private int getBlockPos(Block b)
 	{
 		return b.getX() + b.getY() + b.getZ();
+	}
+
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void on(InventoryClickEvent e)
+	{
+		ItemStack is = e.getCurrentItem();
+		ItemStack cursor = e.getCursor();
+		Inventory top = e.getView().getTopInventory();
+		Inventory bottom = e.getView().getBottomInventory();
+		Inventory clickedInventory = e.getClickedInventory();
+		Inventory otherInventory = clickedInventory.equals(top) ? bottom : top;
+		int clickedSlot = e.getSlot();
+
+		if(e.getAction().equals(InventoryAction.MOVE_TO_OTHER_INVENTORY))
+		{
+			ContentManager.transfer(clickedInventory, otherInventory, clickedSlot);
+			ContentManager.addToInventory(otherInventory, is);
+			e.setCancelled(true);
+			// TODO Test
+		}
+
+		if(e.getAction().equals(InventoryAction.COLLECT_TO_CURSOR))
+		{
+
+		}
+
+		if(e.getAction().equals(InventoryAction.PICKUP_ALL) || e.getAction().equals(InventoryAction.PICKUP_ONE) || e.getAction().equals(InventoryAction.PICKUP_HALF) || e.getAction().equals(InventoryAction.PICKUP_SOME))
+		{
+			if(ContentManager.isCustom(cursor))
+			{
+				CustomItem item = ContentManager.getItem(cursor);
+				CustomBlock block = ContentManager.getBlock(cursor);
+
+				if(item != null && block != null)
+				{
+					return;
+				}
+
+				int maxStack = -1;
+
+				if(item != null)
+				{
+					CustomItem tItem = ContentManager.getItem(is);
+
+					if(tItem != null && tItem.getSuperID() == item.getSuperID())
+					{
+						maxStack = tItem.getStackSize();
+					}
+				}
+
+				if(block != null)
+				{
+					CustomBlock tBlock= ContentManager.getBlock(is);
+
+					if(tBlock != null && tBlock.getSuperID() == block.getSuperID())
+					{
+						maxStack = tBlock.getStackSize();
+					}
+				}
+
+				if(maxStack > 0)
+				{
+
+				}
+			}
+		}
+
+		switch(e.getAction())
+		{
+			case PICKUP_ALL:
+			case PICKUP_HALF:
+			case PICKUP_ONE:
+			case PICKUP_SOME:
+				break;
+			case PLACE_ALL:
+			case PLACE_ONE:
+			case PLACE_SOME:
+				break;
+			case SWAP_WITH_CURSOR:
+				break;
+			default:
+				break;
+
+		}
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -382,10 +467,11 @@ public class ContentHandler implements Listener
 			}
 		}
 
-		else if(ContentManager.a().isMetal(e.getBlock().getType()))
-		{
-			ContentManager.getMetalBreakSound().play(e.getBlock().getLocation().clone().add(0.5, 0.5, 0.5));
-		}
+		else
+			if(ContentManager.a().isMetal(e.getBlock().getType()))
+			{
+				ContentManager.getMetalBreakSound().play(e.getBlock().getLocation().clone().add(0.5, 0.5, 0.5));
+			}
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

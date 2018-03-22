@@ -3,10 +3,11 @@ package com.volmit.fulcrum.custom;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Item;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
-
 import com.volmit.fulcrum.Fulcrum;
 import com.volmit.fulcrum.adapter.IAdapter;
 import com.volmit.fulcrum.lang.GList;
@@ -407,5 +408,12 @@ public class ContentManager
 	public static int getUsedCapacity()
 	{
 		return r().ass().getNormalUse();
+	}
+
+	public static void transfer(Inventory clickedInventory, Inventory move, int clickedSlot)
+	{
+		ItemStack is = clickedInventory.getItem(clickedSlot).clone();
+		clickedInventory.setItem(clickedSlot, new ItemStack(Material.AIR));
+		addToInventory(move, is);
 	}
 }
