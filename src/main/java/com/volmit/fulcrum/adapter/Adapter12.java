@@ -1147,10 +1147,16 @@ public final class Adapter12 implements IAdapter
 	}
 
 	@Override
-	public void sendCrack(Block b, double progress)
+	public void sendCrack(Block b, Entity e, double progress)
+	{
+		sendCrack(b, e.getEntityId(), progress);
+	}
+
+	@Override
+	public void sendCrack(Block b, int eid, double progress)
 	{
 		BlockPosition bp = new BlockPosition(b.getX(), b.getY(), b.getZ());
-		PacketPlayOutBlockBreakAnimation bx = new PacketPlayOutBlockBreakAnimation(0, bp, (byte) (progress * 9.0));
+		PacketPlayOutBlockBreakAnimation bx = new PacketPlayOutBlockBreakAnimation(eid, bp, (byte) (progress * 9.0));
 		sendPacket(b.getLocation(), bx);
 	}
 

@@ -12,6 +12,8 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -116,7 +118,7 @@ public class ContentHandler implements Listener
 
 			if(((int) (progress * 9.0)) != ((int) ((progress - inc) * 9.0)))
 			{
-				ContentManager.a().sendCrack(i, M.clip(progress, 0D, 1D));
+				ContentManager.a().sendCrack(i, getBlockPos(i), M.clip(progress, 0D, 1D));
 			}
 
 			if(progress > 1)
@@ -138,10 +140,15 @@ public class ContentHandler implements Listener
 			digging.remove(i);
 			lastDug.remove(i);
 			ContentManager.a().brokedBlock(i);
-			ContentManager.a().sendCrack(i, 100);
+			ContentManager.a().sendCrack(i, getBlockPos(i), 100);
 		}
 
 		stopped.clear();
+	}
+
+	private int getBlockPos(Block b)
+	{
+		return b.getX() + b.getY() + b.getZ();
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

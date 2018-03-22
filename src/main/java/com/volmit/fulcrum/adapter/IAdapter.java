@@ -137,7 +137,9 @@ public interface IAdapter extends Listener
 
 	public double getBreakProgress(Block b);
 
-	public void sendCrack(Block b, double progress);
+	public void sendCrack(Block b, Entity i, double progress);
+
+	public void sendCrack(Block b, int eid, double progress);
 
 	public boolean canPlace(Player player, Block target);
 
