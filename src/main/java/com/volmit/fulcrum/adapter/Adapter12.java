@@ -631,7 +631,39 @@ public final class Adapter12 implements IAdapter
 	@Override
 	public BlockType getBlockAsync(Location l)
 	{
-		return world.get(l);
+		try
+		{
+			BlockType b = world.get(l);
+
+			if(b.getMaterial().equals(Material.MOB_SPAWNER))
+			{
+				try
+				{
+					// FUCKING UNSAFE
+					if(ContentManager.isCustom(l.getBlock()))
+					{
+						CustomBlock cb = ContentManager.getBlock(l.getBlock());
+						b.setCmat(cb.getMaterial());
+						b.setCdur(cb.getDurabilityLock());
+						b.setCustom(true);
+					}
+				}
+
+				catch(Exception e)
+				{
+
+				}
+
+				return b;
+			}
+		}
+
+		catch(Exception e)
+		{
+
+		}
+
+		return new BlockType();
 	}
 
 	@Override

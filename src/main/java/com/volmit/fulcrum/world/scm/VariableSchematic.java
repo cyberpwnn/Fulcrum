@@ -58,7 +58,7 @@ public class VariableSchematic
 				for(int k = 0; k < dimension.getDepth(); k++)
 				{
 					BlockType bt = new BlockType(o.clone().add(i, j, k));
-					set(i, j, k, bt.getMaterial(), bt.getData());
+					set(i, j, k, bt);
 				}
 			}
 		}
@@ -411,6 +411,17 @@ public class VariableSchematic
 	public void set(int x, int y, int z, Material material, Byte data)
 	{
 		schematic[x][y][z] = new VariableBlock(material, data);
+	}
+
+	public void set(int x, int y, int z, Material material, short cdata)
+	{
+		BlockType bt = new BlockType(material, cdata);
+		schematic[x][y][z] = new VariableBlock(bt);
+	}
+
+	public void set(int x, int y, int z, BlockType bt)
+	{
+		schematic[x][y][z] = new VariableBlock(bt);
 	}
 
 	public Dimension getDimension()

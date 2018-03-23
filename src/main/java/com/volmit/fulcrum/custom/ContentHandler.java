@@ -188,7 +188,6 @@ public class ContentHandler implements Listener
 			int left = e.getOldCursor().getAmount();
 			int div = e.getInventorySlots().size();
 			int f = left / div;
-			int r = left % div;
 
 			if(f <= 1)
 			{

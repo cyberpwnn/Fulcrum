@@ -88,6 +88,13 @@ public class SCMVolume implements IVolume
 					{
 						dos.writeUTF(l.getMaterial().name());
 						dos.writeByte(l.getData());
+						dos.writeBoolean(l.isCustom());
+
+						if(l.isCustom())
+						{
+							dos.writeUTF(l.getCmat().name());
+							dos.writeShort(l.getCdur());
+						}
 					}
 				}
 			}
@@ -116,7 +123,16 @@ public class SCMVolume implements IVolume
 					VariableBlock vb = new VariableBlock();
 					for(int l = 0; l < size; l++)
 					{
-						vb.addBlock(new BlockType(Material.valueOf(din.readUTF()), din.readByte()));
+						BlockType bb = new BlockType(Material.valueOf(din.readUTF()), din.readByte());
+
+						if(din.readBoolean())
+						{
+							bb.setCustom(true);
+							bb.setCmat(Material.valueOf(din.readUTF()));
+							bb.setCdur(din.readShort());
+						}
+
+						vb.addBlock(bb);
 					}
 
 					variableSchem.getSchematic()[i][j][k] = vb;

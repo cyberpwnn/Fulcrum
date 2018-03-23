@@ -30,6 +30,7 @@ import com.volmit.fulcrum.bukkit.P;
 import com.volmit.fulcrum.bukkit.ParticleEffect;
 import com.volmit.fulcrum.bukkit.S;
 import com.volmit.fulcrum.bukkit.TICK;
+import com.volmit.fulcrum.bukkit.TaskLater;
 import com.volmit.fulcrum.bukkit.W;
 import com.volmit.fulcrum.event.VolumeConstructEvent;
 import com.volmit.fulcrum.lang.C;
@@ -56,22 +57,29 @@ public class SCMManager implements Listener, CommandExecutor
 
 		File gf = getSCMFolder();
 
-		if(gf.exists())
+		new TaskLater(5)
 		{
-			for(File i : gf.listFiles())
+			@Override
+			public void run()
 			{
-				try
+				if(gf.exists())
 				{
-					IVolume v = new SCMVolume(i);
-					volumes.put(i.getName().replace(".scmv", ""), v);
-				}
+					for(File i : gf.listFiles())
+					{
+						try
+						{
+							IVolume v = new SCMVolume(i);
+							volumes.put(i.getName().replace(".scmv", ""), v);
+						}
 
-				catch(IOException e)
-				{
-					e.printStackTrace();
+						catch(IOException e)
+						{
+							e.printStackTrace();
+						}
+					}
 				}
 			}
-		}
+		};
 	}
 
 	@Override
