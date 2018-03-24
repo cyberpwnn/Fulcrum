@@ -44,9 +44,10 @@ public class CustomSound implements ICustom
 		this.inst = inst;
 	}
 
-	public void addSound(String resource)
+	public CustomSound addSound(String resource)
 	{
 		getSoundPaths().put(resource + ".ogg", R.getURL(inst.getClass(), "/assets/sounds/" + resource + ".ogg"));
+		return this;
 	}
 
 	public void addSound(String packLocation, String resource)

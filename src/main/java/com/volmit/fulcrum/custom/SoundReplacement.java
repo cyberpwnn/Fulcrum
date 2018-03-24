@@ -1,24 +1,16 @@
 package com.volmit.fulcrum.custom;
 
-import java.net.URL;
-
-import org.bukkit.plugin.Plugin;
-
-import com.volmit.fulcrum.bukkit.R;
-
 public class SoundReplacement
 {
 	private String node;
 	private String replacement;
-	private String newSound;
-	private URL ns;
+	private CustomSound newSound;
 
-	public SoundReplacement(Plugin plugin, String node, String newSound)
+	public SoundReplacement(String node, CustomSound newSound)
 	{
 		this.node = node;
 		replacement = "m." + node;
 		this.newSound = newSound;
-		ns = R.getURL(plugin.getClass(), "/assets/sounds/" + newSound + ".ogg");
 	}
 
 	public String getNode()
@@ -41,23 +33,13 @@ public class SoundReplacement
 		this.replacement = replacement;
 	}
 
-	public String getNewSound()
+	public CustomSound getNewSound()
 	{
 		return newSound;
 	}
 
-	public void setNewSound(String newSound)
+	public void setNewSound(CustomSound newSound)
 	{
 		this.newSound = newSound;
-	}
-
-	public URL getNs()
-	{
-		return ns;
-	}
-
-	public void setNs(URL ns)
-	{
-		this.ns = ns;
 	}
 }

@@ -13,6 +13,9 @@ import java.util.regex.Matcher;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import com.googlecode.pngtastic.core.PngImage;
+import com.googlecode.pngtastic.core.PngOptimizer;
+import com.volmit.dumpster.F;
 import com.volmit.dumpster.GList;
 import com.volmit.dumpster.GMap;
 import com.volmit.dumpster.M;
@@ -20,6 +23,7 @@ import com.volmit.fulcrum.Fulcrum;
 
 public class ResourcePack
 {
+	private long totalSaved = 0;
 	private final PackMeta meta;
 	private GMap<String, URL> copyResources;
 	private GMap<String, String> writeResources;
@@ -144,6 +148,7 @@ public class ResourcePack
 
 	public void writeToFolder(File f) throws IOException
 	{
+		totalSaved = 0;
 		writePackContent(new File(f, "pack.mcmeta"), getMeta().toString());
 		writeResourceToFile(getMeta().getPackIcon(), new File(f, "pack.png"));
 
@@ -160,6 +165,8 @@ public class ResourcePack
 			destination.getParentFile().mkdirs();
 			writePackContent(destination, writeResources.get(i));
 		}
+
+		System.out.println("Saved a total of " + F.ofSize(totalSaved, 1024, 2));
 	}
 
 	private void writeResourceToFile(URL url, File f) throws IOException
@@ -184,13 +191,29 @@ public class ResourcePack
 
 			fos.close();
 			in.close();
+
+			if(f.getName().endsWith(".png"))
+			{
+				optimizePNG(f);
+			}
 		}
 
 		catch(Exception e)
 		{
+			e.printStackTrace();
 			System.out.println("FAILED TO PACK RESOURCE: " + e.getMessage());
 		}
+	}
 
+	private void optimizePNG(File f) throws IOException
+	{
+		PngOptimizer o = new PngOptimizer();
+		PngImage img = new PngImage(f.getPath(), "NONE");
+		o.setCompressor("zopfli", 32);
+		o.optimize(img, f.getPath(), true, 9);
+		long sa = o.getTotalSavings();
+		System.out.println("Optimized " + f.getName() + " (saved " + F.fileSize(sa) + ")");
+		totalSaved += sa;
 	}
 
 	private void writePackContent(File m, String content) throws IOException

@@ -25,9 +25,11 @@ import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.ShapelessRecipe;
 
 import com.google.common.io.Files;
+import com.volmit.dumpster.CNum;
 import com.volmit.dumpster.F;
 import com.volmit.dumpster.GList;
 import com.volmit.dumpster.GMap;
+import com.volmit.dumpster.GSet;
 import com.volmit.dumpster.JSONArray;
 import com.volmit.dumpster.JSONException;
 import com.volmit.dumpster.JSONObject;
@@ -79,6 +81,7 @@ public class ContentRegistry implements Listener
 	private GList<CustomInventory> inventories;
 	private GList<CustomSound> sounds;
 	private GList<CustomItem> items;
+	private GList<SoundReplacement> soundReplacements;
 	private GList<ICustomRecipe> recipes;
 	private GMap<Integer, CustomBlock> superBlocks;
 	private GMap<Integer, CustomItem> superItems;
@@ -92,18 +95,23 @@ public class ContentRegistry implements Listener
 		superBlocks = new GMap<Integer, CustomBlock>();
 		superItems = new GMap<Integer, CustomItem>();
 		superInventories = new GMap<Integer, CustomInventory>();
-
 		inventories = new GList<CustomInventory>();
 		sounds = new GList<CustomSound>();
 		items = new GList<CustomItem>();
 		blocks = new GList<CustomBlock>();
 		recipes = new GList<ICustomRecipe>();
+		soundReplacements = new GList<SoundReplacement>();
 		Fulcrum.register(this);
 	}
 
 	public void registerRecipe(ICustomRecipe r)
 	{
 		recipes.add(r);
+	}
+
+	public void registerSoundReplacement(SoundReplacement s)
+	{
+		soundReplacements.add(s);
 	}
 
 	public void registerSound(CustomSound s)
@@ -151,7 +159,7 @@ public class ContentRegistry implements Listener
 		System.out.println("Blocks: " + F.f(blocks.size()));
 		System.out.println("Sounds: " + F.f(sounds.size()));
 		System.out.println("Inventories: " + F.f(inventories.size()));
-		System.out.println(F.f(pack.size()) + " Resources compiled in " + F.time(pr.getMilliseconds(), 0));
+		System.out.println(F.f(pack.size()) + " Resources compiled in " + F.time(pr.getMilliseconds(), 2));
 	}
 
 	private void mergeResources() throws IOException, NoSuchAlgorithmException
@@ -344,78 +352,58 @@ public class ContentRegistry implements Listener
 	{
 		JSONObject desound = new JSONObject(read(defaultSounds));
 		JSONObject soundx = new JSONObject();
+		CustomSound soundSilent = new CustomSound("f.s").addSound("fulcrum/silent");
+		CustomSound soundBell = new CustomSound("f.b").addSound("fulcrum/bell");
+		CustomSound soundIn = new CustomSound("f.i").addSound("fulcrum/woosh");
+		CustomSound soundOut = new CustomSound("f.o").addSound("fulcrum/hide");
+		registerSoundReplacement(new SoundReplacement("block.metal.step", soundSilent));
+		registerSoundReplacement(new SoundReplacement("block.metal.break", soundSilent));
+		registerSoundReplacement(new SoundReplacement("block.metal.fall", soundSilent));
+		registerSoundReplacement(new SoundReplacement("block.metal.hit", soundSilent));
+		registerSoundReplacement(new SoundReplacement("block.metal.place", soundSilent));
+		registerSoundReplacement(new SoundReplacement("item.hoe.till", soundSilent));
+		registerSoundReplacement(new SoundReplacement("entity.item.pickup", soundSilent));
+		registerSoundReplacement(new SoundReplacement("item.hoe.till", soundSilent));
+		registerSoundReplacement(new SoundReplacement("ui.toast.challenge_complete", soundBell));
+		registerSoundReplacement(new SoundReplacement("ui.toast.in", soundIn));
+		registerSoundReplacement(new SoundReplacement("ui.toast.out", soundOut));
+
 		System.out.println("Reading " + F.f(desound.keySet().size()) + " default sound entries");
+		System.out.println("Processing " + F.f(soundReplacements.size()) + " sound replacements");
+		GSet<String> ffv = new GSet<String>(desound.keySet());
 
-		for(String i : desound.keySet())
+		for(String i : ffv)
 		{
-			if(i.startsWith("block.metal.") && (i.endsWith(".step") || i.endsWith(".break") || i.endsWith(".fall") || i.endsWith("hit") || i.endsWith(".place")))
+			for(SoundReplacement j : soundReplacements)
 			{
-				JSONObject mod = new JSONObject(desound.getJSONObject(i).toString());
-				JSONObject old = new JSONObject(desound.getJSONObject(i).toString());
-				mod.put("sounds", new JSONArray("[" + F.repeat("\"fulcrum/silent\",", 5000) + "]"));
-				soundx.put(i.replace("block.", "m.block."), old);
-				soundx.put(i, mod);
-				System.out.println("  Remapped Sound " + i.replace("block.", "m.block."));
-			}
+				if(j.getNode().equals(i))
+				{
+					JSONObject mod = new JSONObject(desound.getJSONObject(i).toString());
+					JSONObject old = new JSONObject(desound.getJSONObject(i).toString());
+					GList<String> keys = j.getNewSound().getSoundPaths().k();
+					String d = "[";
+					CNum c = new CNum(keys.size() - 1);
 
-			if(i.equalsIgnoreCase("item.hoe.till"))
-			{
-				JSONObject mod = new JSONObject(desound.getJSONObject(i).toString());
-				JSONObject old = new JSONObject(desound.getJSONObject(i).toString());
-				mod.put("sounds", new JSONArray("[" + F.repeat("\"fulcrum/silent\",", 5000) + "]"));
-				soundx.put("m.item.hoe.till", old);
-				soundx.put(i, mod);
-				System.out.println("  Remapped Sound " + "m.item.hoe.till");
-			}
+					for(int k = 0; k < 2500; k++)
+					{
+						if(c.getMax() == 0)
+						{
+							d += "\"" + keys.get(0).replace(".ogg", "") + "\",";
+						}
 
-			if(i.equalsIgnoreCase("entity.item.pickup"))
-			{
-				JSONObject mod = new JSONObject(desound.getJSONObject(i).toString());
-				JSONObject old = new JSONObject(desound.getJSONObject(i).toString());
-				mod.put("sounds", new JSONArray("[" + F.repeat("\"fulcrum/silent\",", 5000) + "]"));
-				soundx.put("m.entity.item.pickup", old);
-				soundx.put(i, mod);
-				System.out.println("  Remapped Sound " + "m.entity.item.pickup");
-			}
+						else
+						{
+							c.add(1);
+							d += "\"" + keys.get(c.get()).replace(".ogg", "") + "\",";
+						}
+					}
 
-			if(i.equalsIgnoreCase("item.armor.equip_leather"))
-			{
-				JSONObject mod = new JSONObject(desound.getJSONObject(i).toString());
-				JSONObject old = new JSONObject(desound.getJSONObject(i).toString());
-				mod.put("sounds", new JSONArray("[" + F.repeat("\"fulcrum/silent\",", 5000) + "]"));
-				soundx.put("m.item.armor.equip_leather", old);
-				soundx.put(i, mod);
-				System.out.println("  Remapped Sound " + "m.item.armor.equip_leather");
-			}
-
-			if(i.equalsIgnoreCase("ui.toast.challenge_complete"))
-			{
-				JSONObject mod = new JSONObject(desound.getJSONObject(i).toString());
-				JSONObject old = new JSONObject(desound.getJSONObject(i).toString());
-				mod.put("sounds", new JSONArray("[" + F.repeat("\"fulcrum/bell\",", 5000) + "]"));
-				soundx.put("m.ui.toast.challenge_complete", old);
-				soundx.put(i, mod);
-				System.out.println("  Remapped Sound " + "m.ui.toast.challenge_complete");
-			}
-
-			if(i.equalsIgnoreCase("ui.toast.in"))
-			{
-				JSONObject mod = new JSONObject(desound.getJSONObject(i).toString());
-				JSONObject old = new JSONObject(desound.getJSONObject(i).toString());
-				mod.put("sounds", new JSONArray("[" + F.repeat("\"fulcrum/woosh\",", 5000) + "]"));
-				soundx.put("m.ui.toast.in", old);
-				soundx.put(i, mod);
-				System.out.println("  Remapped Sound " + "m.ui.toast.in");
-			}
-
-			if(i.equalsIgnoreCase("ui.toast.out"))
-			{
-				JSONObject mod = new JSONObject(desound.getJSONObject(i).toString());
-				JSONObject old = new JSONObject(desound.getJSONObject(i).toString());
-				mod.put("sounds", new JSONArray("[" + F.repeat("\"fulcrum/hide\",", 5000) + "]"));
-				soundx.put("m.ui.toast.out", old);
-				soundx.put(i, mod);
-				System.out.println("  Remapped Sound " + "m.ui.toast.out");
+					d = d.substring(0, d.length() - 1) + "]";
+					mod.put("sounds", new JSONArray(d));
+					soundx.put(j.getReplacement(), old);
+					soundx.put(i, mod);
+					System.out.println("  Remapped Sound " + j.getNode() + " -> " + j.getReplacement());
+				}
 			}
 		}
 
