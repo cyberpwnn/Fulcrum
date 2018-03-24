@@ -9,7 +9,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.block.Action;
 import org.bukkit.util.Vector;
 
-import com.volmit.fulcrum.lang.GList;
+import com.volmit.dumpster.GList;
 import com.volmit.fulcrum.world.scm.IMappedVolume;
 import com.volmit.fulcrum.world.scm.IVolume;
 

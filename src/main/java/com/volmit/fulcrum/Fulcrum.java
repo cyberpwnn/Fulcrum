@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.command.Command;
@@ -15,8 +16,11 @@ import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.volmit.dumpster.GList;
+import com.volmit.dumpster.M;
 import com.volmit.fulcrum.adapter.Adapter12;
 import com.volmit.fulcrum.adapter.IAdapter;
 import com.volmit.fulcrum.bukkit.A;
@@ -33,7 +37,7 @@ import com.volmit.fulcrum.custom.CustomItem;
 import com.volmit.fulcrum.custom.CustomSound;
 import com.volmit.fulcrum.event.ContentRecipeRegistryEvent;
 import com.volmit.fulcrum.event.ContentRegistryEvent;
-import com.volmit.fulcrum.lang.M;
+import com.volmit.fulcrum.lang.C;
 import com.volmit.fulcrum.net.NetworkManager;
 import com.volmit.fulcrum.webserver.ShittyWebserver;
 import com.volmit.fulcrum.world.FastBlock;
@@ -69,6 +73,7 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 		contentHandler = new ContentHandler();
 		server = new ShittyWebserver(8193, new File(getDataFolder(), "web"));
 		icd = 10;
+
 		try
 		{
 			server.start();
@@ -207,6 +212,27 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 				else if(args[0].equalsIgnoreCase("dur"))
 				{
 					p.sendMessage(p.getItemInHand().getDurability() + " dur dur");
+				}
+
+				else if(args[0].equalsIgnoreCase("adv"))
+				{
+					adapter.sendAdvancement((Player) sender, new ItemStack(Material.APPLE), "Testing?");
+				}
+
+				else if(args[0].equalsIgnoreCase("qadv"))
+				{
+					new Task(0, 400)
+					{
+
+						@Override
+						public void run()
+						{
+							if(M.r(0.024))
+							{
+								adapter.sendAdvancement((Player) sender, new ItemStack(new GList<Material>(Material.values()).pickRandom()), C.UNDERLINE + "Notification Test\nAllows up to\n" + C.GREEN + "Three Lines im sure" + C.MAGIC + ".");
+							}
+						}
+					};
 				}
 
 				else if(args[0].equalsIgnoreCase("pull"))

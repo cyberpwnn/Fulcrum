@@ -8,7 +8,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.ParseException;
 
-import com.volmit.fulcrum.lang.JSONObject;
+import com.volmit.dumpster.JSONObject;
 
 /**
  * Paste to the web

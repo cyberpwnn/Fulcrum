@@ -1,10 +1,10 @@
 package com.volmit.fulcrum.bukkit;
 
-import com.volmit.fulcrum.lang.Timer;
+import com.volmit.dumpster.Timer;
 
 /**
  * Quick timer
- * 
+ *
  * @author cyberpwn
  */
 public abstract class T extends Timer
@@ -17,22 +17,22 @@ public abstract class T extends Timer
 		super();
 		start();
 	}
-	
+
 	/**
 	 * Called when the timer has been stopped
-	 * 
+	 *
 	 * @param nsTime
 	 *            the long time in nanoseconds
 	 * @param msTime
 	 *            the double time in milliseconds
 	 */
 	public abstract void onStop(long nsTime, double msTime);
-	
+
 	@Override
 	public void stop()
 	{
 		super.stop();
-		
+
 		onStop(getTime(), ((double) getTime() / 1000000.0));
 	}
 }

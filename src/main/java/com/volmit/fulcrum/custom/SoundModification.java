@@ -1,6 +1,6 @@
 package com.volmit.fulcrum.custom;
 
-import com.volmit.fulcrum.lang.JSONObject;
+import com.volmit.dumpster.JSONObject;
 
 public interface SoundModification
 {

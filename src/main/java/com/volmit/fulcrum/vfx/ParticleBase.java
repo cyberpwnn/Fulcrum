@@ -3,7 +3,7 @@ package com.volmit.fulcrum.vfx;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-import com.volmit.fulcrum.lang.GList;
+import com.volmit.dumpster.GList;
 
 public abstract class ParticleBase implements VisualEffect
 {
@@ -12,7 +12,7 @@ public abstract class ParticleBase implements VisualEffect
 
 	@Override
 	public abstract void play(Location l, Player p);
-	
+
 	@Override
 	public void play(Location l)
 	{

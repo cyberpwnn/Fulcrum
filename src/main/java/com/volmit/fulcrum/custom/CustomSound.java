@@ -2,10 +2,10 @@ package com.volmit.fulcrum.custom;
 
 import java.net.URL;
 
+import com.volmit.dumpster.GMap;
+import com.volmit.dumpster.JSONArray;
+import com.volmit.dumpster.JSONObject;
 import com.volmit.fulcrum.bukkit.R;
-import com.volmit.fulcrum.lang.GMap;
-import com.volmit.fulcrum.lang.JSONArray;
-import com.volmit.fulcrum.lang.JSONObject;
 
 public class CustomSound implements ICustom
 {

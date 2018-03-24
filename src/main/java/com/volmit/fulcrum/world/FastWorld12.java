@@ -46,9 +46,9 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Consumer;
 import org.bukkit.util.Vector;
 
+import com.volmit.dumpster.GList;
 import com.volmit.fulcrum.Fulcrum;
 import com.volmit.fulcrum.data.cluster.DataCluster;
-import com.volmit.fulcrum.lang.GList;
 
 @SuppressWarnings("deprecation")
 public class FastWorld12 implements FastWorld, Listener

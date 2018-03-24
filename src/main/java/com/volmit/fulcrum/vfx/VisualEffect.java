@@ -3,7 +3,7 @@ package com.volmit.fulcrum.vfx;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-import com.volmit.fulcrum.lang.GList;
+import com.volmit.dumpster.GList;
 
 public interface VisualEffect
 {

@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.volmit</groupId>
 	<artifactId>Fulcrum</artifactId>
-	<version>E2</version>
+	<version>E3</version>
 	<name>Fulcrum</name>
 	<properties>
 		<project.author>cyberpwn</project.author>
@@ -142,6 +142,11 @@
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-util</artifactId>
 			<version>9.4.8.v20171121</version>
+		</dependency>
+		<dependency>
+			<groupId>com.volmit</groupId>
+			<artifactId>Dumpster</artifactId>
+			<version>1.0</version>
 		</dependency>
 	</dependencies>
 </project>

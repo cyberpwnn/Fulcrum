@@ -21,11 +21,11 @@ import org.bukkit.entity.ItemFrame;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.map.MapRenderer;
 
-import com.volmit.fulcrum.lang.F;
-import com.volmit.fulcrum.lang.GList;
-import com.volmit.fulcrum.lang.GMap;
-import com.volmit.fulcrum.lang.GSet;
-import com.volmit.fulcrum.lang.M;
+import com.volmit.dumpster.F;
+import com.volmit.dumpster.GList;
+import com.volmit.dumpster.GMap;
+import com.volmit.dumpster.GSet;
+import com.volmit.dumpster.M;
 import com.volmit.fulcrum.map.BakedImageRenderer;
 import com.volmit.fulcrum.map.Papyrus;
 import com.volmit.fulcrum.vfx.particle.ParticleSuspended;

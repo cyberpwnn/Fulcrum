@@ -13,10 +13,10 @@ import java.util.regex.Matcher;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import com.volmit.dumpster.GList;
+import com.volmit.dumpster.GMap;
+import com.volmit.dumpster.M;
 import com.volmit.fulcrum.Fulcrum;
-import com.volmit.fulcrum.lang.GList;
-import com.volmit.fulcrum.lang.GMap;
-import com.volmit.fulcrum.lang.M;
 
 public class ResourcePack
 {

@@ -25,19 +25,19 @@ import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.ShapelessRecipe;
 
 import com.google.common.io.Files;
+import com.volmit.dumpster.F;
+import com.volmit.dumpster.GList;
+import com.volmit.dumpster.GMap;
+import com.volmit.dumpster.JSONArray;
+import com.volmit.dumpster.JSONException;
+import com.volmit.dumpster.JSONObject;
+import com.volmit.dumpster.Profiler;
 import com.volmit.fulcrum.Fulcrum;
 import com.volmit.fulcrum.bukkit.P;
 import com.volmit.fulcrum.bukkit.R;
 import com.volmit.fulcrum.bukkit.TaskLater;
 import com.volmit.fulcrum.event.ContentRecipeRegistryEvent;
 import com.volmit.fulcrum.event.ContentRegistryEvent;
-import com.volmit.fulcrum.lang.F;
-import com.volmit.fulcrum.lang.GList;
-import com.volmit.fulcrum.lang.GMap;
-import com.volmit.fulcrum.lang.JSONArray;
-import com.volmit.fulcrum.lang.JSONException;
-import com.volmit.fulcrum.lang.JSONObject;
-import com.volmit.fulcrum.lang.Profiler;
 import com.volmit.fulcrum.resourcepack.ResourcePack;
 
 public class ContentRegistry implements Listener
@@ -62,6 +62,9 @@ public class ContentRegistry implements Listener
 	private URL missingTexture;
 	private URL defaultSounds;
 	private URL newSpawner;
+	private URL soundHide;
+	private URL soundBell;
+	private URL soundWoosh;
 	private URL soundSilent;
 	private String defaultInventoryContentTop;
 	private String defaultInventoryContentBottom;
@@ -274,7 +277,10 @@ public class ContentRegistry implements Listener
 	private void loadResources() throws IOException
 	{
 		pack = new ResourcePack();
+		soundHide = R.getURL("/assets/sounds/fulcrum/hide.ogg");
 		soundSilent = R.getURL("/assets/sounds/fulcrum/silent.ogg");
+		soundWoosh = R.getURL("/assets/sounds/fulcrum/woosh.ogg");
+		soundBell = R.getURL("/assets/sounds/fulcrum/bell.ogg");
 		defaultSounds = R.getURL("/assets/sounds-default.json");
 		inventoryTop = R.getURL("/assets/models/inventory/fulcrum_top.json");
 		inventoryBottom = R.getURL("/assets/models/inventory/fulcrum_bottom.json");
@@ -317,7 +323,10 @@ public class ContentRegistry implements Listener
 		blocks.removeDuplicates();
 		inventories.removeDuplicates();
 		items.removeDuplicates();
+		pack.setResource("sounds/fulcrum/woosh.ogg", soundWoosh);
+		pack.setResource("sounds/fulcrum/hide.ogg", soundHide);
 		pack.setResource("sounds/fulcrum/silent.ogg", soundSilent);
+		pack.setResource("sounds/fulcrum/bell.ogg", soundBell);
 		pack.setResource("models/inventory/fulcrum_top.json", new JSONObject(read(inventoryTop)).toString());
 		pack.setResource("models/inventory/fulcrum_bottom.json", new JSONObject(read(inventoryBottom)).toString());
 		pack.setResource("models/block/fulcrum_cube.json", new JSONObject(read(cube)).toString());
@@ -377,6 +386,36 @@ public class ContentRegistry implements Listener
 				soundx.put("m.item.armor.equip_leather", old);
 				soundx.put(i, mod);
 				System.out.println("  Remapped Sound " + "m.item.armor.equip_leather");
+			}
+
+			if(i.equalsIgnoreCase("ui.toast.challenge_complete"))
+			{
+				JSONObject mod = new JSONObject(desound.getJSONObject(i).toString());
+				JSONObject old = new JSONObject(desound.getJSONObject(i).toString());
+				mod.put("sounds", new JSONArray("[" + F.repeat("\"fulcrum/bell\",", 5000) + "]"));
+				soundx.put("m.ui.toast.challenge_complete", old);
+				soundx.put(i, mod);
+				System.out.println("  Remapped Sound " + "m.ui.toast.challenge_complete");
+			}
+
+			if(i.equalsIgnoreCase("ui.toast.in"))
+			{
+				JSONObject mod = new JSONObject(desound.getJSONObject(i).toString());
+				JSONObject old = new JSONObject(desound.getJSONObject(i).toString());
+				mod.put("sounds", new JSONArray("[" + F.repeat("\"fulcrum/woosh\",", 5000) + "]"));
+				soundx.put("m.ui.toast.in", old);
+				soundx.put(i, mod);
+				System.out.println("  Remapped Sound " + "m.ui.toast.in");
+			}
+
+			if(i.equalsIgnoreCase("ui.toast.out"))
+			{
+				JSONObject mod = new JSONObject(desound.getJSONObject(i).toString());
+				JSONObject old = new JSONObject(desound.getJSONObject(i).toString());
+				mod.put("sounds", new JSONArray("[" + F.repeat("\"fulcrum/hide\",", 5000) + "]"));
+				soundx.put("m.ui.toast.out", old);
+				soundx.put(i, mod);
+				System.out.println("  Remapped Sound " + "m.ui.toast.out");
 			}
 		}
 

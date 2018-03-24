@@ -4,12 +4,12 @@ import org.bukkit.Location;
 import org.bukkit.material.Stairs;
 import org.bukkit.util.Vector;
 
+import com.volmit.dumpster.GList;
+import com.volmit.dumpster.GMap;
 import com.volmit.fulcrum.bukkit.Axis;
 import com.volmit.fulcrum.bukkit.BlockType;
 import com.volmit.fulcrum.bukkit.Direction;
 import com.volmit.fulcrum.bukkit.VectorMath;
-import com.volmit.fulcrum.lang.GList;
-import com.volmit.fulcrum.lang.GMap;
 
 /**
  * Vector schematics

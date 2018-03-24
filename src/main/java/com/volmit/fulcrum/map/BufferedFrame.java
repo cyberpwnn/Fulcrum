@@ -8,7 +8,7 @@ import java.awt.image.BufferedImage;
 import org.bukkit.map.MapFont;
 import org.bukkit.map.MapFont.CharacterSprite;
 
-import com.volmit.fulcrum.lang.M;
+import com.volmit.dumpster.M;
 
 public class BufferedFrame
 {

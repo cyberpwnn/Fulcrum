@@ -3,8 +3,8 @@ package com.volmit.fulcrum.data.cluster;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
-import com.volmit.fulcrum.lang.GList;
-import com.volmit.fulcrum.lang.GMap;
+import com.volmit.dumpster.GList;
+import com.volmit.dumpster.GMap;
 
 public class DataCluster
 {

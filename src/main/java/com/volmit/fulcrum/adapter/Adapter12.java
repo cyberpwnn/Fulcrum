@@ -49,6 +49,11 @@ import org.bukkit.util.Vector;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
+import com.volmit.dumpster.F;
+import com.volmit.dumpster.GList;
+import com.volmit.dumpster.GMap;
+import com.volmit.dumpster.GSet;
+import com.volmit.dumpster.M;
 import com.volmit.fulcrum.Fulcrum;
 import com.volmit.fulcrum.bukkit.A;
 import com.volmit.fulcrum.bukkit.Base64;
@@ -58,14 +63,11 @@ import com.volmit.fulcrum.bukkit.PE;
 import com.volmit.fulcrum.bukkit.S;
 import com.volmit.fulcrum.bukkit.Task;
 import com.volmit.fulcrum.bukkit.TaskLater;
+import com.volmit.fulcrum.custom.AdvancementManager;
+import com.volmit.fulcrum.custom.AdvancementManager.FrameType;
 import com.volmit.fulcrum.custom.ContentManager;
 import com.volmit.fulcrum.custom.CustomBlock;
 import com.volmit.fulcrum.lang.C;
-import com.volmit.fulcrum.lang.F;
-import com.volmit.fulcrum.lang.GList;
-import com.volmit.fulcrum.lang.GMap;
-import com.volmit.fulcrum.lang.GSet;
-import com.volmit.fulcrum.lang.M;
 import com.volmit.fulcrum.resourcepack.ResourcePack;
 import com.volmit.fulcrum.world.scm.GhostWorld;
 
@@ -949,15 +951,22 @@ public final class Adapter12 implements IAdapter
 					p.removePotionEffect(PotionEffectType.SLOW);
 					p.removePotionEffect(PotionEffectType.SLOW_DIGGING);
 
-					if(!fa[0])
+					new TaskLater(20)
 					{
-						p.sendTitle("    ", C.GREEN + "Resources Loaded", 2, 20, 5);
-					}
+						@Override
+						public void run()
+						{
+							if(!fa[0])
+							{
+								sendAdvancement(p, new ItemStack(Material.NETHER_STAR), C.GREEN + "Resources Loaded");
+							}
 
-					else
-					{
-						p.sendTitle("    ", C.RED + "Resources Failed to Load", 2, 20, 5);
-					}
+							else
+							{
+								p.sendTitle("    ", C.RED + "Resources Failed to Load", 2, 20, 5);
+							}
+						}
+					};
 
 					p.setFlying(f);
 					p.setAllowFlight(faf);
@@ -971,8 +980,7 @@ public final class Adapter12 implements IAdapter
 				p.teleport(lx);
 			}
 		};
-
-		p.sendTitle(C.GRAY + "Please Wait", C.GRAY + "Applying Resources " + C.WHITE + (int) (Math.random() * 30) + "%", 0, 100000, 100);
+		sendAdvancement(p, new ItemStack(Material.FIREBALL), C.GREEN + "Loading Resources");
 
 		new TaskLater(20)
 		{
@@ -989,14 +997,12 @@ public final class Adapter12 implements IAdapter
 						{
 							if(e.getStatus().equals(Status.ACCEPTED))
 							{
-								p.sendTitle(C.GRAY + "Please Wait", C.GRAY + "Applying Resources " + C.WHITE + (30 + (int) (Math.random() * 30)) + "%", 0, 100000, 100);
-
 								new TaskLater(20)
 								{
 									@Override
 									public void run()
 									{
-										p.sendTitle(C.GRAY + "Please Wait", C.GRAY + "Applying Resources " + C.WHITE + (60 + (int) (Math.random() * 30)) + "%", 0, 100000, 100);
+
 									}
 								};
 							}
@@ -1023,7 +1029,6 @@ public final class Adapter12 implements IAdapter
 							if(e.getStatus().equals(Status.SUCCESSFULLY_LOADED))
 							{
 								Fulcrum.unregister(this);
-								p.sendTitle(C.GRAY + "Please Wait", C.GRAY + "Applying Resources " + C.WHITE + "95%", 0, 100000, 100);
 
 								new TaskLater(5)
 								{
@@ -1031,6 +1036,7 @@ public final class Adapter12 implements IAdapter
 									public void run()
 									{
 										fx[0] = true;
+										fa[0] = false;
 									}
 								};
 							}
@@ -1241,5 +1247,30 @@ public final class Adapter12 implements IAdapter
 		}
 
 		return true;
+	}
+
+	@Override
+	public void sendAdvancement(Player p, ItemStack is, String text)
+	{
+		AdvancementManager a = new AdvancementManager(UUID.randomUUID().toString());
+		a.withToast(true);
+		a.withDescription("Go away");
+		a.withFrame(FrameType.CHALLANGE);
+		a.withAnnouncement(false);
+		a.withTitle(text);
+		a.withTrigger("minecraft:impossible");
+		a.withIcon(is.getData());
+		a.withBackground("minecraft:textures/blocks/bedrock.png");
+		a.loadAdvancement();
+		a.sendPlayer(p);
+
+		new TaskLater(5)
+		{
+			@Override
+			public void run()
+			{
+				a.delete(p);
+			}
+		};
 	}
 }

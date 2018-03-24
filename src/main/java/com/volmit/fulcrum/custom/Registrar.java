@@ -1,6 +1,6 @@
 package com.volmit.fulcrum.custom;
 
-import com.volmit.fulcrum.lang.GList;
+import com.volmit.dumpster.GList;
 
 public class Registrar
 {

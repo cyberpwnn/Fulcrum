@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import com.volmit.fulcrum.lang.GList;
+import com.volmit.dumpster.GList;
 
 public class RAWStorageMedium implements IStorageMethod<ByteBuffer>
 {

@@ -1,7 +1,7 @@
 package com.volmit.fulcrum.event;
 
+import com.volmit.dumpster.GList;
 import com.volmit.fulcrum.custom.ICustomRecipe;
-import com.volmit.fulcrum.lang.GList;
 
 public class ContentRecipeRegistryEvent extends FulcrumEvent
 {

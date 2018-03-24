@@ -7,10 +7,10 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
+import com.volmit.dumpster.M;
 import com.volmit.fulcrum.bukkit.Items;
 import com.volmit.fulcrum.entity.FulcrumPet;
 import com.volmit.fulcrum.entity.Pet;
-import com.volmit.fulcrum.lang.M;
 import com.volmit.fulcrum.sfx.Audio;
 import com.volmit.fulcrum.vfx.particle.ParticleVillagerEmote;
 

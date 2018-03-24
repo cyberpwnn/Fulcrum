@@ -2,8 +2,8 @@ package com.volmit.fulcrum.world.scm;
 
 import org.bukkit.Material;
 
+import com.volmit.dumpster.GList;
 import com.volmit.fulcrum.bukkit.BlockType;
-import com.volmit.fulcrum.lang.GList;
 
 /**
  * Represents a block that can be multiple blocks (used for variable schematics)

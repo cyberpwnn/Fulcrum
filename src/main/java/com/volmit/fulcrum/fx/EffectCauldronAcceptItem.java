@@ -7,7 +7,7 @@ import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.entity.Player;
 
-import com.volmit.fulcrum.lang.M;
+import com.volmit.dumpster.M;
 import com.volmit.fulcrum.sfx.Audible;
 import com.volmit.fulcrum.sfx.Audio;
 import com.volmit.fulcrum.vfx.particle.ParticleSpellMob;

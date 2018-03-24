@@ -3,7 +3,7 @@ package com.volmit.fulcrum.map;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.map.MapView;
 
-import com.volmit.fulcrum.lang.GList;
+import com.volmit.dumpster.GList;
 
 public interface IPapyrus
 {

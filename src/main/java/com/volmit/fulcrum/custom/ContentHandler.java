@@ -24,6 +24,9 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+import com.volmit.dumpster.GList;
+import com.volmit.dumpster.GMap;
+import com.volmit.dumpster.M;
 import com.volmit.fulcrum.Fulcrum;
 import com.volmit.fulcrum.bukkit.P;
 import com.volmit.fulcrum.bukkit.TICK;
@@ -33,9 +36,6 @@ import com.volmit.fulcrum.event.CustomBlockPlaceEvent;
 import com.volmit.fulcrum.event.PlayerCancelledDiggingEvent;
 import com.volmit.fulcrum.event.PlayerFinishedDiggingEvent;
 import com.volmit.fulcrum.event.PlayerStartDiggingEvent;
-import com.volmit.fulcrum.lang.GList;
-import com.volmit.fulcrum.lang.GMap;
-import com.volmit.fulcrum.lang.M;
 import com.volmit.fulcrum.sfx.Audible;
 import com.volmit.fulcrum.sfx.Audio;
 

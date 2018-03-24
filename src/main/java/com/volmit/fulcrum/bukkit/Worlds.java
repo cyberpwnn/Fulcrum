@@ -3,7 +3,7 @@ package com.volmit.fulcrum.bukkit;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 
-import com.volmit.fulcrum.lang.GList;
+import com.volmit.dumpster.GList;
 
 /**
  * World utils

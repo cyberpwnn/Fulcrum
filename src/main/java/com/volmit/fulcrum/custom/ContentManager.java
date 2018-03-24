@@ -9,9 +9,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+import com.volmit.dumpster.GList;
 import com.volmit.fulcrum.Fulcrum;
 import com.volmit.fulcrum.adapter.IAdapter;
-import com.volmit.fulcrum.lang.GList;
 import com.volmit.fulcrum.sfx.Audible;
 import com.volmit.fulcrum.sfx.Audio;
 

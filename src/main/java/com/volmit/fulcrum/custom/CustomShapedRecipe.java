@@ -4,8 +4,8 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 
+import com.volmit.dumpster.GMap;
 import com.volmit.fulcrum.bukkit.BlockType;
-import com.volmit.fulcrum.lang.GMap;
 
 public class CustomShapedRecipe implements ICustomRecipe
 {

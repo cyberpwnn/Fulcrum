@@ -6,10 +6,10 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.util.Vector;
 
-import com.volmit.fulcrum.lang.CDou;
-import com.volmit.fulcrum.lang.F;
-import com.volmit.fulcrum.lang.GList;
-import com.volmit.fulcrum.lang.GListAdapter;
+import com.volmit.dumpster.CDou;
+import com.volmit.dumpster.F;
+import com.volmit.dumpster.GList;
+import com.volmit.dumpster.GListAdapter;
 
 /**
  * Vector utilities

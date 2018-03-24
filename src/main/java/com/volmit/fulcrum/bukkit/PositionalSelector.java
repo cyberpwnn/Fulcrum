@@ -3,7 +3,7 @@ package com.volmit.fulcrum.bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.World;
 
-import com.volmit.fulcrum.lang.GSet;
+import com.volmit.dumpster.GSet;
 
 public class PositionalSelector
 {

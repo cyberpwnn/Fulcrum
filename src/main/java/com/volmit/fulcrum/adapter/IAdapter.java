@@ -13,8 +13,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 
+import com.volmit.dumpster.GList;
 import com.volmit.fulcrum.bukkit.BlockType;
-import com.volmit.fulcrum.lang.GList;
 import com.volmit.fulcrum.resourcepack.ResourcePack;
 
 public interface IAdapter extends Listener
@@ -146,4 +146,6 @@ public interface IAdapter extends Listener
 	public void setBlockNoPacket(Location l, BlockType m);
 
 	public void resetSpawnerRotation(Location block);
+
+	public void sendAdvancement(Player p, ItemStack is, String text);
 }

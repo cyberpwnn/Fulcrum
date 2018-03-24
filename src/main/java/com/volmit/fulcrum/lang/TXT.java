@@ -2,6 +2,9 @@ package com.volmit.fulcrum.lang;
 
 import org.apache.commons.lang.WordUtils;
 
+import com.volmit.dumpster.F;
+import com.volmit.dumpster.GList;
+
 /**
  * Textual Utilities
  *

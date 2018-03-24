@@ -3,10 +3,10 @@ package com.volmit.fulcrum.bukkit;
 import org.bukkit.block.BlockFace;
 import org.bukkit.util.Vector;
 
+import com.volmit.dumpster.GBiset;
+import com.volmit.dumpster.GList;
+import com.volmit.dumpster.GMap;
 import com.volmit.fulcrum.bukkit.Cuboid.CuboidDirection;
-import com.volmit.fulcrum.lang.GBiset;
-import com.volmit.fulcrum.lang.GList;
-import com.volmit.fulcrum.lang.GMap;
 
 /**
  * Directions
