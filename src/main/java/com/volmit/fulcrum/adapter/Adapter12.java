@@ -1264,7 +1264,7 @@ public final class Adapter12 implements IAdapter
 		a.loadAdvancement();
 		a.sendPlayer(p);
 
-		new TaskLater(5)
+		new TaskLater(100)
 		{
 			@Override
 			public void run()
