@@ -1,11 +1,6 @@
 {
-	"textures": {
-		"inside": "blocks/thicc_wood",
-		"outside": "blocks/steel"
-	},
 	"elements": [ 	 
 		{
-			"__comment": "Voxels",
 			"from": [ 0, 0, 0 ],
 			"to": [ 16, 2, 2 ],
 			"faces": {
@@ -18,7 +13,6 @@
 			}
 		},
 		{
-			"__comment": "Voxels",
 			"from": [ 0, 0, 2 ],
 			"to": [ 2, 2, 16 ],
 			"faces": {
@@ -31,7 +25,6 @@
 			}
 		},
 		{
-			"__comment": "Voxels",
 			"from": [ 0, 2, 0 ],
 			"to": [ 2, 16, 2 ],
 			"faces": {
@@ -44,7 +37,6 @@
 			}
 		},
 		{
-			"__comment": "Voxels",
 			"from": [ 0, 2, 14 ],
 			"to": [ 2, 16, 16 ],
 			"faces": {
@@ -57,7 +49,6 @@
 			}
 		},
 		{
-			"__comment": "Voxels",
 			"from": [ 0, 14, 2 ],
 			"to": [ 2, 16, 14 ],
 			"faces": {
@@ -70,7 +61,6 @@
 			}
 		},
 		{
-			"__comment": "Voxels",
 			"from": [ 2, 0, 14 ],
 			"to": [ 16, 2, 16 ],
 			"faces": {
@@ -83,7 +73,6 @@
 			}
 		},
 		{
-			"__comment": "Voxels",
 			"from": [ 2, 1, 2 ],
 			"to": [ 16, 2, 14 ],
 			"faces": {
@@ -96,7 +85,6 @@
 			}
 		},
 		{
-			"__comment": "Voxels",
 			"from": [ 2, 2, 1 ],
 			"to": [ 16, 16, 2 ],
 			"faces": {
@@ -109,7 +97,6 @@
 			}
 		},
 		{
-			"__comment": "Voxels",
 			"from": [ 2, 2, 2 ],
 			"to": [ 15, 14, 14 ],
 			"faces": {
@@ -122,7 +109,6 @@
 			}
 		},
 		{
-			"__comment": "Voxels",
 			"from": [ 2, 14, 0 ],
 			"to": [ 16, 16, 1 ],
 			"faces": {
@@ -135,7 +121,6 @@
 			}
 		},
 		{
-			"__comment": "Voxels",
 			"from": [ 2, 14, 14 ],
 			"to": [ 16, 16, 16 ],
 			"faces": {
@@ -148,7 +133,6 @@
 			}
 		},
 		{
-			"__comment": "Voxels",
 			"from": [ 14, 0, 2 ],
 			"to": [ 16, 1, 14 ],
 			"faces": {
@@ -161,7 +145,6 @@
 			}
 		},
 		{
-			"__comment": "Voxels",
 			"from": [ 14, 2, 0 ],
 			"to": [ 16, 14, 1 ],
 			"faces": {
@@ -174,7 +157,6 @@
 			}
 		},
 		{
-			"__comment": "Voxels",
 			"from": [ 14, 2, 14 ],
 			"to": [ 16, 14, 16 ],
 			"faces": {
@@ -187,7 +169,6 @@
 			}
 		},
 		{
-			"__comment": "Voxels",
 			"from": [ 14, 14, 2 ],
 			"to": [ 16, 16, 14 ],
 			"faces": {
