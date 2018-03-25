@@ -8,6 +8,7 @@ public enum ModelType
 	CUBE_BOTTOM_TOP("bottom", "side", "top"),
 	CUBE_COLUMN("end", "side"),
 	CUBE_CASED("inside", "outside"),
+	CUBE_FRAMED("inside", "outside"),
 	CAULDRON("inside", "outside"),
 	PEDESTAL("top", "bottom", "pillar");
 
