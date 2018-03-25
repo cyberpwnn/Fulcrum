@@ -177,7 +177,7 @@ public class ContentRegistry implements Listener
 
 		if(rr.connect(this))
 		{
-			cleanResources();
+			// cleanResources();
 			loadResources();
 			processAdvancements();
 			processItems();
@@ -207,11 +207,6 @@ public class ContentRegistry implements Listener
 			System.out.println("  Registering Advancement " + i.getKey().toString());
 			i.load();
 		}
-	}
-
-	private void cleanResources()
-	{
-		clean();
 	}
 
 	private void mergeResources() throws IOException, NoSuchAlgorithmException

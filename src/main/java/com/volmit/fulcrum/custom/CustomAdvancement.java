@@ -95,7 +95,12 @@ public class CustomAdvancement implements ICustom
 		display.put("background", background);
 		display.put("show_toast", toast);
 		display.put("announce_to_chat", announce);
-		display.put("hidden", hidden);
+
+		if(hidden)
+		{
+			display.put("hidden", hidden);
+		}
+
 		o.put("display", display);
 
 		JSONObject crit = new JSONObject();
@@ -198,7 +203,7 @@ public class CustomAdvancement implements ICustom
 
 	public void setParent(CustomAdvancement parent)
 	{
-		this.parent = parent.getId();
+		this.parent = "fulcrum:" + parent.getId();
 	}
 
 	public String getBackground()

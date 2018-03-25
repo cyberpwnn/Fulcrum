@@ -35,8 +35,6 @@ import com.volmit.fulcrum.custom.CustomAdvancement;
 import com.volmit.fulcrum.custom.CustomBlock;
 import com.volmit.fulcrum.custom.CustomInventory;
 import com.volmit.fulcrum.custom.CustomItem;
-import com.volmit.fulcrum.custom.legit.AdvancementAlchemy;
-import com.volmit.fulcrum.custom.legit.AdvancementAlchemyMakeWater;
 import com.volmit.fulcrum.event.ContentRecipeRegistryEvent;
 import com.volmit.fulcrum.event.ContentRegistryEvent;
 import com.volmit.fulcrum.lang.C;
@@ -116,8 +114,7 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 	@EventHandler
 	public void on(ContentRegistryEvent e)
 	{
-		e.register(new AdvancementAlchemy());
-		e.register(new AdvancementAlchemyMakeWater());
+
 	}
 
 	@EventHandler
