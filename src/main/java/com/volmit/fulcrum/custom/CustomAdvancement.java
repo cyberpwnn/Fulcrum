@@ -7,6 +7,7 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.advancement.Advancement;
 import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftItemStack;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import com.volmit.dumpster.JSONObject;
@@ -41,6 +42,16 @@ public class CustomAdvancement implements ICustom
 		announce = true;
 		toast = true;
 		hidden = false;
+	}
+
+	public void grant(Player p)
+	{
+		Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "advancement grant " + p.getName() + " only fulcrum:" + getId());
+	}
+
+	public void revoke(Player p)
+	{
+		Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "advancement revoke " + p.getName() + " only fulcrum:" + getId());
 	}
 
 	@SuppressWarnings("deprecation")
@@ -183,6 +194,11 @@ public class CustomAdvancement implements ICustom
 	public void setParent(String parent)
 	{
 		this.parent = parent;
+	}
+
+	public void setParent(CustomAdvancement parent)
+	{
+		this.parent = parent.getId();
 	}
 
 	public String getBackground()

@@ -29,6 +29,19 @@ public class ContentManager
 		return Fulcrum.contentRegistry;
 	}
 
+	public static CustomAdvancement getAdvancement(String id)
+	{
+		for(CustomAdvancement i : r().getAdvancements())
+		{
+			if(i.getId().equals(id))
+			{
+				return i;
+			}
+		}
+
+		return null;
+	}
+
 	public static IAdapter a()
 	{
 		return Fulcrum.adapter;

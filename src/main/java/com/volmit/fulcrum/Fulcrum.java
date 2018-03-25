@@ -31,10 +31,12 @@ import com.volmit.fulcrum.bukkit.TaskLater;
 import com.volmit.fulcrum.custom.ContentHandler;
 import com.volmit.fulcrum.custom.ContentManager;
 import com.volmit.fulcrum.custom.ContentRegistry;
+import com.volmit.fulcrum.custom.CustomAdvancement;
 import com.volmit.fulcrum.custom.CustomBlock;
 import com.volmit.fulcrum.custom.CustomInventory;
 import com.volmit.fulcrum.custom.CustomItem;
-import com.volmit.fulcrum.custom.CustomSound;
+import com.volmit.fulcrum.custom.legit.AdvancementAlchemy;
+import com.volmit.fulcrum.custom.legit.AdvancementAlchemyMakeWater;
 import com.volmit.fulcrum.event.ContentRecipeRegistryEvent;
 import com.volmit.fulcrum.event.ContentRegistryEvent;
 import com.volmit.fulcrum.lang.C;
@@ -114,7 +116,8 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 	@EventHandler
 	public void on(ContentRegistryEvent e)
 	{
-
+		e.register(new AdvancementAlchemy());
+		e.register(new AdvancementAlchemyMakeWater());
 	}
 
 	@EventHandler
@@ -209,14 +212,14 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 					p.openInventory(ContentManager.createInventory(args[1]));
 				}
 
+				else if(args.length == 2 && args[0].equalsIgnoreCase("adv"))
+				{
+					ContentManager.getAdvancement(args[1]).grant((Player) sender);
+				}
+
 				else if(args[0].equalsIgnoreCase("dur"))
 				{
 					p.sendMessage(p.getItemInHand().getDurability() + " dur dur");
-				}
-
-				else if(args[0].equalsIgnoreCase("adv"))
-				{
-					adapter.sendAdvancementIntense((Player) sender, new ItemStack(Material.APPLE), "Testing?");
 				}
 
 				else if(args[0].equalsIgnoreCase("qadv"))
@@ -288,9 +291,9 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 						sender.sendMessage("ITEM: " + i.getId());
 					}
 
-					for(CustomSound i : contentRegistry.getSounds())
+					for(CustomAdvancement i : contentRegistry.getAdvancements())
 					{
-						sender.sendMessage("SOUND: " + i.getNode());
+						sender.sendMessage("ADV: " + i.getId());
 					}
 				}
 			}

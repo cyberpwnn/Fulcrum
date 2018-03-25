@@ -193,6 +193,7 @@ public class ContentRegistry implements Listener
 		System.out.println("Items: " + F.f(items.size()));
 		System.out.println("Blocks: " + F.f(blocks.size()));
 		System.out.println("Sounds: " + F.f(sounds.size()));
+		System.out.println("Advancements: " + F.f(advancements.size()));
 		System.out.println("Inventories: " + F.f(inventories.size()));
 		System.out.println(F.f(pack.size()) + " Resources compiled in " + F.time(pr.getMilliseconds(), 2));
 	}
@@ -668,5 +669,10 @@ public class ContentRegistry implements Listener
 	public AllocationSpace ass()
 	{
 		return ass;
+	}
+
+	public GList<CustomAdvancement> getAdvancements()
+	{
+		return advancements;
 	}
 }
