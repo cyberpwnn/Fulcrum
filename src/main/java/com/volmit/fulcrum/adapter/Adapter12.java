@@ -63,8 +63,8 @@ import com.volmit.fulcrum.bukkit.PE;
 import com.volmit.fulcrum.bukkit.S;
 import com.volmit.fulcrum.bukkit.Task;
 import com.volmit.fulcrum.bukkit.TaskLater;
-import com.volmit.fulcrum.custom.AdvancementManager;
-import com.volmit.fulcrum.custom.AdvancementManager.FrameType;
+import com.volmit.fulcrum.custom.AdvancementHolder;
+import com.volmit.fulcrum.custom.AdvancementHolder.FrameType;
 import com.volmit.fulcrum.custom.ContentManager;
 import com.volmit.fulcrum.custom.CustomBlock;
 import com.volmit.fulcrum.lang.C;
@@ -958,7 +958,7 @@ public final class Adapter12 implements IAdapter
 						{
 							if(!fa[0])
 							{
-								sendAdvancement(p, new ItemStack(Material.NETHER_STAR), C.GREEN + "Resources Loaded");
+								sendAdvancementIntense(p, new ItemStack(Material.NETHER_STAR), C.GREEN + "Resources Loaded");
 							}
 
 							else
@@ -980,7 +980,7 @@ public final class Adapter12 implements IAdapter
 				p.teleport(lx);
 			}
 		};
-		sendAdvancement(p, new ItemStack(Material.FIREBALL), C.GREEN + "Loading Resources");
+		sendAdvancementSubtle(p, new ItemStack(Material.FIREBALL), C.GREEN + "Compiling Resource Pack");
 
 		new TaskLater(20)
 		{
@@ -1002,7 +1002,7 @@ public final class Adapter12 implements IAdapter
 									@Override
 									public void run()
 									{
-
+										sendAdvancementSubtle(p, new ItemStack(Material.FIREBALL), C.GREEN + "Accepted Resource Pack\n" + C.BOLD + "Sending...");
 									}
 								};
 							}
@@ -1015,6 +1015,7 @@ public final class Adapter12 implements IAdapter
 									@Override
 									public void run()
 									{
+										sendAdvancementSubtle(p, new ItemStack(Material.FIREBALL), C.RED + "Resource Pack " + C.BOLD + "FAILED...");
 										fx[0] = true;
 										fa[0] = true;
 									}
@@ -1250,9 +1251,9 @@ public final class Adapter12 implements IAdapter
 	}
 
 	@Override
-	public void sendAdvancement(Player p, ItemStack is, String text)
+	public void sendAdvancementIntense(Player p, ItemStack is, String text)
 	{
-		AdvancementManager a = new AdvancementManager(UUID.randomUUID().toString());
+		AdvancementHolder a = new AdvancementHolder(UUID.randomUUID().toString());
 		a.withToast(true);
 		a.withDescription("Go away");
 		a.withFrame(FrameType.CHALLANGE);
@@ -1264,7 +1265,32 @@ public final class Adapter12 implements IAdapter
 		a.loadAdvancement();
 		a.sendPlayer(p);
 
-		new TaskLater(100)
+		new TaskLater(1)
+		{
+			@Override
+			public void run()
+			{
+				a.delete(p);
+			}
+		};
+	}
+
+	@Override
+	public void sendAdvancementSubtle(Player p, ItemStack is, String text)
+	{
+		AdvancementHolder a = new AdvancementHolder(UUID.randomUUID().toString());
+		a.withToast(true);
+		a.withDescription("Go away");
+		a.withFrame(FrameType.GOAL);
+		a.withAnnouncement(false);
+		a.withTitle(text);
+		a.withTrigger("minecraft:impossible");
+		a.withIcon(is.getData());
+		a.withBackground("minecraft:textures/blocks/bedrock.png");
+		a.loadAdvancement();
+		a.sendPlayer(p);
+
+		new TaskLater(1)
 		{
 			@Override
 			public void run()

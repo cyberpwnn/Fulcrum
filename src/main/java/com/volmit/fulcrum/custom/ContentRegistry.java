@@ -16,6 +16,7 @@ import org.apache.commons.codec.binary.Hex;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -38,29 +39,18 @@ import com.volmit.fulcrum.Fulcrum;
 import com.volmit.fulcrum.bukkit.P;
 import com.volmit.fulcrum.bukkit.R;
 import com.volmit.fulcrum.bukkit.TaskLater;
+import com.volmit.fulcrum.bukkit.Worlds;
 import com.volmit.fulcrum.event.ContentRecipeRegistryEvent;
 import com.volmit.fulcrum.event.ContentRegistryEvent;
 import com.volmit.fulcrum.resourcepack.ResourcePack;
 
 public class ContentRegistry implements Listener
 {
-	private URL cube;
 	private URL inventoryTop;
 	private URL inventoryBottom;
-	private URL cubeAll;
-	private URL cubeBottomTop;
-	private URL cubeColumn;
-	private URL cubeTop;
-	private URL cubePedistal;
 	private URL defaultInventoryTop;
 	private URL defaultInventoryBottom;
 	private URL defaultItem;
-	private URL defaultModel;
-	private URL defaultModelAll;
-	private URL defaultModelBottomTop;
-	private URL defaultModelColumn;
-	private URL defaultModelTop;
-	private URL defaultModelPedistal;
 	private URL missingTexture;
 	private URL defaultSounds;
 	private URL newSpawner;
@@ -71,21 +61,17 @@ public class ContentRegistry implements Listener
 	private String defaultInventoryContentTop;
 	private String defaultInventoryContentBottom;
 	private String defaultItemContent;
-	private String defaultModelContent;
-	private String defaultModelContentAll;
-	private String defaultModelContentTop;
-	private String defaultModelContentBottomTop;
-	private String defaultModelContentColumn;
-	private String defaultModelContentPedistal;
 	private GList<CustomBlock> blocks;
 	private GList<CustomInventory> inventories;
 	private GList<CustomSound> sounds;
+	private GList<CustomAdvancement> advancements;
 	private GList<CustomItem> items;
 	private GList<SoundReplacement> soundReplacements;
 	private GList<ICustomRecipe> recipes;
 	private GMap<Integer, CustomBlock> superBlocks;
 	private GMap<Integer, CustomItem> superItems;
 	private GMap<Integer, CustomInventory> superInventories;
+	private GMap<ModelType, ModelSet> blockModels;
 	private AllocationSpace ass;
 	private String rid;
 	private ResourcePack pack;
@@ -99,9 +85,51 @@ public class ContentRegistry implements Listener
 		sounds = new GList<CustomSound>();
 		items = new GList<CustomItem>();
 		blocks = new GList<CustomBlock>();
+		advancements = new GList<CustomAdvancement>();
 		recipes = new GList<ICustomRecipe>();
 		soundReplacements = new GList<SoundReplacement>();
+		blockModels = new GMap<ModelType, ModelSet>();
 		Fulcrum.register(this);
+	}
+
+	public void clean()
+	{
+		System.out.println("Cleaning " + Worlds.getWorlds().size() + " Worlds");
+
+		for(World i : Worlds.getWorlds())
+		{
+			clean(i);
+		}
+	}
+
+	public void clean(World w)
+	{
+		System.out.println(" Cleaning " + w.getName());
+		File f = new File(w.getWorldFolder(), "data" + File.separator + "advancements" + File.separator + "fulcrum");
+		delete(f);
+	}
+
+	private void delete(File f)
+	{
+		if(!f.exists())
+		{
+			return;
+		}
+
+		if(f.isDirectory())
+		{
+			for(File i : f.listFiles())
+			{
+				delete(i);
+			}
+		}
+
+		f.delete();
+	}
+
+	public void registerModelType(ModelSet set)
+	{
+		blockModels.put(set.getType(), set);
 	}
 
 	public void registerRecipe(ICustomRecipe r)
@@ -129,6 +157,11 @@ public class ContentRegistry implements Listener
 		blocks.add(block);
 	}
 
+	public void registerAdvancement(CustomAdvancement adv)
+	{
+		advancements.add(adv);
+	}
+
 	public void registerInventory(CustomInventory i)
 	{
 		inventories.add(i);
@@ -144,7 +177,9 @@ public class ContentRegistry implements Listener
 
 		if(rr.connect(this))
 		{
+			cleanResources();
 			loadResources();
+			processAdvancements();
 			processItems();
 			processBlocks();
 			processInventories();
@@ -160,6 +195,22 @@ public class ContentRegistry implements Listener
 		System.out.println("Sounds: " + F.f(sounds.size()));
 		System.out.println("Inventories: " + F.f(inventories.size()));
 		System.out.println(F.f(pack.size()) + " Resources compiled in " + F.time(pr.getMilliseconds(), 2));
+	}
+
+	private void processAdvancements()
+	{
+		System.out.println("Registering " + advancements.size() + " Advancements");
+
+		for(CustomAdvancement i : advancements)
+		{
+			System.out.println("  Registering Advancement " + i.getKey().toString());
+			i.load();
+		}
+	}
+
+	private void cleanResources()
+	{
+		clean();
 	}
 
 	private void mergeResources() throws IOException, NoSuchAlgorithmException
@@ -285,6 +336,12 @@ public class ContentRegistry implements Listener
 	private void loadResources() throws IOException
 	{
 		pack = new ResourcePack();
+
+		for(ModelType i : ModelType.values())
+		{
+			registerModelType(new ModelSet(i));
+		}
+
 		soundHide = R.getURL("/assets/sounds/fulcrum/hide.ogg");
 		soundSilent = R.getURL("/assets/sounds/fulcrum/silent.ogg");
 		soundWoosh = R.getURL("/assets/sounds/fulcrum/woosh.ogg");
@@ -292,38 +349,24 @@ public class ContentRegistry implements Listener
 		defaultSounds = R.getURL("/assets/sounds-default.json");
 		inventoryTop = R.getURL("/assets/models/inventory/fulcrum_top.json");
 		inventoryBottom = R.getURL("/assets/models/inventory/fulcrum_bottom.json");
-		cube = R.getURL("/assets/models/block/fulcrum_cube.json");
-		cubeAll = R.getURL("/assets/models/block/fulcrum_cube_all.json");
-		cubeBottomTop = R.getURL("/assets/models/block/fulcrum_cube_bottom_top.json");
-		cubeColumn = R.getURL("/assets/models/block/fulcrum_cube_column.json");
-		cubeTop = R.getURL("/assets/models/block/fulcrum_cube_top.json");
-		cubePedistal = R.getURL("/assets/models/block/fulcrum_pedestal.json");
+		defaultItem = R.getURL("/assets/models/item/default_item.json");
 		defaultInventoryTop = R.getURL("/assets/models/inventory/default_top.json");
 		defaultInventoryBottom = R.getURL("/assets/models/inventory/default_bottom.json");
-		defaultModel = R.getURL("/assets/models/block/default_cube.json");
-		defaultItem = R.getURL("/assets/models/item/default_item.json");
-		defaultModelAll = R.getURL("/assets/models/block/default_cube_all.json");
-		defaultModelBottomTop = R.getURL("/assets/models/block/default_cube_bottom_top.json");
-		defaultModelColumn = R.getURL("/assets/models/block/default_cube_column.json");
-		defaultModelTop = R.getURL("/assets/models/block/default_cube_top.json");
-		defaultModelPedistal = R.getURL("/assets/models/block/default_pedistal.json");
 		newSpawner = R.getURL("/assets/textures/blocks/mob_spawner.png");
 		missingTexture = R.getURL("/assets/textures/blocks/unknown.png");
 		defaultInventoryContentTop = read(defaultInventoryTop);
 		defaultInventoryContentBottom = read(defaultInventoryBottom);
-		defaultModelContent = read(defaultModel);
 		defaultItemContent = read(defaultItem);
-		defaultModelContentAll = read(defaultModelAll);
-		defaultModelContentTop = read(defaultModelTop);
-		defaultModelContentBottomTop = read(defaultModelBottomTop);
-		defaultModelContentColumn = read(defaultModelColumn);
-		defaultModelContentPedistal = read(defaultModelPedistal);
-		BlockRenderType.ALL.setMc(defaultModelContentAll);
-		BlockRenderType.MANUAL.setMc(defaultModelContent);
-		BlockRenderType.TOP.setMc(defaultModelContentTop);
-		BlockRenderType.TOP_BOTTOM.setMc(defaultModelContentBottomTop);
-		BlockRenderType.COLUMN.setMc(defaultModelContentColumn);
-		BlockRenderType.PEDISTAL.setMc(defaultModelContentPedistal);
+
+		System.out.println("Compiling " + blockModels.size() + " Model Types");
+
+		for(ModelType i : blockModels.k())
+		{
+			i.setMc(blockModels.get(i).getModel());
+			blockModels.get(i).export(pack);
+			System.out.println("  Compiled Model Type " + i.name() + " as " + blockModels.get(i).getFulcrumModel().toString());
+		}
+
 		ass = new AllocationSpace();
 		ass.sacrificeNormal(Material.DIAMOND_HOE, "diamond_hoe", "diamond_hoe");
 		ass.sacrificeShaded(Material.LEATHER_HELMET, "leather_helmet", "leather_helmet", "leather_helmet_overlay");
@@ -337,12 +380,6 @@ public class ContentRegistry implements Listener
 		pack.setResource("sounds/fulcrum/bell.ogg", soundBell);
 		pack.setResource("models/inventory/fulcrum_top.json", new JSONObject(read(inventoryTop)).toString());
 		pack.setResource("models/inventory/fulcrum_bottom.json", new JSONObject(read(inventoryBottom)).toString());
-		pack.setResource("models/block/fulcrum_cube.json", new JSONObject(read(cube)).toString());
-		pack.setResource("models/block/fulcrum_cube_all.json", new JSONObject(read(cubeAll)).toString());
-		pack.setResource("models/block/fulcrum_cube_top.json", new JSONObject(read(cubeTop)).toString());
-		pack.setResource("models/block/fulcrum_cube_bottom_top.json", new JSONObject(read(cubeBottomTop)).toString());
-		pack.setResource("models/block/fulcrum_cube_column.json", new JSONObject(read(cubeColumn)).toString());
-		pack.setResource("models/block/fulcrum_pedistal.json", new JSONObject(read(cubePedistal)).toString());
 		pack.setResource("textures/blocks/mob_spawner.png", newSpawner);
 		pack.setResource("textures/blocks/unknown.png", missingTexture);
 		pack.setResource("textures/items/unknown.png", missingTexture);
@@ -473,9 +510,11 @@ public class ContentRegistry implements Listener
 
 	private void processBlocks()
 	{
+		System.out.println("Registering " + blocks.size() + " Blocks");
+
 		for(CustomBlock i : blocks)
 		{
-			BlockRenderType rt = i.getRenderType();
+			ModelType rt = i.getRenderType();
 			String m = "/assets/models/block/" + i.getId() + ".json";
 			URL model = i.getClass().getResource(m);
 
@@ -493,7 +532,7 @@ public class ContentRegistry implements Listener
 				else
 				{
 					pack.setResource("textures/blocks/" + i.getId() + a + ".png", missingTexture);
-					System.out.println("WARNING: " + i.getId() + " MISSING TEXTURE: " + t);
+					System.out.println("  WARNING: " + i.getId() + " MISSING TEXTURE: " + t);
 				}
 			}
 
@@ -511,7 +550,7 @@ public class ContentRegistry implements Listener
 			AllocatedNode idx = i.isShaded() ? ass.allocateShaded("block/" + i.getId()) : ass.allocateNormal("block/" + i.getId());
 			i.setDurabilityLock((short) idx.getId());
 			i.setType(idx.getMaterial());
-			System.out.println("Registered BLOCK " + i.getId() + " to " + i.getType() + " @" + i.getDurabilityLock());
+			System.out.println("  Registered BLOCK " + i.getId() + " to " + i.getType() + " @" + i.getDurabilityLock());
 			superBlocks.put(idx.getSuperid(), i);
 			i.setSuperID(idx.getSuperid());
 			i.setMatt(ass.getNameForMaterial(i.getType()));
@@ -520,6 +559,8 @@ public class ContentRegistry implements Listener
 
 	private void processItems()
 	{
+		System.out.println("Registering " + items.size() + " Items");
+
 		for(CustomItem i : items)
 		{
 			JSONObject o = new JSONObject(defaultItemContent);
@@ -537,7 +578,7 @@ public class ContentRegistry implements Listener
 
 				if(url == null)
 				{
-					System.out.println("   Unable to locate item texture " + i.getId() + "_" + j + ".png");
+					System.out.println(" Unable to locate item texture " + i.getId() + "_" + j + ".png");
 					url = missingTexture;
 				}
 

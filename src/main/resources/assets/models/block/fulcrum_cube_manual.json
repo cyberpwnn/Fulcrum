@@ -1,5 +1,5 @@
 {
-    "parent": "block/cube",
+    "parent": "block/cube_manual",
     "display": {
         "head": {
             "rotation": [ -30, 0, 0 ],

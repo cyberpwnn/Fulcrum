@@ -32,25 +32,20 @@ import com.volmit.fulcrum.bukkit.TaskLater;
 import net.minecraft.server.v1_12_R1.Item;
 import net.minecraft.server.v1_12_R1.MinecraftKey;
 
-/**
- * Created by charliej on 14/05/2017. Edited by GiansCode
- */
-public class AdvancementManager
+public class AdvancementHolder
 {
-
 	private NamespacedKey id;
 	private String title, parent, trigger, icon, description, background, frame;
 	private Integer subID = 0, amount = 0;
 	private boolean announce, toast = true;
 	private List<ItemStack> items;
-	public List<AdvancementManager> apiList = new ArrayList<AdvancementManager>();
+	public List<AdvancementHolder> holders = new ArrayList<AdvancementHolder>();
 
-
-	public void addAdvancment(AdvancementManager api)
+	public void addAdvancment(AdvancementHolder api)
 	{
 		NamespacedKey key = api.getID();
 
-		for(AdvancementManager adAPI : this.apiList)
+		for(AdvancementHolder adAPI : this.holders)
 		{
 			if(adAPI.getID().toString().equalsIgnoreCase(key.toString()))
 			{
@@ -58,14 +53,14 @@ public class AdvancementManager
 			}
 		}
 
-		this.apiList.add(api);
+		this.holders.add(api);
 	}
 
 	public static enum FrameType
 	{
 		CHALLANGE("challenge"),
 		GOAL("goal"),
-		DEFAULT("task");
+		TASK("task");
 
 		private String str;
 
@@ -102,7 +97,7 @@ public class AdvancementManager
 		}
 	}
 
-	public AdvancementManager(String id)
+	public AdvancementHolder(String id)
 	{
 		this.id = new NamespacedKey(Fulcrum.instance, "story/" + id);
 		this.items = Lists.newArrayList();
@@ -119,27 +114,27 @@ public class AdvancementManager
 		return icon;
 	}
 
-	public AdvancementManager withIcon(String icon)
+	public AdvancementHolder withIcon(String icon)
 	{
 		this.icon = icon;
 		return this;
 	}
 
-	public AdvancementManager withIcon(Material material)
+	public AdvancementHolder withIcon(Material material)
 	{
 		this.icon = getMinecraftIDFrom(new ItemStack(material));
 		return this;
 	}
 
 	@SuppressWarnings("deprecation")
-	public AdvancementManager withIcon(MaterialData material)
+	public AdvancementHolder withIcon(MaterialData material)
 	{
 		this.icon = getMinecraftIDFrom(new ItemStack(material.getItemType()));
 		this.subID = (int) material.getData();
 		return this;
 	}
 
-	public AdvancementManager withIconData(int subID)
+	public AdvancementHolder withIconData(int subID)
 	{
 		this.subID = subID;
 		return this;
@@ -150,7 +145,7 @@ public class AdvancementManager
 		return description;
 	}
 
-	public AdvancementManager withDescription(String description)
+	public AdvancementHolder withDescription(String description)
 	{
 		this.description = description;
 		return this;
@@ -161,13 +156,13 @@ public class AdvancementManager
 		return background;
 	}
 
-	public AdvancementManager withBackground(String url)
+	public AdvancementHolder withBackground(String url)
 	{
 		this.background = url;
 		return this;
 	}
 
-	public AdvancementManager withAmount(int i)
+	public AdvancementHolder withAmount(int i)
 	{
 		this.amount = i;
 		return this;
@@ -178,7 +173,7 @@ public class AdvancementManager
 		return title;
 	}
 
-	public AdvancementManager withTitle(String title)
+	public AdvancementHolder withTitle(String title)
 	{
 		this.title = title;
 		return this;
@@ -189,13 +184,13 @@ public class AdvancementManager
 		return parent;
 	}
 
-	public AdvancementManager withParent(String parent)
+	public AdvancementHolder withParent(String parent)
 	{
 		this.parent = parent;
 		return this;
 	}
 
-	public AdvancementManager withToast(boolean bool)
+	public AdvancementHolder withToast(boolean bool)
 	{
 		this.toast = bool;
 		return this;
@@ -206,7 +201,7 @@ public class AdvancementManager
 		return trigger;
 	}
 
-	public AdvancementManager withTrigger(String trigger)
+	public AdvancementHolder withTrigger(String trigger)
 	{
 		this.trigger = trigger;
 		return this;
@@ -217,7 +212,7 @@ public class AdvancementManager
 		return items;
 	}
 
-	public AdvancementManager withItem(ItemStack is)
+	public AdvancementHolder withItem(ItemStack is)
 	{
 		items.add(is);
 		return this;
@@ -228,7 +223,7 @@ public class AdvancementManager
 		return frame;
 	}
 
-	public AdvancementManager withFrame(FrameType frame)
+	public AdvancementHolder withFrame(FrameType frame)
 	{
 		this.frame = frame.getName();
 		return this;
@@ -239,7 +234,7 @@ public class AdvancementManager
 		return announce;
 	}
 
-	public AdvancementManager withAnnouncement(boolean announce)
+	public AdvancementHolder withAnnouncement(boolean announce)
 	{
 		this.announce = announce;
 		return this;

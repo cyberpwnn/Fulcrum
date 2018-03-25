@@ -147,5 +147,7 @@ public interface IAdapter extends Listener
 
 	public void resetSpawnerRotation(Location block);
 
-	public void sendAdvancement(Player p, ItemStack is, String text);
+	public void sendAdvancementSubtle(Player p, ItemStack is, String text);
+
+	public void sendAdvancementIntense(Player p, ItemStack is, String text);
 }

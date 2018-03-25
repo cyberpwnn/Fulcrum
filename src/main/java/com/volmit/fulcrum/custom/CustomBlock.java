@@ -22,7 +22,7 @@ public abstract class CustomBlock implements ICustom
 	private Audible digSound;
 	private Audible pickupSound;
 	private Audible stepSound;
-	private BlockRenderType renderType;
+	private ModelType renderType;
 	private String name;
 	private final String id;
 	private short durabilityLock;
@@ -48,7 +48,7 @@ public abstract class CustomBlock implements ICustom
 		setName("fulcrum:" + id);
 		shaded = false;
 		matt = "";
-		renderType = BlockRenderType.ALL;
+		renderType = ModelType.CUBE_ALL;
 		pickupSound = ContentManager.getPickupSound();
 
 		CustomBlock ci = ContentManager.getBlock(id);
@@ -136,7 +136,7 @@ public abstract class CustomBlock implements ICustom
 		setPickupSound(new Audio(pickupSound));
 	}
 
-	public CustomBlock(String id, BlockRenderType renderType)
+	public CustomBlock(String id, ModelType renderType)
 	{
 		this(id);
 		this.renderType = renderType;
@@ -247,12 +247,12 @@ public abstract class CustomBlock implements ICustom
 		Fulcrum.adapter.setSpawnerType(location, getMatt(), getDurabilityLock(), ee);
 	}
 
-	public BlockRenderType getRenderType()
+	public ModelType getRenderType()
 	{
 		return renderType;
 	}
 
-	public void setRenderType(BlockRenderType renderType)
+	public void setRenderType(ModelType renderType)
 	{
 		this.renderType = renderType;
 	}

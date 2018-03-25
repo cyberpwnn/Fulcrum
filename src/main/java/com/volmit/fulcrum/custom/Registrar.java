@@ -39,6 +39,11 @@ public class Registrar
 				r.registerSound((CustomSound) i);
 			}
 
+			if(i instanceof CustomAdvancement)
+			{
+				r.registerAdvancement((CustomAdvancement) i);
+			}
+
 			if(i instanceof CustomBlock)
 			{
 				m = true;

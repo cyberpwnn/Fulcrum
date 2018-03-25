@@ -31,6 +31,7 @@ import com.volmit.fulcrum.bukkit.TaskLater;
 import com.volmit.fulcrum.custom.ContentHandler;
 import com.volmit.fulcrum.custom.ContentManager;
 import com.volmit.fulcrum.custom.ContentRegistry;
+import com.volmit.fulcrum.custom.CustomAdvancement;
 import com.volmit.fulcrum.custom.CustomBlock;
 import com.volmit.fulcrum.custom.CustomInventory;
 import com.volmit.fulcrum.custom.CustomItem;
@@ -114,7 +115,15 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 	@EventHandler
 	public void on(ContentRegistryEvent e)
 	{
-
+		e.register(new CustomAdvancement("test1"));
+		e.register(new CustomAdvancement("test12"));
+		e.register(new CustomAdvancement("test123"));
+		e.register(new CustomAdvancement("test1234"));
+		e.register(new CustomAdvancement("test12345"));
+		e.register(new CustomAdvancement("test123456"));
+		e.register(new CustomAdvancement("test1234567"));
+		e.register(new CustomAdvancement("test12345678"));
+		e.register(new CustomAdvancement("test123456789"));
 	}
 
 	@EventHandler
@@ -216,20 +225,24 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 
 				else if(args[0].equalsIgnoreCase("adv"))
 				{
-					adapter.sendAdvancement((Player) sender, new ItemStack(Material.APPLE), "Testing?");
+					adapter.sendAdvancementIntense((Player) sender, new ItemStack(Material.APPLE), "Testing?");
 				}
 
 				else if(args[0].equalsIgnoreCase("qadv"))
 				{
-					new Task(0, 400)
+					new Task(2, 5)
 					{
-
 						@Override
 						public void run()
 						{
-							if(M.r(0.024))
+							if(M.r(0.25))
 							{
-								adapter.sendAdvancement((Player) sender, new ItemStack(new GList<Material>(Material.values()).pickRandom()), C.UNDERLINE + "Notification Test\nAllows up to\n" + C.GREEN + "Three Lines im sure" + C.MAGIC + ".");
+								adapter.sendAdvancementIntense((Player) sender, new ItemStack(new GList<Material>(Material.values()).pickRandom()), C.UNDERLINE + "Intense Test\nAllows up to\n" + C.GREEN + "Three Lines im sure" + C.MAGIC + ".");
+							}
+
+							else
+							{
+								adapter.sendAdvancementSubtle((Player) sender, new ItemStack(new GList<Material>(Material.values()).pickRandom()), C.UNDERLINE + "Subtle Test\nAllows up to\n" + C.GREEN + "Three Lines im sure" + C.MAGIC + ".");
 							}
 						}
 					};

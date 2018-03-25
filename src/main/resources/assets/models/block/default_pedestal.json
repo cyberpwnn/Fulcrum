@@ -1,5 +1,5 @@
 {
-    "parent": "block/fulcrum_pedistal",
+    "parent": "block/fulcrum_pedestal",
     "textures": {
         "top": "blocks/$id_top",
         "bottom": "blocks/$id_bottom",
