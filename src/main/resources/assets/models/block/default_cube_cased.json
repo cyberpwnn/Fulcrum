@@ -1,5 +1,5 @@
 {
-    "parent": "block/fulcrum_cube_companion",
+    "parent": "block/fulcrum_cube_cased",
     "textures": {
         "inside": "blocks/$id_inside",
         "outside": "blocks/$id_outside"
