@@ -31,7 +31,6 @@ import com.volmit.fulcrum.bukkit.TaskLater;
 import com.volmit.fulcrum.custom.ContentHandler;
 import com.volmit.fulcrum.custom.ContentManager;
 import com.volmit.fulcrum.custom.ContentRegistry;
-import com.volmit.fulcrum.custom.CustomAdvancement;
 import com.volmit.fulcrum.custom.CustomBlock;
 import com.volmit.fulcrum.custom.CustomInventory;
 import com.volmit.fulcrum.custom.CustomItem;
@@ -115,15 +114,7 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 	@EventHandler
 	public void on(ContentRegistryEvent e)
 	{
-		e.register(new CustomAdvancement("test1"));
-		e.register(new CustomAdvancement("test12"));
-		e.register(new CustomAdvancement("test123"));
-		e.register(new CustomAdvancement("test1234"));
-		e.register(new CustomAdvancement("test12345"));
-		e.register(new CustomAdvancement("test123456"));
-		e.register(new CustomAdvancement("test1234567"));
-		e.register(new CustomAdvancement("test12345678"));
-		e.register(new CustomAdvancement("test123456789"));
+
 	}
 
 	@EventHandler
