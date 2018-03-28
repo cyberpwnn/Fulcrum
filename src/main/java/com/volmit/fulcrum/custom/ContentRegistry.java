@@ -605,7 +605,7 @@ public class ContentRegistry implements Listener
 		};
 	}
 
-	private String read(URL url) throws IOException
+	public static String read(URL url) throws IOException
 	{
 		String content = "";
 		BufferedReader bu = new BufferedReader(new InputStreamReader(url.openStream()));
