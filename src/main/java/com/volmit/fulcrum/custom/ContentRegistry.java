@@ -68,6 +68,7 @@ public class ContentRegistry implements Listener
 	private GList<CustomItem> items;
 	private GList<SoundReplacement> soundReplacements;
 	private GList<ICustomRecipe> recipes;
+	private GList<CompilerFlag> flags;
 	private GMap<Integer, CustomBlock> superBlocks;
 	private GMap<Integer, CustomItem> superItems;
 	private GMap<Integer, CustomInventory> superInventories;
@@ -89,7 +90,13 @@ public class ContentRegistry implements Listener
 		recipes = new GList<ICustomRecipe>();
 		soundReplacements = new GList<SoundReplacement>();
 		blockModels = new GMap<ModelType, ModelSet>();
+		flags = new GList<CompilerFlag>();
 		Fulcrum.register(this);
+	}
+
+	public boolean hasFlag(CompilerFlag flag)
+	{
+		return flags.contains(flag);
 	}
 
 	public void clean()
@@ -167,8 +174,9 @@ public class ContentRegistry implements Listener
 		inventories.add(i);
 	}
 
-	public void compileResources() throws IOException, NoSuchAlgorithmException
+	public void compileResources(CompilerFlag... flagSet) throws IOException, NoSuchAlgorithmException
 	{
+		flags = new GList<CompilerFlag>(flagSet);
 		Profiler pr = new Profiler();
 		pr.begin();
 		Registrar rr = new Registrar();
@@ -177,7 +185,6 @@ public class ContentRegistry implements Listener
 
 		if(rr.connect(this))
 		{
-			// cleanResources();
 			loadResources();
 			processAdvancements();
 			processItems();
@@ -204,8 +211,8 @@ public class ContentRegistry implements Listener
 
 		for(CustomAdvancement i : advancements)
 		{
-			System.out.println("  Registering Advancement " + i.getKey().toString());
 			i.load();
+			System.out.println("  Registered Advancement " + i.getKey().toString());
 		}
 	}
 
@@ -317,21 +324,27 @@ public class ContentRegistry implements Listener
 		for(Material i : ass.getIorda())
 		{
 			JSONObject[] ox = ass.generateNormalModel(i);
-			pack.setResource("models/" + ass.getNormalSuperModelName(i) + ".json", ox[1].toString());
-			pack.setResource("models/" + ass.getNormalModelName(i) + ".json", ox[0].toString());
+			pack.setResource("models/" + ass.getNormalSuperModelName(i) + ".json", ox[1].toString(idf()));
+			pack.setResource("models/" + ass.getNormalModelName(i) + ".json", ox[0].toString(idf()));
 		}
 
 		for(Material i : ass.getIordb())
 		{
 			JSONObject[] ox = ass.generateShadedModel(i);
-			pack.setResource("models/" + ass.getShadedSuperModelName(i) + ".json", ox[1].toString());
-			pack.setResource("models/" + ass.getShadedModelName(i) + ".json", ox[0].toString());
+			pack.setResource("models/" + ass.getShadedSuperModelName(i) + ".json", ox[1].toString(idf()));
+			pack.setResource("models/" + ass.getShadedModelName(i) + ".json", ox[0].toString(idf()));
 		}
+	}
+
+	private int idf()
+	{
+		return hasFlag(CompilerFlag.JSON_MINIFICATION) ? 0 : 4;
 	}
 
 	private void loadResources() throws IOException
 	{
 		pack = new ResourcePack();
+		pack.setOptimizePngs(hasFlag(CompilerFlag.PNG_COMPRESSION));
 
 		for(ModelType i : ModelType.values())
 		{
@@ -359,12 +372,16 @@ public class ContentRegistry implements Listener
 		for(ModelType i : blockModels.k())
 		{
 			i.setMc(blockModels.get(i).getModel());
-			blockModels.get(i).export(pack);
+			blockModels.get(i).export(pack, idf());
 			System.out.println("  Compiled Model Type " + i.name() + " as " + blockModels.get(i).getFulcrumModel().toString());
 		}
 
-		ass = new AllocationSpace();
+		ass = new AllocationSpace(hasFlag(CompilerFlag.PREDICATE_MINIFICATION), hasFlag(CompilerFlag.PREDICATE_CYCLING));
 		ass.sacrificeNormal(Material.DIAMOND_HOE, "diamond_hoe", "diamond_hoe");
+		ass.sacrificeNormal(Material.IRON_HOE, "iron_hoe", "iron_hoe");
+		ass.sacrificeNormal(Material.STONE_HOE, "stone_hoe", "stone_hoe");
+		ass.sacrificeNormal(Material.WOOD_HOE, "wooden_hoe", "wood_hoe");
+		ass.sacrificeNormal(Material.GOLD_HOE, "golden_hoe", "gold_hoe");
 		ass.sacrificeShaded(Material.LEATHER_HELMET, "leather_helmet", "leather_helmet", "leather_helmet_overlay");
 		sounds.removeDuplicates();
 		blocks.removeDuplicates();
@@ -374,8 +391,8 @@ public class ContentRegistry implements Listener
 		pack.setResource("sounds/fulcrum/hide.ogg", soundHide);
 		pack.setResource("sounds/fulcrum/silent.ogg", soundSilent);
 		pack.setResource("sounds/fulcrum/bell.ogg", soundBell);
-		pack.setResource("models/inventory/fulcrum_top.json", new JSONObject(read(inventoryTop)).toString());
-		pack.setResource("models/inventory/fulcrum_bottom.json", new JSONObject(read(inventoryBottom)).toString());
+		pack.setResource("models/inventory/fulcrum_top.json", new JSONObject(read(inventoryTop)).toString(idf()));
+		pack.setResource("models/inventory/fulcrum_bottom.json", new JSONObject(read(inventoryBottom)).toString(idf()));
 		pack.setResource("textures/blocks/mob_spawner.png", newSpawner);
 		pack.setResource("textures/blocks/unknown.png", missingTexture);
 		pack.setResource("textures/items/unknown.png", missingTexture);
@@ -411,13 +428,14 @@ public class ContentRegistry implements Listener
 			{
 				if(j.getNode().equals(i))
 				{
-					JSONObject mod = new JSONObject(desound.getJSONObject(i).toString());
-					JSONObject old = new JSONObject(desound.getJSONObject(i).toString());
+					JSONObject mod = new JSONObject(desound.getJSONObject(i).toString(idf()));
+					JSONObject old = new JSONObject(desound.getJSONObject(i).toString(idf()));
 					GList<String> keys = j.getNewSound().getSoundPaths().k();
 					String d = "[";
 					CNum c = new CNum(keys.size() - 1);
+					int vv = 5000;
 
-					for(int k = 0; k < 2500; k++)
+					for(int k = 0; k < vv; k++)
 					{
 						if(c.getMax() == 0)
 						{
@@ -453,7 +471,7 @@ public class ContentRegistry implements Listener
 			i.toJson(soundx);
 		}
 
-		pack.setResource("sounds.json", soundx.toString());
+		pack.setResource("sounds.json", soundx.toString(idf()));
 	}
 
 	private void processInventories()
@@ -473,8 +491,8 @@ public class ContentRegistry implements Listener
 				continue;
 			}
 
-			String modelTop = new JSONObject(defaultInventoryContentTop).toString(0).replace("$id", i.getId());
-			String modelBottom = new JSONObject(defaultInventoryContentBottom).toString(0).replace("$id", i.getId());
+			String modelTop = new JSONObject(defaultInventoryContentTop).toString(idf()).replace("$id", i.getId());
+			String modelBottom = new JSONObject(defaultInventoryContentBottom).toString(idf()).replace("$id", i.getId());
 
 			if(ut != null)
 			{
@@ -540,13 +558,13 @@ public class ContentRegistry implements Listener
 			else
 			{
 				String newModel = rt.getModelContent().replaceAll("\\Q$id\\E", i.getId());
-				pack.setResource("models/block/" + i.getId() + ".json", new JSONObject(newModel).toString());
+				pack.setResource("models/block/" + i.getId() + ".json", new JSONObject(newModel).toString(idf()));
 			}
 
 			AllocatedNode idx = i.isShaded() ? ass.allocateShaded("block/" + i.getId()) : ass.allocateNormal("block/" + i.getId());
 			i.setDurabilityLock((short) idx.getId());
 			i.setType(idx.getMaterial());
-			System.out.println("  Registered BLOCK " + i.getId() + " to " + i.getType() + " @" + i.getDurabilityLock());
+			System.out.println("  Registered Block " + i.getId() + " to " + i.getType() + ":" + i.getDurabilityLock());
 			superBlocks.put(idx.getSuperid(), i);
 			i.setSuperID(idx.getSuperid());
 			i.setMatt(ass.getNameForMaterial(i.getType()));
@@ -561,7 +579,6 @@ public class ContentRegistry implements Listener
 		{
 			JSONObject o = new JSONObject(defaultItemContent);
 			JSONObject t = o.getJSONObject("textures");
-			System.out.println("  Registering Item " + i.getId());
 
 			for(int j = 0; j < i.getLayers(); j++)
 			{
@@ -583,8 +600,9 @@ public class ContentRegistry implements Listener
 				o.put("textures", t);
 			}
 
-			pack.setResource("models/item/" + i.getId() + ".json", o.toString());
+			pack.setResource("models/item/" + i.getId() + ".json", o.toString(idf()));
 			AllocatedNode node = ass.allocateNormal("item/" + i.getId());
+			System.out.println("  Registered Item " + i.getId() + " to " + node.getMaterial() + ":" + node.getId());
 			superItems.put(node.getSuperid(), i);
 			i.setType(node.getMaterial());
 			i.setDurability((short) node.getId());

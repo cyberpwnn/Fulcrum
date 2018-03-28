@@ -29,11 +29,11 @@ public class ResourcePack
 	private GMap<String, String> writeResources;
 	GList<String> oc = new GList<String>();
 	GList<String> ow = new GList<String>();
-	private boolean optimize;
+	private boolean optimizePngs;
 
 	public ResourcePack()
 	{
-		optimize = false;
+		optimizePngs = false;
 		meta = new PackMeta();
 		copyResources = new GMap<String, URL>();
 		writeResources = new GMap<String, String>();
@@ -41,14 +41,14 @@ public class ResourcePack
 		ow = new GList<String>();
 	}
 
-	public boolean isOptimize()
+	public boolean isOptimizedPngs()
 	{
-		return optimize;
+		return optimizePngs;
 	}
 
-	public void setOptimize(boolean optimize)
+	public void setOptimizePngs(boolean optimize)
 	{
-		this.optimize = optimize;
+		this.optimizePngs = optimize;
 	}
 
 	public int size()
@@ -204,7 +204,7 @@ public class ResourcePack
 			fos.close();
 			in.close();
 
-			if(f.getName().endsWith(".png") && isOptimize())
+			if(f.getName().endsWith(".png") && isOptimizedPngs())
 			{
 				optimizePNG(f);
 			}

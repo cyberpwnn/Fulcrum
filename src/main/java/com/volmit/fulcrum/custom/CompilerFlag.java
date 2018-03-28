@@ -1,0 +1,10 @@
+package com.volmit.fulcrum.custom;
+
+public enum CompilerFlag
+{
+	PNG_COMPRESSION,
+	JSON_MINIFICATION,
+	PREDICATE_CYCLING,
+	DYNAMIC_TRACKING,
+	PREDICATE_MINIFICATION;
+}

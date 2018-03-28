@@ -1,6 +1,7 @@
 package com.volmit.fulcrum.custom;
 
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
@@ -48,6 +49,11 @@ public class ContentHandler implements Listener
 	private GMap<Player, Double> dist;
 	private GMap<Player, Integer> steps;
 	public GList<Block> stopped;
+	public GMap<Player, Double> view;
+	public GMap<Player, GList<Location>> controlled;
+	public GMap<Player, GList<Location>> hidden;
+	public static double max = 80.0;
+	public static double min = 12.0;
 
 	public ContentHandler()
 	{
@@ -58,6 +64,9 @@ public class ContentHandler implements Listener
 		lastDug = new GMap<Block, Player>();
 		stopped = new GList<Block>();
 		vdel = new GMap<Player, Integer>();
+		view = new GMap<Player, Double>();
+		controlled = new GMap<Player, GList<Location>>();
+		hidden = new GMap<Player, GList<Location>>();
 		Fulcrum.register(this);
 
 		new Task(0)
@@ -91,6 +100,11 @@ public class ContentHandler implements Listener
 			}
 
 			ground.put(i, i.isOnGround());
+
+			if(Fulcrum.contentRegistry.hasFlag(CompilerFlag.DYNAMIC_TRACKING))
+			{
+				updateView(i);
+			}
 		}
 
 		for(Player i : vdel.k())
@@ -149,6 +163,76 @@ public class ContentHandler implements Listener
 		}
 
 		stopped.clear();
+	}
+
+	private void updateView(Player p)
+	{
+		if(!view.containsKey(p))
+		{
+			view.put(p, max);
+		}
+
+		if(!hidden.containsKey(p))
+		{
+			hidden.put(p, new GList<Location>());
+		}
+
+		int oh = hidden.get(p).size();
+		controlled.put(p, ContentManager.getBlocks(p.getLocation(), max));
+
+		for(Location i : controlled.get(p))
+		{
+			double f = i.distanceSquared(p.getLocation());
+			if(f > Math.pow(view.get(p), 2))
+			{
+				if(Math.abs(f - Math.pow(view.get(p), 2)) < 10)
+				{
+					continue;
+				}
+
+				if(!hidden.get(p).contains(i))
+				{
+					hidden.get(p).add(i);
+					ContentManager.a().hideSpawner(i);
+				}
+			}
+
+			else if(hidden.get(p).contains(i))
+			{
+				hidden.get(p).remove(i);
+				ContentManager.a().showSpawner(i);
+			}
+		}
+
+		for(Location i : hidden.get(p).copy())
+		{
+			if(!ContentManager.isCustom(i.getBlock()))
+			{
+				hidden.get(p).remove(i);
+				continue;
+			}
+
+			if(i.distanceSquared(p.getLocation()) > Math.pow(max, 2))
+			{
+				hidden.get(p).remove(i);
+				ContentManager.a().showSpawner(i);
+			}
+		}
+
+		int v = controlled.get(p).size() - oh;
+		double x = (max + 2) - (v / 7);
+
+		if(x > max)
+		{
+			x = max;
+		}
+
+		if(x < min)
+		{
+			x = min;
+		}
+
+		view.put(p, (x + (view.get(p) * 79)) / 80.0);
 	}
 
 	private int getBlockPos(Block b)

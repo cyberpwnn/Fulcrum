@@ -94,6 +94,7 @@ import net.minecraft.server.v1_12_R1.PacketPlayOutTileEntityData;
 import net.minecraft.server.v1_12_R1.PacketPlayOutUnloadChunk;
 import net.minecraft.server.v1_12_R1.SoundEffectType;
 import net.minecraft.server.v1_12_R1.TileEntity;
+import net.minecraft.server.v1_12_R1.TileEntityMobSpawner;
 
 public final class Adapter12 implements IAdapter
 {
@@ -1168,7 +1169,27 @@ public final class Adapter12 implements IAdapter
 		sendBlockChange(block, new BlockType(Material.AIR), P.getAnyPlayer());
 		sendBlockChange(block, new BlockType(Material.MOB_SPAWNER), P.getAnyPlayer());
 		sendPacket(bc);
+	}
 
+	@Override
+	public void hideSpawner(Location block)
+	{
+		sendBlockChange(block, new BlockType(Material.AIR), P.getAnyPlayer());
+	}
+
+	@Override
+	public void showSpawner(Location block)
+	{
+		sendBlockChange(block, new BlockType(Material.MOB_SPAWNER), P.getAnyPlayer());
+		BlockPosition pos = new BlockPosition(block.getBlockX(), block.getBlockY(), block.getBlockZ());
+		net.minecraft.server.v1_12_R1.World nmsworld = ((CraftWorld) block.getWorld()).getHandle();
+		TileEntity tile = nmsworld.getTileEntity(pos);
+		NBTTagCompound nbt = tile.save(new NBTTagCompound());
+		NBTTagCompound ee = new NBTTagCompound();
+		nbt.g();
+		ee.g();
+		PacketPlayOutTileEntityData bc = new PacketPlayOutTileEntityData(pos, 1, nbt);
+		sendPacket(bc);
 	}
 
 	@Override
@@ -1298,5 +1319,23 @@ public final class Adapter12 implements IAdapter
 				a.delete(p);
 			}
 		};
+	}
+
+	@Override
+	public GList<Location> getSpawners(Chunk c)
+	{
+		GList<Location> locations = new GList<Location>();
+		net.minecraft.server.v1_12_R1.Chunk chunk = ((CraftChunk) c).getHandle();
+
+		for(TileEntity i : chunk.tileEntities.values())
+		{
+			if(i instanceof TileEntityMobSpawner)
+			{
+				BlockPosition pos = i.getPosition();
+				locations.add(new Location(c.getWorld(), pos.getX(), pos.getY(), pos.getZ()));
+			}
+		}
+
+		return locations;
 	}
 }

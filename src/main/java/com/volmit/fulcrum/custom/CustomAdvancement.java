@@ -59,7 +59,6 @@ public class CustomAdvancement implements ICustom
 	{
 		try
 		{
-			System.out.println("Loading Advancement " + getKey().toString());
 			a = Bukkit.getUnsafe().loadAdvancement(getKey(), toJSON().toString(0));
 		}
 
@@ -67,14 +66,12 @@ public class CustomAdvancement implements ICustom
 		{
 			try
 			{
-				System.out.println(getKey().toString() + " already exists... Loading?");
 				a = Bukkit.getAdvancement(getKey());
 			}
 
-			catch(Exception eee)
+			catch(Exception ee)
 			{
-				System.out.println("Well shit that diddnt fucking work. i give up.");
-				eee.printStackTrace();
+				ee.printStackTrace();
 			}
 		}
 	}

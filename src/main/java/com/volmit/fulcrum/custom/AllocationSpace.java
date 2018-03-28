@@ -17,8 +17,12 @@ public class AllocationSpace
 	private GMap<Material, String> mattx;
 	private GList<Material> iorda;
 	private GList<Material> iordb;
+	private boolean minify;
+	private boolean cyclic;
+	private GList<Material> iva;
+	private GList<Material> ivb;
 
-	public AllocationSpace()
+	public AllocationSpace(boolean minify, boolean cyclic)
 	{
 		mattx = new GMap<Material, String>();
 		normalModelTextures = new GMap<String, String>();
@@ -28,6 +32,10 @@ public class AllocationSpace
 		superIds = new GMap<String, Integer>();
 		iorda = new GList<Material>();
 		iordb = new GList<Material>();
+		iva = new GList<Material>();
+		ivb = new GList<Material>();
+		this.minify = minify;
+		this.cyclic = cyclic;
 	}
 
 	public String getNormalSuperModelName(Material m)
@@ -62,34 +70,80 @@ public class AllocationSpace
 		return new JSONObject[] {shadedAllocations.get(mat).generateModel(shadedModelTextures.get(shadedAllocations.get(mat).getModel())[0], shadedModelTextures.get(shadedAllocations.get(mat).getModel())[1]), shadedAllocations.get(mat).getParenter()};
 	}
 
-	public AllocatedNode allocateNormal(String model)
+	private GList<Material> usableNormals()
 	{
+		GList<Material> u = new GList<Material>(iorda.copy());
+
 		for(Material i : iorda)
 		{
-			if(!normalAllocations.get(i).isFull())
+			if(normalAllocations.get(i).isFull())
 			{
-				int id = normalAllocations.get(i).register(model);
-				superIds.put(model, superIds.size() + 100);
-				return new AllocatedNode(i, id, superIds.get(model));
+				u.remove(i);
 			}
 		}
 
-		return null;
+		return u;
+	}
+
+	private GList<Material> usableShaded()
+	{
+		GList<Material> u = new GList<Material>(iordb.copy());
+
+		for(Material i : iordb)
+		{
+			if(shadedAllocations.get(i).isFull())
+			{
+				u.remove(i);
+			}
+		}
+
+		return u;
+	}
+
+	private Material nextNormal()
+	{
+		if(iva.isEmpty())
+		{
+			iva = new GList<Material>(usableNormals().copy());
+		}
+
+		return iva.pop();
+	}
+
+	private Material nextShaded()
+	{
+		if(ivb.isEmpty())
+		{
+			ivb = new GList<Material>(usableShaded().copy());
+		}
+
+		return ivb.pop();
+	}
+
+	public AllocatedNode allocateNormal(String model)
+	{
+		if(usableNormals().isEmpty())
+		{
+			return null;
+		}
+
+		Material i = cyclic ? nextNormal() : usableNormals().get(0);
+		int id = normalAllocations.get(i).register(model);
+		superIds.put(model, superIds.size() + 100);
+		return new AllocatedNode(i, id, superIds.get(model));
 	}
 
 	public AllocatedNode allocateShaded(String model)
 	{
-		for(Material i : iordb)
+		if(usableShaded().isEmpty())
 		{
-			if(!shadedAllocations.get(i).isFull())
-			{
-				int id = shadedAllocations.get(i).register(model);
-				superIds.put(model, superIds.size());
-				return new AllocatedNode(i, id, superIds.get(model));
-			}
+			return null;
 		}
 
-		return null;
+		Material i = cyclic ? nextShaded() : usableShaded().get(0);
+		int id = shadedAllocations.get(i).register(model);
+		superIds.put(model, superIds.size() + 100);
+		return new AllocatedNode(i, id, superIds.get(model));
 	}
 
 	public int getNormalCapacity()
@@ -142,7 +196,7 @@ public class AllocationSpace
 
 	public void sacrificeNormal(Material type, String model, String texture) throws UnsupportedOperationException
 	{
-		normalAllocations.put(type, new PredicateGenerator(type, "item/" + model));
+		normalAllocations.put(type, new PredicateGenerator(type, "item/" + model, minify));
 		normalModelTextures.put("item/" + model, "items/" + texture);
 		mattx.put(type, model);
 		iorda.add(type);
@@ -150,7 +204,7 @@ public class AllocationSpace
 
 	public void sacrificeShaded(Material type, String model, String texture, String texture2) throws UnsupportedOperationException
 	{
-		shadedAllocations.put(type, new PredicateGenerator(type, "item/" + model));
+		shadedAllocations.put(type, new PredicateGenerator(type, "item/" + model, minify));
 		shadedModelTextures.put("item/" + model, new String[] {"items/" + texture, "items/" + texture2});
 		mattx.put(type, model);
 		iordb.add(type);

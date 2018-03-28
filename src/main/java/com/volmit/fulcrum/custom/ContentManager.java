@@ -1,6 +1,8 @@
 package com.volmit.fulcrum.custom;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.HumanEntity;
@@ -12,6 +14,7 @@ import org.bukkit.inventory.ItemStack;
 import com.volmit.dumpster.GList;
 import com.volmit.fulcrum.Fulcrum;
 import com.volmit.fulcrum.adapter.IAdapter;
+import com.volmit.fulcrum.bukkit.W;
 import com.volmit.fulcrum.sfx.Audible;
 import com.volmit.fulcrum.sfx.Audio;
 
@@ -45,6 +48,44 @@ public class ContentManager
 	public static IAdapter a()
 	{
 		return Fulcrum.adapter;
+	}
+
+	public static GList<Location> getBlocks(Chunk c)
+	{
+		GList<Location> lx = a().getSpawners(c);
+
+		for(Location i : lx.copy())
+		{
+			if(!isCustom(i.getBlock()))
+			{
+				lx.remove(i);
+			}
+		}
+
+		return lx;
+	}
+
+	public static GList<Location> getBlocks(Location l, double distance, int c)
+	{
+		GList<Location> lx = new GList<Location>();
+
+		for(Chunk i : W.chunkRadius(l.getChunk(), c))
+		{
+			for(Location j : a().getSpawners(i))
+			{
+				if(j.distanceSquared(l) < Math.pow(distance, 2) && isCustom(j.getBlock()))
+				{
+					lx.add(j);
+				}
+			}
+		}
+
+		return lx;
+	}
+
+	public static GList<Location> getBlocks(Location l, double distance)
+	{
+		return getBlocks(l, distance, 1 + (int) (distance / 16.0));
 	}
 
 	public static void stack(ItemStack ist, Inventory inv, HumanEntity e, int hintSlot)

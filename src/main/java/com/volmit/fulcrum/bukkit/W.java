@@ -636,6 +636,11 @@ public class W
 		return null;
 	}
 
+	public static GList<Chunk> chunkRadiusBLocks(Chunk c, int rad)
+	{
+		return chunkRadius(c, rad / 16);
+	}
+
 	/**
 	 * Get a radius area of chunks around a given chunk
 	 *
@@ -660,7 +665,10 @@ public class W
 			}
 		}
 
-		cx.add(c);
+		if(!cx.contains(c))
+		{
+			cx.add(c);
+		}
 
 		return cx;
 	}

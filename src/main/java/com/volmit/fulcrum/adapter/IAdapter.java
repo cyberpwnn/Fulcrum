@@ -149,5 +149,11 @@ public interface IAdapter extends Listener
 
 	public void sendAdvancementSubtle(Player p, ItemStack is, String text);
 
+	public void hideSpawner(Location block);
+
+	public GList<Location> getSpawners(Chunk c);
+
+	public void showSpawner(Location block);
+
 	public void sendAdvancementIntense(Player p, ItemStack is, String text);
 }

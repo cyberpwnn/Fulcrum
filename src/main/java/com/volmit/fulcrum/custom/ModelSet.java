@@ -73,8 +73,8 @@ public class ModelSet
 		return fulcrumModel;
 	}
 
-	public void export(ResourcePack pack) throws JSONException, IOException
+	public void export(ResourcePack pack, int i) throws JSONException, IOException
 	{
-		pack.setResource("models/block/fulcrum_" + type.toString().toLowerCase() + ".json", new JSONObject(read(getFulcrumModel())).toString(0));
+		pack.setResource("models/block/fulcrum_" + type.toString().toLowerCase() + ".json", new JSONObject(read(getFulcrumModel())).toString(i));
 	}
 }

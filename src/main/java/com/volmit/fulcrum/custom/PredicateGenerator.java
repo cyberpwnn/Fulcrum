@@ -17,9 +17,11 @@ public class PredicateGenerator
 	private JSONArray overrides;
 	private JSONObject parenter;
 	private GMap<String, Integer> mapping;
+	private boolean minify;
 
-	public PredicateGenerator(Material type, String model) throws UnsupportedOperationException
+	public PredicateGenerator(Material type, String model, boolean minify) throws UnsupportedOperationException
 	{
+		this.minify = minify;
 		models = new GList<String>();
 		this.model = model;
 		max = type.getMaxDurability();
@@ -123,8 +125,13 @@ public class PredicateGenerator
 
 		for(int i = 0; i < max; i++)
 		{
+			if(pending.isEmpty() && minify)
+			{
+				break;
+			}
+
 			boolean put = !pending.isEmpty();
-			String m = i == 0 ? modelSuperName() : pending.isEmpty() ? modelSuperName() : pending.pop();
+			String m = pending.isEmpty() ? modelSuperName() : pending.pop();
 			double raw = (double) ((float) ((double) i / (double) max));
 			raw = Double.valueOf(F.f(raw, 10));
 			JSONObject pred = new JSONObject();

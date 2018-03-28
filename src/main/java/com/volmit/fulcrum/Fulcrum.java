@@ -28,6 +28,7 @@ import com.volmit.fulcrum.bukkit.P;
 import com.volmit.fulcrum.bukkit.TICK;
 import com.volmit.fulcrum.bukkit.Task;
 import com.volmit.fulcrum.bukkit.TaskLater;
+import com.volmit.fulcrum.custom.CompilerFlag;
 import com.volmit.fulcrum.custom.ContentHandler;
 import com.volmit.fulcrum.custom.ContentManager;
 import com.volmit.fulcrum.custom.ContentRegistry;
@@ -214,11 +215,6 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 					ContentManager.getAdvancement(args[1]).grant((Player) sender);
 				}
 
-				else if(args[0].equalsIgnoreCase("dur"))
-				{
-					p.sendMessage(p.getItemInHand().getDurability() + " dur dur");
-				}
-
 				else if(args[0].equalsIgnoreCase("qadv"))
 				{
 					new Task(2, 5)
@@ -329,7 +325,14 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 				{
 					try
 					{
-						contentRegistry.compileResources();
+						//@fuckboy:on
+						contentRegistry.compileResources(
+								CompilerFlag.PREDICATE_MINIFICATION,
+								CompilerFlag.PREDICATE_CYCLING,
+								CompilerFlag.DYNAMIC_TRACKING,
+								CompilerFlag.JSON_MINIFICATION
+								);
+						//@fuckboy:off
 					}
 
 					catch(Exception e)
