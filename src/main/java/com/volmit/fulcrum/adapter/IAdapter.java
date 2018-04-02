@@ -3,6 +3,7 @@ package com.volmit.fulcrum.adapter;
 import java.lang.reflect.InvocationTargetException;
 
 import org.bukkit.Chunk;
+import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -12,6 +13,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
 
 import com.volmit.dumpster.GList;
 import com.volmit.fulcrum.bukkit.BlockType;
@@ -156,4 +158,8 @@ public interface IAdapter extends Listener
 	public void showSpawner(Location block);
 
 	public void sendAdvancementIntense(Player p, ItemStack is, String text);
+
+	public boolean isTileEntity(Block b);
+
+	public PotionEffect getGlowEffect(DyeColor color);
 }

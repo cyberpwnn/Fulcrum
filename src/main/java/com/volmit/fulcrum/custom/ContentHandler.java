@@ -100,11 +100,6 @@ public class ContentHandler implements Listener
 			}
 
 			ground.put(i, i.isOnGround());
-
-			if(Fulcrum.contentRegistry.hasFlag(CompilerFlag.DYNAMIC_TRACKING))
-			{
-				updateView(i);
-			}
 		}
 
 		for(Player i : vdel.k())
@@ -165,76 +160,6 @@ public class ContentHandler implements Listener
 		stopped.clear();
 	}
 
-	private void updateView(Player p)
-	{
-		if(!view.containsKey(p))
-		{
-			view.put(p, max);
-		}
-
-		if(!hidden.containsKey(p))
-		{
-			hidden.put(p, new GList<Location>());
-		}
-
-		int oh = hidden.get(p).size();
-		controlled.put(p, ContentManager.getBlocks(p.getLocation(), max));
-
-		for(Location i : controlled.get(p))
-		{
-			double f = i.distanceSquared(p.getLocation());
-			if(f > Math.pow(view.get(p), 2))
-			{
-				if(Math.abs(f - Math.pow(view.get(p), 2)) < 10)
-				{
-					continue;
-				}
-
-				if(!hidden.get(p).contains(i))
-				{
-					hidden.get(p).add(i);
-					ContentManager.a().hideSpawner(i);
-				}
-			}
-
-			else if(hidden.get(p).contains(i))
-			{
-				hidden.get(p).remove(i);
-				ContentManager.a().showSpawner(i);
-			}
-		}
-
-		for(Location i : hidden.get(p).copy())
-		{
-			if(!ContentManager.isCustom(i.getBlock()))
-			{
-				hidden.get(p).remove(i);
-				continue;
-			}
-
-			if(i.distanceSquared(p.getLocation()) > Math.pow(max, 2))
-			{
-				hidden.get(p).remove(i);
-				ContentManager.a().showSpawner(i);
-			}
-		}
-
-		int v = controlled.get(p).size() - oh;
-		double x = (max + 2) - (v / 7);
-
-		if(x > max)
-		{
-			x = max;
-		}
-
-		if(x < min)
-		{
-			x = min;
-		}
-
-		view.put(p, (x + (view.get(p) * 79)) / 80.0);
-	}
-
 	private int getBlockPos(Block b)
 	{
 		return b.getX() + b.getY() + b.getZ();
@@ -270,7 +195,7 @@ public class ContentHandler implements Listener
 		{
 			int count = ContentManager.getBlock(is) != null ? ContentManager.getBlock(is).getStackSize() : ContentManager.getItem(is).getStackSize();
 			int left = e.getOldCursor().getAmount();
-			int div = e.getInventorySlots().size();
+			int div = e.getRawSlots().size();
 			int f = left / div;
 
 			if(f <= 1)
@@ -279,16 +204,17 @@ public class ContentHandler implements Listener
 			}
 
 			e.setCancelled(true);
-			for(int i : e.getInventorySlots())
+			for(int i : e.getRawSlots())
 			{
 				int place = Math.min(f, count);
-				ItemStack ix = e.getInventory().getItem(i);
+				ItemStack ix = e.getView().getItem(i);
 
 				if(ix == null || ix.getType().equals(Material.AIR))
 				{
 					ItemStack iv = is.clone();
 					iv.setAmount(place);
-					e.getInventory().setItem(i, iv);
+					e.getView().setItem(i, iv);
+
 					left -= place;
 				}
 			}
@@ -320,6 +246,11 @@ public class ContentHandler implements Listener
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void on(InventoryClickEvent e)
 	{
+		if(e.getCurrentItem() == null)
+		{
+			return;
+		}
+
 		ItemStack is = e.getCurrentItem().clone();
 		ItemStack cursor = e.getCursor();
 		Inventory top = e.getView().getTopInventory();
@@ -544,6 +475,11 @@ public class ContentHandler implements Listener
 				aa.osc(0.35).play(e.getBlock().getLocation().clone().add(0.5, 0.5, 0.5));
 			}
 
+			if(e.getPlayer().getGameMode().equals(GameMode.CREATIVE))
+			{
+				return;
+			}
+
 			ItemStack is = e.getPlayer().getInventory().getItemInMainHand();
 			String type = ToolType.getType(is);
 			double speed = ToolLevel.getMiningSpeed(cb, is);
@@ -742,6 +678,11 @@ public class ContentHandler implements Listener
 
 		if(e.getAction().equals(Action.RIGHT_CLICK_BLOCK))
 		{
+			if(!e.getPlayer().isSneaking() && Fulcrum.adapter.isTileEntity(e.getClickedBlock()))
+			{
+				return;
+			}
+
 			CustomBlock cb = ContentManager.getBlock(is);
 
 			if(ci != null)

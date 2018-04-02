@@ -3,6 +3,7 @@ package com.volmit.fulcrum;
 import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
+import java.util.Iterator;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -25,10 +26,12 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.util.Vector;
 
 import com.volmit.dumpster.F;
+import com.volmit.dumpster.FinalInteger;
 import com.volmit.dumpster.GBiset;
 import com.volmit.dumpster.GList;
 import com.volmit.dumpster.GMap;
 import com.volmit.fulcrum.bukkit.A;
+import com.volmit.fulcrum.bukkit.BlockType;
 import com.volmit.fulcrum.bukkit.Cuboid;
 import com.volmit.fulcrum.bukkit.P;
 import com.volmit.fulcrum.bukkit.ParticleEffect;
@@ -36,8 +39,11 @@ import com.volmit.fulcrum.bukkit.S;
 import com.volmit.fulcrum.bukkit.TICK;
 import com.volmit.fulcrum.bukkit.TaskLater;
 import com.volmit.fulcrum.bukkit.W;
+import com.volmit.fulcrum.custom.ContentManager;
+import com.volmit.fulcrum.custom.CustomBlock;
 import com.volmit.fulcrum.event.VolumeConstructEvent;
 import com.volmit.fulcrum.lang.C;
+import com.volmit.fulcrum.lang.MaterialBlock;
 import com.volmit.fulcrum.sfx.Audio;
 import com.volmit.fulcrum.vfx.particle.ParticleRedstone;
 import com.volmit.fulcrum.world.scm.IMappedVolume;
@@ -94,6 +100,7 @@ public class SCMManager implements Listener, CommandExecutor
 				sender.sendMessage("/scm list");
 				sender.sendMessage("/scm status");
 				sender.sendMessage("/scm save <id>");
+				sender.sendMessage("/scm set <custom block>");
 				sender.sendMessage("/scm place <id>");
 				sender.sendMessage("/scm delete <id>");
 				return true;
@@ -166,6 +173,70 @@ public class SCMManager implements Listener, CommandExecutor
 
 			else if(args.length >= 1)
 			{
+				if(args[0].equalsIgnoreCase("set"))
+				{
+					if(args.length == 2)
+					{
+						CustomBlock cb = ContentManager.getBlock(args[1]);
+
+						if(cb != null)
+						{
+							Cuboid c = new Cuboid(getSelection((Player) sender)[0], getSelection((Player) sender)[1]);
+							Iterator<Block> it = c.iterator();
+							FinalInteger d = new FinalInteger(0);
+							while(it.hasNext())
+							{
+								d.add(1);
+								Block b = it.next();
+								new TaskLater(d.get() / 100)
+								{
+									@Override
+									public void run()
+									{
+										ContentManager.setBlock(b, cb);
+									}
+								};
+							}
+
+							new TaskLater((int) (c.volume() / 100.0))
+							{
+								@Override
+								public void run()
+								{
+									sender.sendMessage("Done");
+								}
+							};
+						}
+
+						else
+						{
+							MaterialBlock mb = W.getMaterialBlock(args[1]);
+
+							if(mb != null)
+							{
+								Cuboid c = new Cuboid(getSelection((Player) sender)[0], getSelection((Player) sender)[1]);
+								Iterator<Block> it = c.iterator();
+								Fulcrum.adapter.pushPhysics();
+
+								while(it.hasNext())
+								{
+									Block b = it.next();
+									Fulcrum.adapter.setBlock(b.getLocation(), new BlockType(mb.getMaterial(), mb.getData()));
+								}
+
+								Fulcrum.adapter.popPhysics();
+
+								sender.sendMessage("Done");
+							}
+						}
+					}
+
+					else
+					{
+						sender.sendMessage("/scm set <BLOCK>");
+					}
+				}
+
 				if(args[0].equalsIgnoreCase("delete"))
 				{
 					if(args.length == 2)

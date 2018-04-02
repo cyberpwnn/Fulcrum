@@ -18,20 +18,92 @@ import com.volmit.fulcrum.bukkit.W;
 import com.volmit.fulcrum.sfx.Audible;
 import com.volmit.fulcrum.sfx.Audio;
 
+/**
+ * The content manager assists with interacting with registered content
+ *
+ * @author cyberpwn
+ */
 public class ContentManager
 {
 	public static boolean reload = false;
 
+	/**
+	 * Request the content manager reload itself and re-call registry events
+	 */
 	public static void reloadContentManager()
 	{
 		reload = true;
 	}
 
+	/**
+	 * Get the content registry
+	 *
+	 * @return the content registry
+	 */
 	public static ContentRegistry r()
 	{
 		return Fulcrum.contentRegistry;
 	}
 
+	/**
+	 * Grant an advancement
+	 *
+	 * @param p
+	 *            the player
+	 * @param a
+	 *            the custom advancement
+	 */
+	public static void grantAdvancement(Player p, CustomAdvancement a)
+	{
+		a.grant(p);
+	}
+
+	/**
+	 * Grant an advancement
+	 *
+	 * @param p
+	 *            the player
+	 * @param a
+	 *            the custom advancement
+	 */
+	public static void grantAdvancement(Player p, String id)
+	{
+		grantAdvancement(p, getAdvancement(id));
+	}
+
+	/**
+	 * Revoke an advancement
+	 *
+	 * @param p
+	 *            the player
+	 * @param a
+	 *            the custom advancement
+	 */
+	public static void revokeAdvancement(Player p, CustomAdvancement a)
+	{
+		a.revoke(p);
+	}
+
+	/**
+	 * Revoke an advancement
+	 *
+	 * @param p
+	 *            the player
+	 * @param a
+	 *            the custom advancement
+	 */
+	public static void revokeAdvancement(Player p, String id)
+	{
+		revokeAdvancement(p, getAdvancement(id));
+	}
+
+	/**
+	 * Get a custom advancement by id
+	 *
+	 * @param id
+	 *            the id
+	 * @return the advancement or null
+	 */
 	public static CustomAdvancement getAdvancement(String id)
 	{
 		for(CustomAdvancement i : r().getAdvancements())
@@ -45,11 +117,23 @@ public class ContentManager
 		return null;
 	}
 
+	/**
+	 * Get the fulcrum adapter
+	 *
+	 * @return the adapter
+	 */
 	public static IAdapter a()
 	{
 		return Fulcrum.adapter;
 	}
 
+	/**
+	 * Get all custom block (locations) in the given chunk (EXPENSIVE
+	 *
+	 * @param c
+	 *            the chunk
+	 * @return the locations
+	 */
 	public static GList<Location> getBlocks(Chunk c)
 	{
 		GList<Location> lx = a().getSpawners(c);
@@ -65,6 +149,17 @@ public class ContentManager
 		return lx;
 	}
 
+	/**
+	 * Get custom blocks within a sphere
+	 *
+	 * @param l
+	 *            the center
+	 * @param distance
+	 *            the radius
+	 * @param c
+	 *            the radius of chunks to visit
+	 * @return the list of locations
+	 */
 	public static GList<Location> getBlocks(Location l, double distance, int c)
 	{
 		GList<Location> lx = new GList<Location>();
@@ -83,11 +178,32 @@ public class ContentManager
 		return lx;
 	}
 
+	/**
+	 * Get custom blocks within a sphere
+	 *
+	 * @param l
+	 *            the center
+	 * @param distance
+	 *            the radius
+	 * @return the list of locations
+	 */
 	public static GList<Location> getBlocks(Location l, double distance)
 	{
 		return getBlocks(l, distance, 1 + (int) (distance / 16.0));
 	}
 
+	/**
+	 * Stack an itemstack in a given inventory
+	 *
+	 * @param ist
+	 *            the item
+	 * @param inv
+	 *            the inventory
+	 * @param e
+	 *            the entity who wants to merge
+	 * @param hintSlot
+	 *            the hinted slot to merge at
+	 */
 	public static void stack(ItemStack ist, Inventory inv, HumanEntity e, int hintSlot)
 	{
 		int count = 0;
@@ -120,56 +236,123 @@ public class ContentManager
 
 	}
 
+	/**
+	 * Check if a given material is used by the allocation space
+	 *
+	 * @param m
+	 *            the material
+	 * @return true if it is
+	 */
 	public static boolean isUsed(Material m)
 	{
 		return r().ass().getNormalAllocations().k().contains(m);
 	}
 
+	/**
+	 * Check if a given material is used by the allocation space
+	 *
+	 * @param m
+	 *            the material
+	 * @param durability
+	 *            the durability value
+	 * @return true if it is
+	 */
 	public static boolean isUsed(Material m, short durability)
 	{
 		return isUsed(m) && r().ass().getNormalAllocations().get(m).isUsed(durability);
 	}
 
+	/**
+	 * Get the custom item type for the given itemstack
+	 *
+	 * @param item
+	 *            the itemstack
+	 * @return the custom item or null
+	 */
 	public static CustomItem getItem(ItemStack item)
 	{
 		return item.getItemMeta().isUnbreakable() ? getItem(item.getType(), item.getDurability()) : null;
 	}
 
+	/**
+	 * Get the remapped sound
+	 *
+	 * @return the sound
+	 */
 	public static Audible getMetalBreakSound()
 	{
 		return new Audio().s("m.block.metal.break").setPitch(1.2f);
 	}
 
+	/**
+	 * Get the remapped sound
+	 *
+	 * @return the sound
+	 */
 	public static Audible getMetalFallSound()
 	{
 		return new Audio().s("m.block.metal.fall").setPitch(1.2f).v(0.5f);
 	}
 
+	/**
+	 * Get the remapped sound
+	 *
+	 * @return the sound
+	 */
 	public static Audible getMetalHitSound()
 	{
 		return new Audio().s("m.block.metal.hit").setPitch(1.2f).v(0.5f);
 	}
 
+	/**
+	 * Get the remapped sound
+	 *
+	 * @return the sound
+	 */
 	public static Audible getMetalStepSound()
 	{
 		return new Audio().s("m.block.metal.step").setPitch(1.2f).v(0.5f);
 	}
 
+	/**
+	 * Get the remapped sound
+	 *
+	 * @return the sound
+	 */
 	public static Audible getHoeTillSound()
 	{
 		return new Audio().s("m.item.hoe.till");
 	}
 
+	/**
+	 * Get the remapped sound
+	 *
+	 * @return the sound
+	 */
 	public static Audible getLeatherArmorEquipSound()
 	{
 		return new Audio().s("m.item.armor.equip_leather").v(0.7f);
 	}
 
+	/**
+	 * Get the remapped sound
+	 *
+	 * @return the sound
+	 */
 	public static Audible getPickupSound()
 	{
 		return new Audio().s("m.entity.item.pickup").vp(0.5f, 1.5f);
 	}
 
+	/**
+	 * Get a custom item from material and durability
+	 *
+	 * @param m
+	 *            the material
+	 * @param durability
+	 *            the durability
+	 * @return the item or null
+	 */
 	public static CustomItem getItem(Material m, short durability)
 	{
 		if(isUsed(m, durability))
@@ -186,11 +369,29 @@ public class ContentManager
 		return null;
 	}
 
+	/**
+	 * Add an item to the inventory force stacking if its custom
+	 *
+	 * @param inv
+	 *            the inventory
+	 * @param is
+	 *            the item
+	 */
 	public static void addToInventory(Inventory inv, ItemStack is)
 	{
 		addToInventory(inv, is, 0);
 	}
 
+	/**
+	 * Add an item to the inventory force stacking if its needed
+	 *
+	 * @param inv
+	 *            the inventory
+	 * @param is
+	 *            the item
+	 * @param hint
+	 *            the slot hint
+	 */
 	public static void addToInventory(Inventory inv, ItemStack is, int hint)
 	{
 		ItemStack[] iss = inv.getContents();
@@ -259,11 +460,25 @@ public class ContentManager
 		}
 	}
 
+	/**
+	 * Get a custom item for the drop
+	 *
+	 * @param item
+	 *            the item entity
+	 * @return the custom item or null
+	 */
 	public static CustomItem getItem(Item item)
 	{
 		return getItem(item.getItemStack());
 	}
 
+	/**
+	 * Check if the given item entity is custom (block or item)
+	 *
+	 * @param item
+	 *            the item entity
+	 * @return true if it is
+	 */
 	public static boolean isCustom(Item item)
 	{
 		if(item == null)
@@ -274,6 +489,13 @@ public class ContentManager
 		return isCustom(item.getItemStack());
 	}
 
+	/**
+	 * Check if the given itemstack is custom block or item
+	 *
+	 * @param item
+	 *            the item
+	 * @return true if it is
+	 */
 	public static boolean isCustom(ItemStack item)
 	{
 		if(item == null)
@@ -294,6 +516,13 @@ public class ContentManager
 		return isUsed(item.getType(), item.getDurability());
 	}
 
+	/**
+	 * Check if the given block is custom blocks only
+	 *
+	 * @param block
+	 *            the block
+	 * @return true if it is
+	 */
 	public static boolean isCustom(Block block)
 	{
 		if(block == null)
@@ -304,6 +533,13 @@ public class ContentManager
 		return block.getType().equals(Material.MOB_SPAWNER) && getBlock(block) != null;
 	}
 
+	/**
+	 * Create a custom inventory
+	 *
+	 * @param i
+	 *            the inventory type (custom)
+	 * @return the inventory object or null
+	 */
 	public static Inventory createInventory(CustomInventory i)
 	{
 		if(i == null)
@@ -318,11 +554,25 @@ public class ContentManager
 		return inv;
 	}
 
+	/**
+	 * Create a custom inventory
+	 *
+	 * @param inventory
+	 *            the custom inventory id
+	 * @return the custom inventory or null
+	 */
 	public static Inventory createInventory(String inventory)
 	{
 		return createInventory(getInventory(inventory));
 	}
 
+	/**
+	 * Get a custom inventory
+	 *
+	 * @param id
+	 *            the id
+	 * @return the custom inventory
+	 */
 	public static CustomInventory getInventory(String id)
 	{
 		for(CustomInventory i : getInventories())
@@ -336,6 +586,13 @@ public class ContentManager
 		return null;
 	}
 
+	/**
+	 * Get a custom item
+	 *
+	 * @param id
+	 *            the id
+	 * @return the item or null
+	 */
 	public static CustomItem getItem(String id)
 	{
 		for(CustomItem i : getItems())
@@ -349,6 +606,13 @@ public class ContentManager
 		return null;
 	}
 
+	/**
+	 * Get a custom block
+	 *
+	 * @param id
+	 *            the id
+	 * @return the block or null
+	 */
 	public static CustomBlock getBlock(String id)
 	{
 		for(CustomBlock i : getBlocks())
@@ -362,6 +626,13 @@ public class ContentManager
 		return null;
 	}
 
+	/**
+	 * Get a custom block
+	 *
+	 * @param is
+	 *            the itemstack
+	 * @return the block or null
+	 */
 	public static CustomBlock getBlock(ItemStack is)
 	{
 		if(!isCustom(is))
@@ -382,27 +653,63 @@ public class ContentManager
 		return null;
 	}
 
+	/**
+	 * Set the block to a custom block
+	 *
+	 * @param block
+	 *            the block
+	 * @param c
+	 *            the custom block
+	 */
 	public static void setBlock(Block block, CustomBlock c)
 	{
 		a().setSpawnerType(block.getLocation(), c.getSuperID());
 	}
 
+	/**
+	 * Set the block to a custom block
+	 *
+	 * @param block
+	 *            the block
+	 * @param superId
+	 *            the superid
+	 */
 	public static void setBlock(Block block, int superId)
 	{
 		setBlock(block, getBlock(superId));
 	}
 
+	/**
+	 * Play the step sound for the given block (if its custom)
+	 *
+	 * @param block
+	 *            the block
+	 */
 	public static void stepBlock(Block block)
 	{
 		playBlockStep(block);
 	}
 
+	/**
+	 * Place a block setting it and playing sound
+	 *
+	 * @param block
+	 *            the block
+	 * @param c
+	 *            the custom type
+	 */
 	public static void placeBlock(Block block, CustomBlock c)
 	{
 		setBlock(block, c);
 		playBlockPlace(block, c);
 	}
 
+	/**
+	 * Play block step sound
+	 *
+	 * @param block
+	 *            the block to play
+	 */
 	public static void playBlockStep(Block block)
 	{
 		if(isCustom(block))
@@ -416,6 +723,14 @@ public class ContentManager
 		}
 	}
 
+	/**
+	 * Play block place (just the effect sound)
+	 *
+	 * @param block
+	 *            the block
+	 * @param c
+	 *            the custom block
+	 */
 	public static void playBlockPlace(Block block, CustomBlock c)
 	{
 		if(isCustom(block))
@@ -429,6 +744,12 @@ public class ContentManager
 		}
 	}
 
+	/**
+	 * Play a block break effect
+	 *
+	 * @param block
+	 *            the block
+	 */
 	public static void playBlockBreak(Block block)
 	{
 		if(isCustom(block))
@@ -442,16 +763,37 @@ public class ContentManager
 		}
 	}
 
+	/**
+	 * Check if the given slot is a restricted slot in a custom inventory
+	 *
+	 * @param slot
+	 *            the slot
+	 * @return true if the slot is restricted
+	 */
 	public static boolean isRestrictedSlot(int slot)
 	{
 		return slot == 0 || slot == 18;
 	}
 
+	/**
+	 * Break a block.
+	 *
+	 * @param block
+	 *            the block
+	 */
 	public static void breakBlock(Block block)
 	{
 		breakBlock(block, false);
 	}
 
+	/**
+	 * Break a custom block
+	 *
+	 * @param block
+	 *            the block
+	 * @param drop
+	 *            should the item be dropped
+	 */
 	public static void breakBlock(Block block, boolean drop)
 	{
 		if(isCustom(block))
@@ -472,56 +814,124 @@ public class ContentManager
 		}
 	}
 
+	/**
+	 * Get all registered custom items
+	 *
+	 * @return the items
+	 */
 	public static GList<CustomItem> getItems()
 	{
 		return r().getItems().copy();
 	}
 
+	/**
+	 * Get all custom blocks
+	 *
+	 * @return the blocks
+	 */
 	public static GList<CustomBlock> getBlocks()
 	{
 		return r().getBlocks().copy();
 	}
 
+	/**
+	 * Get all custom inventories
+	 *
+	 * @return the inventories
+	 */
 	public static GList<CustomInventory> getInventories()
 	{
 		return r().getInventories().copy();
 	}
 
+	/**
+	 * Get the custom block
+	 *
+	 * @param block
+	 *            the custom block
+	 * @return the custom block or null
+	 */
 	public static CustomBlock getBlock(Block block)
 	{
 		return getBlock(a().getSpawnerType(block.getLocation()));
 	}
 
+	/**
+	 * Get the custom block
+	 *
+	 * @param superId
+	 *            the superid
+	 * @return the block or null
+	 */
 	public static CustomBlock getBlock(int superId)
 	{
 		return r().getSuperBlocks().get(superId);
 	}
 
+	/**
+	 * Get the custom item
+	 *
+	 * @param superId
+	 *            the superid
+	 * @return the custom item or null
+	 */
 	public static CustomItem getItem(int superId)
 	{
 		return r().getSuperItems().get(superId);
 	}
 
+	/**
+	 * Get the custom inventory
+	 *
+	 * @param superId
+	 *            the superid
+	 * @return the inventory or null
+	 */
 	public static CustomInventory getInventory(int superId)
 	{
 		return r().getSuperInventories().get(superId);
 	}
 
+	/**
+	 * Get the percent usage of item predicates
+	 *
+	 * @return the capacity
+	 */
 	public static double getCapacityUsage()
 	{
 		return (double) getUsedCapacity() / (double) getMaxCapacity();
 	}
 
+	/**
+	 * Get the maximum capacity
+	 *
+	 * @return the capacity
+	 */
 	public static int getMaxCapacity()
 	{
 		return r().ass().getNormalCapacity();
 	}
 
+	/**
+	 * Get the used capacity
+	 *
+	 * @return the used capacity
+	 */
 	public static int getUsedCapacity()
 	{
 		return r().ass().getNormalUse();
 	}
 
+	/**
+	 * Transfer a clicked slot from the inventories
+	 *
+	 * @param clickedInventory
+	 *            the clicked inventory
+	 * @param move
+	 *            the inventory to move to
+	 * @param clickedSlot
+	 *            the clicked slot
+	 */
 	public static void transfer(Inventory clickedInventory, Inventory move, int clickedSlot)
 	{
 		ItemStack is = clickedInventory.getItem(clickedSlot).clone();

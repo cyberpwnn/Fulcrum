@@ -5,11 +5,14 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.net.Inet4Address;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.UUID;
 
 import org.bukkit.Chunk;
+import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -19,6 +22,8 @@ import org.bukkit.block.CreatureSpawner;
 import org.bukkit.craftbukkit.v1_12_R1.CraftChunk;
 import org.bukkit.craftbukkit.v1_12_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_12_R1.block.CraftBlock;
+import org.bukkit.craftbukkit.v1_12_R1.block.CraftBlockState;
+import org.bukkit.craftbukkit.v1_12_R1.block.CraftCreatureSpawner;
 import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_12_R1.util.CraftMagicNumbers;
 import org.bukkit.entity.Entity;
@@ -44,6 +49,7 @@ import org.bukkit.event.player.PlayerResourcePackStatusEvent.Status;
 import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
@@ -842,7 +848,16 @@ public final class Adapter12 implements IAdapter
 				if(p.getAddress().getAddress().getHostAddress().equals("127.0.0.1"))
 				{
 					System.out.println("Client is on the same network as the server. Setting url to local");
-					uurl = "localhost";
+
+					try
+					{
+						uurl = Inet4Address.getLocalHost().getHostAddress();
+					}
+
+					catch(UnknownHostException e)
+					{
+						e.printStackTrace();
+					}
 				}
 
 				String url = uurl;
@@ -890,8 +905,18 @@ public final class Adapter12 implements IAdapter
 				if(p.getAddress().getAddress().getHostAddress().equals("127.0.0.1"))
 				{
 					System.out.println("Client is on the same network as the server. Setting url to local");
-					uurl = "localhost";
+
+					try
+					{
+						uurl = Inet4Address.getLocalHost().getHostAddress();
+					}
+
+					catch(UnknownHostException e)
+					{
+						e.printStackTrace();
+					}
 				}
+
 				String url = uurl;
 
 				try
@@ -1337,5 +1362,22 @@ public final class Adapter12 implements IAdapter
 		}
 
 		return locations;
+	}
+
+	@Override
+	public boolean isTileEntity(Block b)
+	{
+		if(b.getState().getClass().equals(CraftCreatureSpawner.class))
+		{
+			return false;
+		}
+
+		return !b.getState().getClass().equals(CraftBlockState.class);
+	}
+
+	@Override
+	public PotionEffect getGlowEffect(DyeColor color)
+	{
+		return new PotionEffect(PotionEffectType.GLOWING, Integer.MAX_VALUE, 0, false, true, color.getColor());
 	}
 }

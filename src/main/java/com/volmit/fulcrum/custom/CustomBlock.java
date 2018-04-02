@@ -23,6 +23,8 @@ public abstract class CustomBlock implements ICustom
 	private Audible pickupSound;
 	private Audible stepSound;
 	private ModelType renderType;
+	private BlockRegistryType blockType;
+	private BlockRender blockRenderType;
 	private String name;
 	private final String id;
 	private short durabilityLock;
@@ -50,6 +52,8 @@ public abstract class CustomBlock implements ICustom
 		matt = "";
 		renderType = ModelType.CUBE_ALL;
 		pickupSound = ContentManager.getPickupSound();
+		blockType = BlockRegistryType.TILE_BLOCK;
+		blockRenderType = BlockRender.NORMAL;
 
 		CustomBlock ci = ContentManager.getBlock(id);
 
@@ -60,6 +64,8 @@ public abstract class CustomBlock implements ICustom
 			setSuperID(ci.getSuperID());
 		}
 	}
+
+	public abstract void onViewTicked(Player player, Block block);
 
 	public abstract void onPickedUp(Player player, Item item, boolean cancel);
 
@@ -325,5 +331,25 @@ public abstract class CustomBlock implements ICustom
 	public int getStackSize()
 	{
 		return stackSize;
+	}
+
+	public BlockRegistryType getBlockType()
+	{
+		return blockType;
+	}
+
+	public void setBlockType(BlockRegistryType blockType)
+	{
+		this.blockType = blockType;
+	}
+
+	public BlockRender getBlockRenderType()
+	{
+		return blockRenderType;
+	}
+
+	public void setBlockRenderType(BlockRender blockRenderType)
+	{
+		this.blockRenderType = blockRenderType;
 	}
 }

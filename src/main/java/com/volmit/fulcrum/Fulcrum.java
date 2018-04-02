@@ -23,7 +23,6 @@ import com.volmit.dumpster.GList;
 import com.volmit.dumpster.M;
 import com.volmit.fulcrum.adapter.Adapter12;
 import com.volmit.fulcrum.adapter.IAdapter;
-import com.volmit.fulcrum.bukkit.A;
 import com.volmit.fulcrum.bukkit.P;
 import com.volmit.fulcrum.bukkit.TICK;
 import com.volmit.fulcrum.bukkit.Task;
@@ -170,7 +169,6 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 		return new FastWorld12(world);
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args)
 	{
@@ -242,26 +240,6 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 					Fulcrum.adapter.sendResourcePackWeb(p, rid + ".zip");
 				}
 
-				else if(args[0].equalsIgnoreCase("pop"))
-				{
-					new TaskLater()
-					{
-						@Override
-						public void run()
-						{
-							try
-							{
-								contentRegistry.compileResources();
-							}
-
-							catch(Exception e)
-							{
-								e.printStackTrace();
-							}
-						}
-					};
-				}
-
 				else if(args[0].equalsIgnoreCase("fix"))
 				{
 					adapter.resetSpawnerRotation(P.targetBlock(p, 8));
@@ -318,21 +296,14 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 			ContentManager.reload = false;
 			icd = 10;
 
-			new A()
+			new Thread("Fulcrum Resource Compiler")
 			{
 				@Override
 				public void run()
 				{
 					try
 					{
-						//@fuckboy:on
-						contentRegistry.compileResources(
-								CompilerFlag.PREDICATE_MINIFICATION,
-								CompilerFlag.PREDICATE_CYCLING,
-								CompilerFlag.DYNAMIC_TRACKING,
-								CompilerFlag.JSON_MINIFICATION
-								);
-						//@fuckboy:off
+						contentRegistry.compileResources(CompilerFlag.CONCURRENT_REGISTRY, CompilerFlag.PREDICATE_MINIFICATION, CompilerFlag.PREDICATE_CYCLING, CompilerFlag.JSON_MINIFICATION);
 					}
 
 					catch(Exception e)
@@ -340,7 +311,7 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 						e.printStackTrace();
 					}
 				}
-			};
+			}.start();
 		}
 	}
 

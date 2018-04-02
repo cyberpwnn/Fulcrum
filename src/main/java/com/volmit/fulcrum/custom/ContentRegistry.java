@@ -174,7 +174,7 @@ public class ContentRegistry implements Listener
 		inventories.add(i);
 	}
 
-	public void compileResources(CompilerFlag... flagSet) throws IOException, NoSuchAlgorithmException
+	public void compileResources(CompilerFlag... flagSet) throws IOException, NoSuchAlgorithmException, InterruptedException
 	{
 		flags = new GList<CompilerFlag>(flagSet);
 		Profiler pr = new Profiler();
@@ -183,7 +183,87 @@ public class ContentRegistry implements Listener
 		ContentRegistryEvent e = new ContentRegistryEvent(rr);
 		Fulcrum.callEvent(e);
 
-		if(rr.connect(this))
+		if(!rr.connect(this))
+		{
+			return;
+		}
+
+		registerDebug();
+
+		if(hasFlag(CompilerFlag.CONCURRENT_REGISTRY))
+		{
+			System.out.println("Warning: Using Concurrent Registry");
+			loadResources();
+
+			Thread tAdvancements = new Thread("Fulcrum Registry - Advancements")
+			{
+				@Override
+				public void run()
+				{
+					processAdvancements();
+				}
+			};
+
+			Thread tBaseContent = new Thread("Fulcrum Registry - Content")
+			{
+				@Override
+				public void run()
+				{
+					processItems();
+					processBlocks();
+					processInventories();
+				}
+			};
+
+			Thread tSounds = new Thread("Fulcrum Registry - Sounds")
+			{
+				@Override
+				public void run()
+				{
+					try
+					{
+						processSounds();
+					}
+
+					catch(Exception e)
+					{
+						e.printStackTrace();
+					}
+				}
+			};
+
+			Thread tRecipes = new Thread("Fulcrum Registry - Recipes")
+			{
+				@Override
+				public void run()
+				{
+					processRecipes();
+				}
+			};
+
+			Thread tPredicates = new Thread("Fulcrum Registry - Predicates")
+			{
+				@Override
+				public void run()
+				{
+					buildPredicates();
+				}
+			};
+
+			tBaseContent.start();
+			tSounds.start();
+			tAdvancements.start();
+			tBaseContent.join();
+			tRecipes.start();
+			tPredicates.start();
+			tAdvancements.join();
+			tSounds.join();
+			tRecipes.join();
+			tPredicates.join();
+			mergeResources();
+		}
+
+		else
 		{
 			loadResources();
 			processAdvancements();
@@ -193,9 +273,9 @@ public class ContentRegistry implements Listener
 			processSounds();
 			buildPredicates();
 			mergeResources();
+			processRecipes();
 		}
 
-		processRecipes();
 		pr.end();
 		System.out.println("Items: " + F.f(items.size()));
 		System.out.println("Blocks: " + F.f(blocks.size()));
@@ -203,6 +283,11 @@ public class ContentRegistry implements Listener
 		System.out.println("Advancements: " + F.f(advancements.size()));
 		System.out.println("Inventories: " + F.f(inventories.size()));
 		System.out.println(F.f(pack.size()) + " Resources compiled in " + F.time(pr.getMilliseconds(), 2));
+	}
+
+	private void registerDebug()
+	{
+		registerInventory(new CustomInventory("debug_slots"));
 	}
 
 	private void processAdvancements()
@@ -417,44 +502,59 @@ public class ContentRegistry implements Listener
 		registerSoundReplacement(new SoundReplacement("ui.toast.challenge_complete", soundBell));
 		registerSoundReplacement(new SoundReplacement("ui.toast.in", soundIn));
 		registerSoundReplacement(new SoundReplacement("ui.toast.out", soundOut));
-
 		System.out.println("Reading " + F.f(desound.keySet().size()) + " default sound entries");
 		System.out.println("Processing " + F.f(soundReplacements.size()) + " sound replacements");
 		GSet<String> ffv = new GSet<String>(desound.keySet());
-
+		GList<Thread> tvm = new GList<Thread>();
 		for(String i : ffv)
 		{
 			for(SoundReplacement j : soundReplacements)
 			{
 				if(j.getNode().equals(i))
 				{
-					JSONObject mod = new JSONObject(desound.getJSONObject(i).toString(idf()));
-					JSONObject old = new JSONObject(desound.getJSONObject(i).toString(idf()));
-					GList<String> keys = j.getNewSound().getSoundPaths().k();
-					String d = "[";
-					CNum c = new CNum(keys.size() - 1);
-					int vv = 5000;
-
-					for(int k = 0; k < vv; k++)
+					if(!hasFlag(CompilerFlag.CONCURRENT_REGISTRY))
 					{
-						if(c.getMax() == 0)
+						remap(desound, i, soundx, j);
+					}
+
+					else
+					{
+						if(j.getNewSound().getSoundPaths().k().size() == 1)
 						{
-							d += "\"" + keys.get(0).replace(".ogg", "") + "\",";
+							remap(desound, i, soundx, j);
 						}
 
 						else
 						{
-							c.add(1);
-							d += "\"" + keys.get(c.get()).replace(".ogg", "") + "\",";
+							tvm.add(new Thread("Fulcrum Registry - Sound Remap " + (tvm.size() + 1))
+							{
+								@Override
+								public void run()
+								{
+									remap(desound, i, soundx, j);
+								}
+							});
 						}
 					}
-
-					d = d.substring(0, d.length() - 1) + "]";
-					mod.put("sounds", new JSONArray(d));
-					soundx.put(j.getReplacement(), old);
-					soundx.put(i, mod);
-					System.out.println("  Remapped Sound " + j.getNode() + " -> " + j.getReplacement());
 				}
+			}
+		}
+
+		for(Thread i : tvm)
+		{
+			i.start();
+		}
+
+		for(Thread i : tvm)
+		{
+			try
+			{
+				i.join();
+			}
+
+			catch(InterruptedException e)
+			{
+				e.printStackTrace();
 			}
 		}
 
@@ -472,6 +572,36 @@ public class ContentRegistry implements Listener
 		}
 
 		pack.setResource("sounds.json", soundx.toString(idf()));
+	}
+
+	private void remap(JSONObject desound, String i, JSONObject soundx, SoundReplacement j)
+	{
+		JSONObject mod = new JSONObject(desound.getJSONObject(i).toString(idf()));
+		JSONObject old = new JSONObject(desound.getJSONObject(i).toString(idf()));
+		GList<String> keys = j.getNewSound().getSoundPaths().k();
+		String d = "[";
+		CNum c = new CNum(keys.size() - 1);
+		int vv = 5000;
+
+		if(c.getMax() == 0)
+		{
+			d += F.repeat("\"" + keys.get(0).replace(".ogg", "") + "\",", vv);
+		}
+
+		else
+		{
+			for(int k = 0; k < vv; k++)
+			{
+				c.add(1);
+				d += "\"" + keys.get(c.get()).replace(".ogg", "") + "\",";
+			}
+		}
+
+		d = d.substring(0, d.length() - 1) + "]";
+		mod.put("sounds", new JSONArray(d));
+		soundx.put(j.getReplacement(), old);
+		soundx.put(i, mod);
+		System.out.println("  Remapped Sound " + j.getNode() + " -> " + j.getReplacement());
 	}
 
 	private void processInventories()
