@@ -1,7 +1,11 @@
 package com.volmit.fulcrum.custom;
 
+import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.Recipe;
+import org.bukkit.material.MaterialData;
 
 import com.volmit.dumpster.F;
 import com.volmit.dumpster.GList;
@@ -10,6 +14,7 @@ import com.volmit.fulcrum.bukkit.BlockType;
 
 public class OverridedAllocationSpace
 {
+	private GList<Recipe> impossibleRecipes;
 	private GMap<BlockType, CustomBlock> allocated;
 	private GList<BlockType> unallocatedNormals;
 	private GList<BlockType> unallocatedAlphas;
@@ -18,6 +23,7 @@ public class OverridedAllocationSpace
 
 	public OverridedAllocationSpace()
 	{
+		impossibleRecipes = new GList<Recipe>();
 		allocated = new GMap<BlockType, CustomBlock>();
 		unallocatedNormals = new GList<BlockType>();
 		unallocatedAlphas = new GList<BlockType>();
@@ -52,16 +58,34 @@ public class OverridedAllocationSpace
 		return b;
 	}
 
+	@SuppressWarnings("deprecation")
 	public void sacrificeNormal(BlockType type)
 	{
 		unallocatedNormals.add(type);
 		pn.add(type);
+
+		ItemStack d = new ItemStack(type.getMaterial());
+		d.setData(new MaterialData(type.getMaterial(), type.getData()));
+
+		for(Recipe i : Bukkit.getRecipesFor(d))
+		{
+			impossibleRecipes.add(i);
+		}
 	}
 
+	@SuppressWarnings("deprecation")
 	public void sacrificeAlpha(BlockType type)
 	{
 		unallocatedAlphas.add(type);
 		pa.add(type);
+
+		ItemStack d = new ItemStack(type.getMaterial());
+		d.setData(new MaterialData(type.getMaterial(), type.getData()));
+
+		for(Recipe i : Bukkit.getRecipesFor(d))
+		{
+			impossibleRecipes.add(i);
+		}
 	}
 
 	public void sacrificeNormal(Material mat, int from, int to)
@@ -156,5 +180,20 @@ public class OverridedAllocationSpace
 		}
 
 		return b.getMaterial().name().toLowerCase();
+	}
+
+	public GList<Recipe> getImpossibleRecipes()
+	{
+		return impossibleRecipes;
+	}
+
+	public GList<BlockType> getPn()
+	{
+		return pn;
+	}
+
+	public GList<BlockType> getPa()
+	{
+		return pa;
 	}
 }

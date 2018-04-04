@@ -473,11 +473,11 @@ public class ContentRegistry implements Listener
 		ass.sacrificeNormal(Material.GOLD_HOE, "golden_hoe", "gold_hoe");
 		ass.sacrificeShaded(Material.LEATHER_HELMET, "leather_helmet", "leather_helmet", "leather_helmet_overlay");
 		oass = new OverridedAllocationSpace();
-		oass.sacrificeNormal(Material.WOOL, 15);
 		oass.sacrificeNormal(Material.CONCRETE, 15);
 		oass.sacrificeNormal(Material.CONCRETE_POWDER, 15);
 		oass.sacrificeNormal(Material.STAINED_CLAY, 15);
 		oass.sacrificeAlpha(Material.STAINED_GLASS, 15);
+		System.out.println("Disabling " + F.f(oass.getImpossibleRecipes().size()) + " recipes due to sacrificed blocks.");
 		sounds.removeDuplicates();
 		blocks.removeDuplicates();
 		inventories.removeDuplicates();
@@ -659,7 +659,6 @@ public class ContentRegistry implements Listener
 				i.setTypeTop(idx.getMaterial());
 				i.setDurabilityTop((short) idx.getId());
 				i.setSuperIDTop(idx.getSuperid());
-				System.out.println("   Registered Inventory TOP " + i.getId() + " as " + idx.getMaterial().toString() + ":" + idx.getId());
 			}
 
 			if(ub != null)
@@ -672,7 +671,6 @@ public class ContentRegistry implements Listener
 				i.setTypeBottom(idx.getMaterial());
 				i.setDurabilityBottom((short) idx.getId());
 				i.setSuperIDBottom(idx.getSuperid());
-				System.out.println("   Registered Inventory BOTTOM " + i.getId() + " as " + idx.getMaterial().toString() + ":" + idx.getId());
 			}
 		}
 	}

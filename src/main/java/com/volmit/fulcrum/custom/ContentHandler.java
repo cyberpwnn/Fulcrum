@@ -4,15 +4,20 @@ import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
+import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockDamageEvent;
+import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.CraftItemEvent;
@@ -34,6 +39,7 @@ import com.volmit.fulcrum.bukkit.P;
 import com.volmit.fulcrum.bukkit.TICK;
 import com.volmit.fulcrum.bukkit.Task;
 import com.volmit.fulcrum.bukkit.TaskLater;
+import com.volmit.fulcrum.bukkit.W;
 import com.volmit.fulcrum.event.CustomBlockPlaceEvent;
 import com.volmit.fulcrum.event.PlayerCancelledDiggingEvent;
 import com.volmit.fulcrum.event.PlayerFinishedDiggingEvent;
@@ -54,11 +60,13 @@ public class ContentHandler implements Listener
 	public GMap<Player, GList<Location>> controlled;
 	public GMap<Player, GList<Location>> hidden;
 	private GList<Block> breaks;
+	private GList<Block> update;
 	public static double max = 80.0;
 	public static double min = 12.0;
 
 	public ContentHandler()
 	{
+		update = new GList<Block>();
 		steps = new GMap<Player, Integer>();
 		dist = new GMap<Player, Double>();
 		ground = new GMap<Player, Boolean>();
@@ -212,7 +220,51 @@ public class ContentHandler implements Listener
 			digging.remove(i);
 		}
 
+		for(Block i : update.copy())
+		{
+			CustomBlock cb = ContentManager.getAny(i);
+
+			if(cb != null)
+			{
+				cb.onUpdate(i);
+
+				if(cb.hasFlag(BlockFlag.GRAVITY) && cb.getBlockRegistryType().equals(BlockRegistryType.BUILDING_BLOCK))
+				{
+					processGravity(cb, i);
+				}
+			}
+
+			update.remove(i);
+		}
+
 		stopped.clear();
+	}
+
+	private void processGravity(CustomBlock cb, Block b)
+	{
+		Block below = b.getRelative(BlockFace.DOWN);
+
+		if(below.getType().equals(Material.AIR))
+		{
+			doFall(cb, b);
+			notify(b);
+		}
+	}
+
+	public void notify(Block b)
+	{
+		for(Block i : W.blockFaces(b))
+		{
+			update.add(i);
+		}
+	}
+
+	public void doFall(CustomBlock cb, Block b)
+	{
+		b.setType(Material.AIR);
+		@SuppressWarnings("deprecation")
+		FallingBlock fb = b.getWorld().spawnFallingBlock(b.getLocation().clone().add(0.5, 0, 0.5), cb.getType(), cb.getData());
+		fb.setDropItem(true);
 	}
 
 	private int getBlockPos(Block b)
@@ -475,6 +527,12 @@ public class ContentHandler implements Listener
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void on(PrepareItemCraftEvent e)
 	{
+		if(ContentManager.r().getOass().getImpossibleRecipes().contains(e.getRecipe()))
+		{
+			e.getInventory().setResult(new ItemStack(Material.AIR));
+			return;
+		}
+
 		if(e.isRepair())
 		{
 			ItemStack is = e.getRecipe().getResult();
@@ -677,6 +735,43 @@ public class ContentHandler implements Listener
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void on(BlockBurnEvent e)
+	{
+		if(ContentManager.isOverrided(e.getBlock()))
+		{
+			e.setCancelled(true);
+		}
+	}
+
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void on(BlockExplodeEvent e)
+	{
+		for(Block i : new GList<Block>(e.blockList()))
+		{
+			if((ContentManager.isOverrided(i) && ContentManager.getOverrided(i).hasFlag(BlockFlag.BLAST_RESISTANT)) || ContentManager.isCustom(i) && ContentManager.getBlock(i).hasFlag(BlockFlag.BLAST_RESISTANT))
+			{
+				e.blockList().remove(i);
+			}
+
+			notify(i);
+		}
+	}
+
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void on(EntityExplodeEvent e)
+	{
+		for(Block i : new GList<Block>(e.blockList()))
+		{
+			if((ContentManager.isOverrided(i) && ContentManager.getOverrided(i).hasFlag(BlockFlag.BLAST_RESISTANT)) || ContentManager.isCustom(i) && ContentManager.getBlock(i).hasFlag(BlockFlag.BLAST_RESISTANT))
+			{
+				e.blockList().remove(i);
+			}
+
+			notify(i);
+		}
+	}
+
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void on(EntityPickupItemEvent e)
 	{
 		if(e.getEntity() instanceof Player)
@@ -807,6 +902,12 @@ public class ContentHandler implements Listener
 			}
 
 			ContentManager.getOverrided(e.getBlock()).getPlaceSound().play(e.getBlock().getLocation().clone().add(0.5, 0.5, 0.5));
+		}
+
+		if(!e.isCancelled())
+		{
+			notify(e.getBlock());
+			update.add(e.getBlock());
 		}
 	}
 
@@ -950,6 +1051,11 @@ public class ContentHandler implements Listener
 			{
 				vdel.put(e.getPlayer(), 1);
 			}
+		}
+
+		if(!e.isCancelled())
+		{
+			notify(e.getBlock());
 		}
 	}
 

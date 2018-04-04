@@ -11,6 +11,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import com.volmit.dumpster.GSet;
 import com.volmit.fulcrum.Fulcrum;
 import com.volmit.fulcrum.bukkit.BlockType;
 import com.volmit.fulcrum.sfx.Audible;
@@ -39,9 +40,11 @@ public class CustomBlock implements ICustom
 	private int minimumToolLevel;
 	private double hardness;
 	private byte data;
+	private GSet<BlockFlag> flags;
 
 	public CustomBlock(String id)
 	{
+		flags = new GSet<BlockFlag>();
 		data = -1;
 		hardness = 0.5;
 		toolType = ToolType.HAND;
@@ -66,6 +69,64 @@ public class CustomBlock implements ICustom
 			setDurabilityLock(ci.getDurabilityLock());
 			setSuperID(ci.getSuperID());
 		}
+	}
+
+	public void flag(BlockFlag... flags)
+	{
+		for(BlockFlag i : flags)
+		{
+			this.flags.add(i);
+		}
+	}
+
+	public void addFlag(BlockFlag flag)
+	{
+		flag(flag);
+	}
+
+	public void addFlags(BlockFlag... flags)
+	{
+		flag(flags);
+	}
+
+	public boolean hasFlag(BlockFlag flag)
+	{
+		return flags.contains(flag);
+	}
+
+	public GSet<BlockFlag> getFlags()
+	{
+		return flags;
+	}
+
+	public void setFlags(GSet<BlockFlag> flags)
+	{
+		this.flags = flags;
+	}
+
+	public void setBlockRegistryType(BlockRegistryType blockRegistryType)
+	{
+		this.blockRegistryType = blockRegistryType;
+	}
+
+	public void setSid(int sid)
+	{
+		this.sid = sid;
+	}
+
+	public void setEe(boolean ee)
+	{
+		this.ee = ee;
+	}
+
+	public ItemStack onDrop()
+	{
+		return getItem(1);
+	}
+
+	public void onUpdate(Block block)
+	{
+
 	}
 
 	public void onViewTicked(Player player, Block block)

@@ -28,6 +28,11 @@ public class ContentManager
 {
 	public static boolean reload = false;
 
+	public static CustomBlock getAny(Block b)
+	{
+		return isCustom(b) ? getBlock(b) : getOverrided(b);
+	}
+
 	/**
 	 * Request the content manager reload itself and re-call registry events
 	 */
@@ -901,7 +906,7 @@ public class ContentManager
 
 			if(drop)
 			{
-				ItemStack i = cb.getItem();
+				ItemStack i = cb.onDrop();
 				block.getWorld().dropItemNaturally(block.getLocation().clone().add(0.5, 0.5, 0.5), i);
 			}
 		}
