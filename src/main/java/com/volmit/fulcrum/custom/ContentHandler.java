@@ -953,7 +953,6 @@ public class ContentHandler implements Listener
 			if(e.getPlayer().getGameMode().equals(GameMode.SURVIVAL))
 			{
 				e.setCancelled(true);
-				System.out.println("WTF");
 			}
 		}
 	}
