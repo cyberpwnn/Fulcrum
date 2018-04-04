@@ -36,6 +36,7 @@ import com.volmit.dumpster.JSONException;
 import com.volmit.dumpster.JSONObject;
 import com.volmit.dumpster.Profiler;
 import com.volmit.fulcrum.Fulcrum;
+import com.volmit.fulcrum.bukkit.BlockType;
 import com.volmit.fulcrum.bukkit.P;
 import com.volmit.fulcrum.bukkit.R;
 import com.volmit.fulcrum.bukkit.TaskLater;
@@ -74,6 +75,7 @@ public class ContentRegistry implements Listener
 	private GMap<Integer, CustomInventory> superInventories;
 	private GMap<ModelType, ModelSet> blockModels;
 	private AllocationSpace ass;
+	private OverridedAllocationSpace oass;
 	private String rid;
 	private ResourcePack pack;
 
@@ -306,7 +308,7 @@ public class ContentRegistry implements Listener
 		rid = UUID.randomUUID().toString().replaceAll("-", "");
 		File fpack = new File(Fulcrum.server.getRoot(), rid + ".zip");
 		byte[] hash = pack.writeToArchive(fpack);
-		System.out.println("RESULTS:\n" + ass.toString());
+		System.out.println("RESULTS:\n" + ass.toString() + "\n" + oass.toString());
 		File hasf = new File(Fulcrum.server.getRoot(), "latest-hash.md5");
 		boolean needsToUpdate = true;
 
@@ -468,6 +470,27 @@ public class ContentRegistry implements Listener
 		ass.sacrificeNormal(Material.WOOD_HOE, "wooden_hoe", "wood_hoe");
 		ass.sacrificeNormal(Material.GOLD_HOE, "golden_hoe", "gold_hoe");
 		ass.sacrificeShaded(Material.LEATHER_HELMET, "leather_helmet", "leather_helmet", "leather_helmet_overlay");
+		oass = new OverridedAllocationSpace();
+		oass.sacrificeNormal(Material.WOOL, 15);
+		oass.sacrificeNormal(Material.CONCRETE, 15);
+		oass.sacrificeNormal(Material.CONCRETE_POWDER, 15);
+		oass.sacrificeNormal(Material.STAINED_CLAY, 15);
+		oass.sacrificeNormal(Material.BLACK_GLAZED_TERRACOTTA, 3);
+		oass.sacrificeNormal(Material.BLUE_GLAZED_TERRACOTTA, 3);
+		oass.sacrificeNormal(Material.BROWN_GLAZED_TERRACOTTA, 3);
+		oass.sacrificeNormal(Material.CYAN_GLAZED_TERRACOTTA, 3);
+		oass.sacrificeNormal(Material.GRAY_GLAZED_TERRACOTTA, 3);
+		oass.sacrificeNormal(Material.GREEN_GLAZED_TERRACOTTA, 3);
+		oass.sacrificeNormal(Material.LIGHT_BLUE_GLAZED_TERRACOTTA, 3);
+		oass.sacrificeNormal(Material.LIME_GLAZED_TERRACOTTA, 3);
+		oass.sacrificeNormal(Material.MAGENTA_GLAZED_TERRACOTTA, 3);
+		oass.sacrificeNormal(Material.ORANGE_GLAZED_TERRACOTTA, 3);
+		oass.sacrificeNormal(Material.PINK_GLAZED_TERRACOTTA, 3);
+		oass.sacrificeNormal(Material.PURPLE_GLAZED_TERRACOTTA, 3);
+		oass.sacrificeNormal(Material.RED_GLAZED_TERRACOTTA, 3);
+		oass.sacrificeNormal(Material.SILVER_GLAZED_TERRACOTTA, 3);
+		oass.sacrificeNormal(Material.WHITE_GLAZED_TERRACOTTA, 3);
+		oass.sacrificeAlpha(Material.STAINED_GLASS, 15);
 		sounds.removeDuplicates();
 		blocks.removeDuplicates();
 		inventories.removeDuplicates();
@@ -496,6 +519,21 @@ public class ContentRegistry implements Listener
 		registerSoundReplacement(new SoundReplacement("block.metal.fall", soundSilent));
 		registerSoundReplacement(new SoundReplacement("block.metal.hit", soundSilent));
 		registerSoundReplacement(new SoundReplacement("block.metal.place", soundSilent));
+		registerSoundReplacement(new SoundReplacement("block.cloth.step", soundSilent));
+		registerSoundReplacement(new SoundReplacement("block.cloth.break", soundSilent));
+		registerSoundReplacement(new SoundReplacement("block.cloth.fall", soundSilent));
+		registerSoundReplacement(new SoundReplacement("block.cloth.hit", soundSilent));
+		registerSoundReplacement(new SoundReplacement("block.cloth.place", soundSilent));
+		registerSoundReplacement(new SoundReplacement("block.stone.step", soundSilent));
+		registerSoundReplacement(new SoundReplacement("block.stone.break", soundSilent));
+		registerSoundReplacement(new SoundReplacement("block.stone.fall", soundSilent));
+		registerSoundReplacement(new SoundReplacement("block.stone.hit", soundSilent));
+		registerSoundReplacement(new SoundReplacement("block.stone.place", soundSilent));
+		registerSoundReplacement(new SoundReplacement("block.glass.step", soundSilent));
+		registerSoundReplacement(new SoundReplacement("block.glass.break", soundSilent));
+		registerSoundReplacement(new SoundReplacement("block.glass.fall", soundSilent));
+		registerSoundReplacement(new SoundReplacement("block.glass.hit", soundSilent));
+		registerSoundReplacement(new SoundReplacement("block.glass.place", soundSilent));
 		registerSoundReplacement(new SoundReplacement("item.hoe.till", soundSilent));
 		registerSoundReplacement(new SoundReplacement("entity.item.pickup", soundSilent));
 		registerSoundReplacement(new SoundReplacement("item.hoe.till", soundSilent));
@@ -691,13 +729,30 @@ public class ContentRegistry implements Listener
 				pack.setResource("models/block/" + i.getId() + ".json", new JSONObject(newModel).toString(idf()));
 			}
 
-			AllocatedNode idx = i.isShaded() ? ass.allocateShaded("block/" + i.getId()) : ass.allocateNormal("block/" + i.getId());
-			i.setDurabilityLock((short) idx.getId());
-			i.setType(idx.getMaterial());
-			System.out.println("  Registered Block " + i.getId() + " to " + i.getType() + ":" + i.getDurabilityLock());
-			superBlocks.put(idx.getSuperid(), i);
-			i.setSuperID(idx.getSuperid());
-			i.setMatt(ass.getNameForMaterial(i.getType()));
+			if(i.getBlockType().equals(BlockRegistryType.BUILDING_BLOCK))
+			{
+				BlockType overriding = null;
+
+				if((overriding = oass.allocate(i)) == null)
+				{
+					continue;
+				}
+
+				i.setDurabilityLock((short) -1);
+				i.setType(overriding.getMaterial());
+				i.setSuperID(overriding.getData());
+			}
+
+			else
+			{
+				AllocatedNode idx = i.isShaded() ? ass.allocateShaded("block/" + i.getId()) : ass.allocateNormal("block/" + i.getId());
+				i.setDurabilityLock((short) idx.getId());
+				i.setType(idx.getMaterial());
+				System.out.println("  Registered Block " + i.getId() + " to " + i.getType() + ":" + i.getDurabilityLock());
+				superBlocks.put(idx.getSuperid(), i);
+				i.setSuperID(idx.getSuperid());
+				i.setMatt(ass.getNameForMaterial(i.getType()));
+			}
 		}
 	}
 
@@ -817,5 +872,10 @@ public class ContentRegistry implements Listener
 	public GList<CustomAdvancement> getAdvancements()
 	{
 		return advancements;
+	}
+
+	public OverridedAllocationSpace getOass()
+	{
+		return oass;
 	}
 }

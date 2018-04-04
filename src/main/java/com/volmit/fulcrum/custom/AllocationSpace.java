@@ -260,8 +260,8 @@ public class AllocationSpace
 	{
 		String f = "";
 
-		f += "Normal: " + F.f(getNormalUse()) + " of " + F.f(getNormalCapacity()) + " across " + getNormalAllocations().k().size() + " items (" + F.pc((double) getNormalUse() / (double) getNormalCapacity(), 1) + " use)" + "\n";
-		f += "Shaded: " + F.f(getShadedUse()) + " of " + F.f(getShadedCapacity()) + " across " + getShadedAllocations().k().size() + " items (" + F.pc((double) getShadedUse() / (double) getShadedCapacity(), 1) + " use)" + "";
+		f += "=== ALLOCATION SPACE ===\nTile Normal: " + F.f(getNormalUse()) + " of " + F.f(getNormalCapacity()) + " across " + getNormalAllocations().k().size() + " items (" + F.pc((double) getNormalUse() / (double) getNormalCapacity(), 1) + " use)" + "\n";
+		f += "Tile Shaded: " + F.f(getShadedUse()) + " of " + F.f(getShadedCapacity()) + " across " + getShadedAllocations().k().size() + " items (" + F.pc((double) getShadedUse() / (double) getShadedCapacity(), 1) + " use)" + "";
 
 		return f;
 	}

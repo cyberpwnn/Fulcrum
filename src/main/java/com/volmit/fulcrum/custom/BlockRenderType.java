@@ -1,6 +1,6 @@
 package com.volmit.fulcrum.custom;
 
-public enum BlockRender
+public enum BlockRenderType
 {
 	NORMAL,
 	ALPHA;

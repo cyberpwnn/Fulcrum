@@ -23,6 +23,12 @@ public interface IAdapter extends Listener
 {
 	public boolean isMetal(Material type);
 
+	public boolean isCloth(Material type);
+
+	public boolean isStone(Material type);
+
+	public boolean isGlass(Material type);
+
 	public void queueUpdate(Block b);
 
 	public void pushPhysics();

@@ -23,8 +23,8 @@ public abstract class CustomBlock implements ICustom
 	private Audible pickupSound;
 	private Audible stepSound;
 	private ModelType renderType;
-	private BlockRegistryType blockType;
-	private BlockRender blockRenderType;
+	private BlockRegistryType blockRegistryType;
+	private BlockRenderType blockRenderType;
 	private String name;
 	private final String id;
 	private short durabilityLock;
@@ -52,8 +52,8 @@ public abstract class CustomBlock implements ICustom
 		matt = "";
 		renderType = ModelType.CUBE_ALL;
 		pickupSound = ContentManager.getPickupSound();
-		blockType = BlockRegistryType.TILE_BLOCK;
-		blockRenderType = BlockRender.NORMAL;
+		blockRegistryType = BlockRegistryType.TILE_BLOCK;
+		blockRenderType = BlockRenderType.NORMAL;
 
 		CustomBlock ci = ContentManager.getBlock(id);
 
@@ -335,20 +335,20 @@ public abstract class CustomBlock implements ICustom
 
 	public BlockRegistryType getBlockType()
 	{
-		return blockType;
+		return blockRegistryType;
 	}
 
 	public void setBlockType(BlockRegistryType blockType)
 	{
-		this.blockType = blockType;
+		this.blockRegistryType = blockType;
 	}
 
-	public BlockRender getBlockRenderType()
+	public BlockRenderType getBlockRenderType()
 	{
 		return blockRenderType;
 	}
 
-	public void setBlockRenderType(BlockRender blockRenderType)
+	public void setBlockRenderType(BlockRenderType blockRenderType)
 	{
 		this.blockRenderType = blockRenderType;
 	}

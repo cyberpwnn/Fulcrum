@@ -97,6 +97,29 @@ public class ContentHandler implements Listener
 				{
 					cb.getStepSound().play(i.getLocation());
 				}
+
+				else if(!ContentManager.isOverrided(b))
+				{
+					if(ContentManager.a().isCloth(b.getType()))
+					{
+						ContentManager.getClothFallSound().play(b.getLocation().clone().add(0.5, 0.5, 0.5));
+					}
+
+					if(ContentManager.a().isMetal(b.getType()))
+					{
+						ContentManager.getMetalFallSound().play(b.getLocation().clone().add(0.5, 0.5, 0.5));
+					}
+
+					if(ContentManager.a().isStone(b.getType()))
+					{
+						ContentManager.getStoneFallSound().play(b.getLocation().clone().add(0.5, 0.5, 0.5));
+					}
+
+					if(ContentManager.a().isGlass(b.getType()))
+					{
+						ContentManager.getGlassFallSound().play(b.getLocation().clone().add(0.5, 0.5, 0.5));
+					}
+				}
 			}
 
 			ground.put(i, i.isOnGround());
@@ -443,11 +466,35 @@ public class ContentHandler implements Listener
 
 			if(steps.get(e.getPlayer()) % factor == 0)
 			{
-				CustomBlock cb = ContentManager.getBlock(e.getPlayer().getLocation().getBlock().getLocation().clone().add(0, -0.5, 0).getBlock());
+				Block bb = e.getPlayer().getLocation().getBlock().getLocation().clone().add(0, -0.5, 0).getBlock();
+				CustomBlock cb = ContentManager.getBlock(bb);
 
 				if(cb != null && cb.getStepSound() != null)
 				{
 					cb.getStepSound().play(e.getPlayer().getLocation());
+				}
+
+				else if(!ContentManager.isOverrided(bb))
+				{
+					if(ContentManager.a().isCloth(bb.getType()))
+					{
+						ContentManager.getClothStepSound().play(bb.getLocation().clone().add(0.5, 0.5, 0.5));
+					}
+
+					if(ContentManager.a().isStone(bb.getType()))
+					{
+						ContentManager.getStoneStepSound().play(bb.getLocation().clone().add(0.5, 0.5, 0.5));
+					}
+
+					if(ContentManager.a().isGlass(bb.getType()))
+					{
+						ContentManager.getGlassStepSound().play(bb.getLocation().clone().add(0.5, 0.5, 0.5));
+					}
+
+					if(ContentManager.a().isMetal(bb.getType()))
+					{
+						ContentManager.getMetalStepSound().play(bb.getLocation().clone().add(0.5, 0.5, 0.5));
+					}
 				}
 			}
 		}
@@ -491,6 +538,34 @@ public class ContentHandler implements Listener
 
 			digging.put(e.getBlock(), speed);
 			lastDug.put(e.getBlock(), e.getPlayer());
+		}
+
+		else if(!ContentManager.isOverrided(e.getBlock()))
+		{
+			if(e.getPlayer().getGameMode().equals(GameMode.CREATIVE))
+			{
+				return;
+			}
+
+			if(ContentManager.a().isCloth(e.getBlock().getType()))
+			{
+				ContentManager.getClothHitSound().play(e.getBlock().getLocation().clone().add(0.5, 0.5, 0.5));
+			}
+
+			if(ContentManager.a().isStone(e.getBlock().getType()))
+			{
+				ContentManager.getStoneHitSound().play(e.getBlock().getLocation().clone().add(0.5, 0.5, 0.5));
+			}
+
+			if(ContentManager.a().isGlass(e.getBlock().getType()))
+			{
+				ContentManager.getGlassHitSound().play(e.getBlock().getLocation().clone().add(0.5, 0.5, 0.5));
+			}
+
+			if(ContentManager.a().isMetal(e.getBlock().getType()))
+			{
+				ContentManager.getMetalHitSound().play(e.getBlock().getLocation().clone().add(0.5, 0.5, 0.5));
+			}
 		}
 	}
 
@@ -590,6 +665,24 @@ public class ContentHandler implements Listener
 
 			ContentManager.getMetalBreakSound().play(e.getBlock().getLocation().clone().add(0.5, 0.5, 0.5));
 		}
+
+		if(!ContentManager.isOverrided(e.getBlock()))
+		{
+			if(ContentManager.a().isCloth(e.getBlock().getType()))
+			{
+				ContentManager.getClothBreakSound().play(e.getBlock().getLocation().clone().add(0.5, 0.5, 0.5));
+			}
+
+			if(ContentManager.a().isStone(e.getBlock().getType()))
+			{
+				ContentManager.getStoneBreakSound().play(e.getBlock().getLocation().clone().add(0.5, 0.5, 0.5));
+			}
+
+			if(ContentManager.a().isGlass(e.getBlock().getType()))
+			{
+				ContentManager.getGlassPlaceSound().play(e.getBlock().getLocation().clone().add(0.5, 0.5, 0.5));
+			}
+		}
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -656,6 +749,24 @@ public class ContentHandler implements Listener
 		else if(ContentManager.a().isMetal(e.getBlock().getType()))
 		{
 			ContentManager.getMetalBreakSound().play(e.getBlock().getLocation().clone().add(0.5, 0.5, 0.5));
+		}
+
+		if(!ContentManager.isOverrided(e.getBlock()))
+		{
+			if(ContentManager.a().isCloth(e.getBlock().getType()))
+			{
+				ContentManager.getClothBreakSound().play(e.getBlock().getLocation().clone().add(0.5, 0.5, 0.5));
+			}
+
+			if(ContentManager.a().isStone(e.getBlock().getType()))
+			{
+				ContentManager.getStoneBreakSound().play(e.getBlock().getLocation().clone().add(0.5, 0.5, 0.5));
+			}
+
+			if(ContentManager.a().isGlass(e.getBlock().getType()))
+			{
+				ContentManager.getGlassBreakSound().play(e.getBlock().getLocation().clone().add(0.5, 0.5, 0.5));
+			}
 		}
 	}
 

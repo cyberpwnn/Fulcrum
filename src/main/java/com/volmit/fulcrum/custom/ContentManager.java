@@ -14,6 +14,7 @@ import org.bukkit.inventory.ItemStack;
 import com.volmit.dumpster.GList;
 import com.volmit.fulcrum.Fulcrum;
 import com.volmit.fulcrum.adapter.IAdapter;
+import com.volmit.fulcrum.bukkit.BlockType;
 import com.volmit.fulcrum.bukkit.W;
 import com.volmit.fulcrum.sfx.Audible;
 import com.volmit.fulcrum.sfx.Audio;
@@ -274,44 +275,89 @@ public class ContentManager
 		return item.getItemMeta().isUnbreakable() ? getItem(item.getType(), item.getDurability()) : null;
 	}
 
-	/**
-	 * Get the remapped sound
-	 *
-	 * @return the sound
-	 */
 	public static Audible getMetalBreakSound()
 	{
 		return new Audio().s("m.block.metal.break").setPitch(1.2f);
 	}
 
-	/**
-	 * Get the remapped sound
-	 *
-	 * @return the sound
-	 */
 	public static Audible getMetalFallSound()
 	{
 		return new Audio().s("m.block.metal.fall").setPitch(1.2f).v(0.5f);
 	}
 
-	/**
-	 * Get the remapped sound
-	 *
-	 * @return the sound
-	 */
 	public static Audible getMetalHitSound()
 	{
 		return new Audio().s("m.block.metal.hit").setPitch(1.2f).v(0.5f);
 	}
 
-	/**
-	 * Get the remapped sound
-	 *
-	 * @return the sound
-	 */
 	public static Audible getMetalStepSound()
 	{
-		return new Audio().s("m.block.metal.step").setPitch(1.2f).v(0.5f);
+		return new Audio().s("m.block.metal.step").setPitch(1.2f).v(0.3f);
+	}
+
+	public static Audible getStoneBreakSound()
+	{
+		return new Audio().s("m.block.stone.break").setPitch(0.8f);
+	}
+
+	public static Audible getStoneFallSound()
+	{
+		return new Audio().s("m.block.stone.fall").setPitch(0.8f).v(0.5f);
+	}
+
+	public static Audible getStoneHitSound()
+	{
+		return new Audio().s("m.block.stone.hit").setPitch(0.8f).v(0.5f);
+	}
+
+	public static Audible getStoneStepSound()
+	{
+		return new Audio().s("m.block.stone.step").setPitch(0.8f).v(0.3f);
+	}
+
+	public static Audible getGlassBreakSound()
+	{
+		return new Audio().s("m.block.glass.break").setPitch(0.8f);
+	}
+
+	public static Audible getGlassPlaceSound()
+	{
+		return new Audio().s("m.block.glass.place").setPitch(0.8f);
+	}
+
+	public static Audible getGlassFallSound()
+	{
+		return new Audio().s("m.block.glass.fall").setPitch(0.8f).v(0.5f);
+	}
+
+	public static Audible getGlassHitSound()
+	{
+		return new Audio().s("m.block.glass.hit").setPitch(0.8f).v(0.5f);
+	}
+
+	public static Audible getGlassStepSound()
+	{
+		return new Audio().s("m.block.glass.step").setPitch(0.8f).v(0.3f);
+	}
+
+	public static Audible getClothBreakSound()
+	{
+		return new Audio().s("m.block.cloth.break").setPitch(0.8f);
+	}
+
+	public static Audible getClothFallSound()
+	{
+		return new Audio().s("m.block.cloth.fall").setPitch(0.8f).v(0.5f);
+	}
+
+	public static Audible getClothHitSound()
+	{
+		return new Audio().s("m.block.cloth.hit").setPitch(0.8f).v(0.5f);
+	}
+
+	public static Audible getClothStepSound()
+	{
+		return new Audio().s("m.block.cloth.step").setPitch(0.8f).v(0.5f);
 	}
 
 	/**
@@ -531,6 +577,16 @@ public class ContentManager
 		}
 
 		return block.getType().equals(Material.MOB_SPAWNER) && getBlock(block) != null;
+	}
+
+	public static boolean isOverrided(Block block)
+	{
+		if(block == null)
+		{
+			return false;
+		}
+
+		return r().getOass().getAllocated().containsKey(new BlockType(block));
 	}
 
 	/**

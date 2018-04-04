@@ -1095,12 +1095,6 @@ public final class Adapter12 implements IAdapter
 	}
 
 	@Override
-	public boolean isMetal(Material type)
-	{
-		return CraftMagicNumbers.getBlock(type).getStepSound().equals(SoundEffectType.e);
-	}
-
-	@Override
 	public int getSpawnerType(Location block)
 	{
 		if(block.getBlock().getType().equals(Material.MOB_SPAWNER))
@@ -1379,5 +1373,29 @@ public final class Adapter12 implements IAdapter
 	public PotionEffect getGlowEffect(DyeColor color)
 	{
 		return new PotionEffect(PotionEffectType.GLOWING, Integer.MAX_VALUE, 0, false, true, color.getColor());
+	}
+
+	@Override
+	public boolean isStone(Material type)
+	{
+		return CraftMagicNumbers.getBlock(type).getStepSound().equals(SoundEffectType.d);
+	}
+
+	@Override
+	public boolean isGlass(Material type)
+	{
+		return CraftMagicNumbers.getBlock(type).getStepSound().equals(SoundEffectType.f);
+	}
+
+	@Override
+	public boolean isMetal(Material type)
+	{
+		return CraftMagicNumbers.getBlock(type).getStepSound().equals(SoundEffectType.e);
+	}
+
+	@Override
+	public boolean isCloth(Material type)
+	{
+		return CraftMagicNumbers.getBlock(type).getStepSound().equals(SoundEffectType.g);
 	}
 }
