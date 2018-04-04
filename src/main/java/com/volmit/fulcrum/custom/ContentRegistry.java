@@ -78,9 +78,11 @@ public class ContentRegistry implements Listener
 	private OverridedAllocationSpace oass;
 	private String rid;
 	private ResourcePack pack;
+	private int msid;
 
 	public ContentRegistry()
 	{
+		msid = -10000;
 		superBlocks = new GMap<Integer, CustomBlock>();
 		superItems = new GMap<Integer, CustomItem>();
 		superInventories = new GMap<Integer, CustomInventory>();
@@ -740,7 +742,9 @@ public class ContentRegistry implements Listener
 
 				i.setDurabilityLock((short) -1);
 				i.setType(overriding.getMaterial());
-				i.setSuperID(overriding.getData());
+				i.setSuperID(msid--);
+				i.setData(overriding.getData());
+				System.out.println("  Registered BUILDING Block " + i.getId() + " to " + i.getType() + ":" + i.getData());
 			}
 
 			else
@@ -748,10 +752,10 @@ public class ContentRegistry implements Listener
 				AllocatedNode idx = i.isShaded() ? ass.allocateShaded("block/" + i.getId()) : ass.allocateNormal("block/" + i.getId());
 				i.setDurabilityLock((short) idx.getId());
 				i.setType(idx.getMaterial());
-				System.out.println("  Registered Block " + i.getId() + " to " + i.getType() + ":" + i.getDurabilityLock());
 				superBlocks.put(idx.getSuperid(), i);
 				i.setSuperID(idx.getSuperid());
 				i.setMatt(ass.getNameForMaterial(i.getType()));
+				System.out.println("  Registered TILE Block " + i.getId() + " to " + i.getType() + ":" + i.getDurabilityLock());
 			}
 		}
 	}

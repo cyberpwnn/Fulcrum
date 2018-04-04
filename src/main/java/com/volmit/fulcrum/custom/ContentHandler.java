@@ -120,6 +120,11 @@ public class ContentHandler implements Listener
 						ContentManager.getGlassFallSound().play(b.getLocation().clone().add(0.5, 0.5, 0.5));
 					}
 				}
+
+				else
+				{
+					ContentManager.getBlock(b).getStepSound().play(b.getLocation().clone().add(0.5, 0.5, 0.5));
+				}
 			}
 
 			ground.put(i, i.isOnGround());
@@ -496,6 +501,11 @@ public class ContentHandler implements Listener
 						ContentManager.getMetalStepSound().play(bb.getLocation().clone().add(0.5, 0.5, 0.5));
 					}
 				}
+
+				else
+				{
+					ContentManager.getBlock(bb).getStepSound().play(bb.getLocation().clone().add(0.5, 0.5, 0.5));
+				}
 			}
 		}
 	}
@@ -566,6 +576,11 @@ public class ContentHandler implements Listener
 			{
 				ContentManager.getMetalHitSound().play(e.getBlock().getLocation().clone().add(0.5, 0.5, 0.5));
 			}
+		}
+
+		else
+		{
+			ContentManager.getBlock(e.getBlock()).getDigSound().play(e.getBlock().getLocation().clone().add(0.5, 0.5, 0.5));
 		}
 	}
 
@@ -683,6 +698,11 @@ public class ContentHandler implements Listener
 				ContentManager.getGlassPlaceSound().play(e.getBlock().getLocation().clone().add(0.5, 0.5, 0.5));
 			}
 		}
+
+		else
+		{
+			ContentManager.getBlock(e.getBlock()).getPlaceSound().play(e.getBlock().getLocation().clone().add(0.5, 0.5, 0.5));
+		}
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -767,6 +787,11 @@ public class ContentHandler implements Listener
 			{
 				ContentManager.getGlassBreakSound().play(e.getBlock().getLocation().clone().add(0.5, 0.5, 0.5));
 			}
+		}
+
+		else
+		{
+			ContentManager.getBlock(e.getBlock()).getBreakSound().play(e.getBlock().getLocation().clone().add(0.5, 0.5, 0.5));
 		}
 	}
 

@@ -589,6 +589,17 @@ public class ContentManager
 		return r().getOass().getAllocated().containsKey(new BlockType(block));
 	}
 
+	@SuppressWarnings("deprecation")
+	public static boolean isOverrided(ItemStack block)
+	{
+		if(block == null)
+		{
+			return false;
+		}
+
+		return r().getOass().getAllocated().containsKey(new BlockType(block.getType(), block.getData().getData()));
+	}
+
 	/**
 	 * Create a custom inventory
 	 *
@@ -691,6 +702,13 @@ public class ContentManager
 	 */
 	public static CustomBlock getBlock(ItemStack is)
 	{
+		if(isOverrided(is))
+		{
+			@SuppressWarnings("deprecation")
+			BlockType bt = new BlockType(is.getType(), is.getData().getData());
+			return r().getOass().getAllocated().get(bt);
+		}
+
 		if(!isCustom(is))
 		{
 			return null;
@@ -709,6 +727,11 @@ public class ContentManager
 		return null;
 	}
 
+	public static boolean isOverrided(CustomBlock c)
+	{
+		return c.getBlockType().equals(BlockRegistryType.BUILDING_BLOCK);
+	}
+
 	/**
 	 * Set the block to a custom block
 	 *
@@ -719,7 +742,15 @@ public class ContentManager
 	 */
 	public static void setBlock(Block block, CustomBlock c)
 	{
-		a().setSpawnerType(block.getLocation(), c.getSuperID());
+		if(isOverrided(c))
+		{
+			c.set(block.getLocation());
+		}
+
+		else
+		{
+			a().setSpawnerType(block.getLocation(), c.getSuperID());
+		}
 	}
 
 	/**
@@ -898,6 +929,11 @@ public class ContentManager
 	public static GList<CustomInventory> getInventories()
 	{
 		return r().getInventories().copy();
+	}
+
+	public static CustomBlock getOverrided(Block b)
+	{
+		return r().getOass().getAllocated().get(new BlockType(b));
 	}
 
 	/**

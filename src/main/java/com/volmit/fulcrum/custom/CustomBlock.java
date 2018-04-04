@@ -12,6 +12,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import com.volmit.fulcrum.Fulcrum;
+import com.volmit.fulcrum.bukkit.BlockType;
 import com.volmit.fulcrum.sfx.Audible;
 import com.volmit.fulcrum.sfx.Audio;
 
@@ -37,9 +38,11 @@ public abstract class CustomBlock implements ICustom
 	private String toolType;
 	private int minimumToolLevel;
 	private double hardness;
+	private byte data;
 
 	public CustomBlock(String id)
 	{
+		data = -1;
 		hardness = 0.5;
 		toolType = ToolType.HAND;
 		minimumToolLevel = ToolLevel.HAND;
@@ -248,9 +251,18 @@ public abstract class CustomBlock implements ICustom
 		return is;
 	}
 
+	@SuppressWarnings("deprecation")
 	public void set(Location location)
 	{
-		Fulcrum.adapter.setSpawnerType(location, getMatt(), getDurabilityLock(), ee);
+		if(blockRegistryType.equals(BlockRegistryType.BUILDING_BLOCK))
+		{
+			location.getBlock().setTypeIdAndData(getType().getId(), getData(), true);
+		}
+
+		else
+		{
+			Fulcrum.adapter.setSpawnerType(location, getMatt(), getDurabilityLock(), ee);
+		}
 	}
 
 	public ModelType getRenderType()
@@ -351,5 +363,35 @@ public abstract class CustomBlock implements ICustom
 	public void setBlockRenderType(BlockRenderType blockRenderType)
 	{
 		this.blockRenderType = blockRenderType;
+	}
+
+	public void setData(byte data)
+	{
+		this.data = data;
+	}
+
+	public BlockRegistryType getBlockRegistryType()
+	{
+		return blockRegistryType;
+	}
+
+	public int getSid()
+	{
+		return sid;
+	}
+
+	public boolean isEe()
+	{
+		return ee;
+	}
+
+	public byte getData()
+	{
+		return data;
+	}
+
+	public BlockType getAsType()
+	{
+		return new BlockType(getType(), getData());
 	}
 }
