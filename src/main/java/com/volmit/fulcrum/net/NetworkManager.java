@@ -6,6 +6,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 
+import com.volmit.dumpster.GMap;
 import com.volmit.fulcrum.Fulcrum;
 import com.volmit.fulcrum.bukkit.S;
 import com.volmit.fulcrum.custom.TinyProtocol;
@@ -19,11 +20,18 @@ import net.minecraft.server.v1_12_R1.PacketPlayInBlockDig;
 public class NetworkManager
 {
 	private TinyProtocol proto;
+	public static GMap<Block, Integer> forceProgress = new GMap<Block, Integer>();
 
 	public NetworkManager()
 	{
 		proto = new TinyProtocol(Fulcrum.instance)
 		{
+			@Override
+			public Object onPacketOutAsync(Player reciever, Object packet)
+			{
+				return super.onPacketOutAsync(reciever, packet);
+			}
+
 			@Override
 			public Object onPacketInAsync(Player sender, Object packet)
 			{

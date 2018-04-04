@@ -21,6 +21,10 @@ import com.volmit.fulcrum.resourcepack.ResourcePack;
 
 public interface IAdapter extends Listener
 {
+	public void forceSwing(Player p, Player ob);
+
+	public void stopDigging(Block block, Player p);
+
 	public boolean isMetal(Material type);
 
 	public boolean isCloth(Material type);

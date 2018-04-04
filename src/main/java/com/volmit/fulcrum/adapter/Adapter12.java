@@ -89,6 +89,7 @@ import net.minecraft.server.v1_12_R1.MojangsonParser;
 import net.minecraft.server.v1_12_R1.NBTTagCompound;
 import net.minecraft.server.v1_12_R1.NBTTagList;
 import net.minecraft.server.v1_12_R1.Packet;
+import net.minecraft.server.v1_12_R1.PacketPlayOutAnimation;
 import net.minecraft.server.v1_12_R1.PacketPlayOutBlockBreakAnimation;
 import net.minecraft.server.v1_12_R1.PacketPlayOutChat;
 import net.minecraft.server.v1_12_R1.PacketPlayOutCollect;
@@ -1397,5 +1398,18 @@ public final class Adapter12 implements IAdapter
 	public boolean isCloth(Material type)
 	{
 		return CraftMagicNumbers.getBlock(type).getStepSound().equals(SoundEffectType.g);
+	}
+
+	@Override
+	public void stopDigging(Block block, Player p)
+	{
+		PE.SLOW_DIGGING.a(-1).d(3).apply(p);
+	}
+
+	@Override
+	public void forceSwing(Player p, Player ob)
+	{
+		PacketPlayOutAnimation a = new PacketPlayOutAnimation(((CraftPlayer) p).getHandle(), 0);
+		sendPacket(p.getLocation(), a);
 	}
 }

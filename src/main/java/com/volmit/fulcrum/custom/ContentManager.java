@@ -839,14 +839,16 @@ public class ContentManager
 	 */
 	public static void playBlockBreak(Block block)
 	{
-		if(isCustom(block))
-		{
-			CustomBlock cb = getBlock(block);
+		CustomBlock cb = getBlock(block);
 
-			if(cb != null)
-			{
-				cb.getBreakSound().play(block.getLocation().clone().add(0.5, 0.5, 0.5));
-			}
+		if(cb == null && isOverrided(block))
+		{
+			cb = getOverrided(block);
+		}
+
+		if(cb != null)
+		{
+			cb.getBreakSound().play(block.getLocation().clone().add(0.5, 0.5, 0.5));
 		}
 	}
 
@@ -883,20 +885,22 @@ public class ContentManager
 	 */
 	public static void breakBlock(Block block, boolean drop)
 	{
-		if(isCustom(block))
+		CustomBlock cb = getBlock(block);
+
+		if(cb == null && isOverrided(block))
 		{
-			CustomBlock cb = getBlock(block);
+			cb = getOverrided(block);
+		}
 
-			if(cb != null)
+		if(cb != null)
+		{
+			playBlockBreak(block);
+			block.setType(Material.AIR);
+
+			if(drop)
 			{
-				playBlockBreak(block);
-				block.setType(Material.AIR);
-
-				if(drop)
-				{
-					ItemStack i = cb.getItem();
-					block.getWorld().dropItemNaturally(block.getLocation().clone().add(0.5, 0.5, 0.5), i);
-				}
+				ItemStack i = cb.getItem();
+				block.getWorld().dropItemNaturally(block.getLocation().clone().add(0.5, 0.5, 0.5), i);
 			}
 		}
 	}

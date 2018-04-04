@@ -53,6 +53,7 @@ public class ContentHandler implements Listener
 	public GMap<Player, Double> view;
 	public GMap<Player, GList<Location>> controlled;
 	public GMap<Player, GList<Location>> hidden;
+	private GList<Block> breaks;
 	public static double max = 80.0;
 	public static double min = 12.0;
 
@@ -66,6 +67,7 @@ public class ContentHandler implements Listener
 		stopped = new GList<Block>();
 		vdel = new GMap<Player, Integer>();
 		view = new GMap<Player, Double>();
+		breaks = new GList<Block>();
 		controlled = new GMap<Player, GList<Location>>();
 		hidden = new GMap<Player, GList<Location>>();
 		Fulcrum.register(this);
@@ -164,26 +166,50 @@ public class ContentHandler implements Listener
 				ContentManager.a().sendCrack(i, getBlockPos(i), M.clip(progress, 0D, 1D));
 			}
 
+			if(ContentManager.isOverrided(i))
+			{
+				ContentManager.a().stopDigging(i, lastDug.get(i));
+
+				if(TICK.tick % 5 == 0)
+				{
+					ContentManager.a().sendCrack(i, getBlockPos(i), M.clip(progress, 0D, 1D));
+				}
+			}
+
 			if(progress > 1)
 			{
+				if(ContentManager.isOverrided(i))
+				{
+					breaks.add(i);
+				}
+
 				Fulcrum.callEvent(new BlockBreakEvent(i, lastDug.get(i)));
 				stopped.add(i);
 			}
 
 			CustomBlock cb = ContentManager.getBlock(i);
 
+			if(cb == null && ContentManager.isOverrided(i))
+			{
+				cb = ContentManager.getOverrided(i);
+			}
+
 			if(cb != null && TICK.tick % 5 == 0 && cb.getDigSound() != null)
 			{
+				if(ContentManager.isOverrided(i))
+				{
+					ContentManager.a().forceSwing(lastDug.get(i), lastDug.get(i));
+				}
+
 				cb.getDigSound().osc(0.35).play(i.getLocation().clone().add(0.5, 0.5, 0.5));
 			}
 		}
 
 		for(Block i : stopped)
 		{
-			digging.remove(i);
-			lastDug.remove(i);
 			ContentManager.a().brokedBlock(i);
 			ContentManager.a().sendCrack(i, getBlockPos(i), 100);
+			digging.remove(i);
 		}
 
 		stopped.clear();
@@ -860,16 +886,75 @@ public class ContentHandler implements Listener
 
 		else
 		{
-			ContentManager.getOverrided(e.getBlock()).getBreakSound().play(e.getBlock().getLocation().clone().add(0.5, 0.5, 0.5));
+			if(!breaks.contains(e.getBlock()) && !e.getPlayer().getGameMode().equals(GameMode.CREATIVE))
+			{
+				e.setCancelled(true);
+				return;
+			}
+
+			cb = ContentManager.getOverrided(e.getBlock());
+			breaks.remove(e.getBlock());
+			stopped.add(e.getBlock());
+			ItemStack is = e.getPlayer().getInventory().getItemInMainHand();
+			double hardness = cb.getHardness();
+			String toolType = ToolType.getType(is);
+			int level = ToolLevel.getToolLevel(is);
+			double speed = ToolLevel.getMiningSpeed(cb, is);
+			boolean shouldDrop = !e.getPlayer().getGameMode().equals(GameMode.CREATIVE);
+			boolean instantBreak = false;
+			boolean toolsMatch = toolType.equals(cb.getToolType());
+			boolean cancel = false;
+			cb.onBroke(e.getPlayer(), e.getBlock(), cancel);
+
+			if(cancel)
+			{
+				e.setCancelled(true);
+				return;
+			}
+
+			if(level < cb.getMinimumToolLevel())
+			{
+				shouldDrop = false;
+			}
+
+			if(cb.getMinimumToolLevel() > ToolLevel.HAND && !toolsMatch)
+			{
+				shouldDrop = false;
+			}
+
+			if((speed / 20D) * 30D > hardness && toolsMatch)
+			{
+				instantBreak = true;
+			}
+
+			ContentManager.breakBlock(e.getBlock(), shouldDrop);
+			e.setDropItems(false);
+			e.setExpToDrop(0);
+
+			if(!instantBreak)
+			{
+				vdel.put(e.getPlayer(), 5);
+			}
+
+			else
+			{
+				vdel.put(e.getPlayer(), 1);
+			}
 		}
 	}
 
-	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false)
 	public void on(BlockDamageEvent e)
 	{
 		if(ContentManager.isOverrided(e.getBlock()))
 		{
-			e.setCancelled(true);
+			lastDug.put(e.getBlock(), e.getPlayer());
+
+			if(e.getPlayer().getGameMode().equals(GameMode.SURVIVAL))
+			{
+				e.setCancelled(true);
+				System.out.println("WTF");
+			}
 		}
 	}
 
@@ -1000,6 +1085,11 @@ public class ContentHandler implements Listener
 					}
 				}
 			}
+		}
+
+		else if(e.getAction().equals(Action.LEFT_CLICK_BLOCK))
+		{
+			lastDug.put(e.getClickedBlock(), e.getPlayer());
 		}
 
 		else
