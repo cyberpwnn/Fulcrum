@@ -936,6 +936,12 @@ public class ContentManager
 		return r().getOass().getAllocated().get(new BlockType(b));
 	}
 
+	@SuppressWarnings("deprecation")
+	public static CustomBlock getOverrided(ItemStack is)
+	{
+		return r().getOass().getAllocated().get(new BlockType(is.getType(), is.getData().getData()));
+	}
+
 	/**
 	 * Get the custom block
 	 *

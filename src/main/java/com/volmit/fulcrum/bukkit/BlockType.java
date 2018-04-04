@@ -102,7 +102,7 @@ public class BlockType
 		data = 0;
 	}
 
-	public BlockType(Material material, short s)
+	public BlockType(Material material, short s, boolean spawner)
 	{
 		custom = false;
 		this.material = Material.MOB_SPAWNER;

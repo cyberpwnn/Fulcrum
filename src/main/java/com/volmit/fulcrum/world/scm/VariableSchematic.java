@@ -415,7 +415,7 @@ public class VariableSchematic
 
 	public void set(int x, int y, int z, Material material, short cdata)
 	{
-		BlockType bt = new BlockType(material, cdata);
+		BlockType bt = new BlockType(material, cdata, false);
 		schematic[x][y][z] = new VariableBlock(bt);
 	}
 

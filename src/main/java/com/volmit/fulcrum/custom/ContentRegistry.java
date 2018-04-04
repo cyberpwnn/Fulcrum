@@ -700,9 +700,9 @@ public class ContentRegistry implements Listener
 		{
 			if(i.getBlockType().equals(BlockRegistryType.BUILDING_BLOCK))
 			{
-				BlockType overriding = null;
+				BlockType overriding = oass.allocate(i);
 
-				if((overriding = oass.allocate(i)) == null)
+				if(overriding == null)
 				{
 					continue;
 				}

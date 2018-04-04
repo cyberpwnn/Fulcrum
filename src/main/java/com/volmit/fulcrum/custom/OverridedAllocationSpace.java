@@ -135,7 +135,22 @@ public class OverridedAllocationSpace
 			{
 				if(i.getWoolData() == b.getData())
 				{
-					return i.name().toLowerCase() + "_" + b.getMaterial().name().toLowerCase();
+					if(b.getMaterial().equals(Material.STAINED_CLAY))
+					{
+						return "hardened_clay_stained_" + i.name().toLowerCase();
+					}
+
+					if(b.getMaterial().equals(Material.STAINED_GLASS))
+					{
+						return "glass_" + i.name().toLowerCase();
+					}
+
+					if(b.getMaterial().equals(Material.WOOL))
+					{
+						return "wool_colored_" + i.name().toLowerCase();
+					}
+
+					return b.getMaterial().name().toLowerCase() + "_" + i.name().toLowerCase();
 				}
 			}
 		}

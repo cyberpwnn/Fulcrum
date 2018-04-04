@@ -11,6 +11,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.inventory.ClickType;
@@ -123,7 +124,7 @@ public class ContentHandler implements Listener
 
 				else
 				{
-					ContentManager.getBlock(b).getStepSound().play(b.getLocation().clone().add(0.5, 0.5, 0.5));
+					ContentManager.getOverrided(b).getStepSound().play(b.getLocation().clone().add(0.5, 0.5, 0.5));
 				}
 			}
 
@@ -504,7 +505,7 @@ public class ContentHandler implements Listener
 
 				else
 				{
-					ContentManager.getBlock(bb).getStepSound().play(bb.getLocation().clone().add(0.5, 0.5, 0.5));
+					ContentManager.getOverrided(bb).getStepSound().play(bb.getLocation().clone().add(0.5, 0.5, 0.5));
 				}
 			}
 		}
@@ -580,7 +581,39 @@ public class ContentHandler implements Listener
 
 		else
 		{
-			ContentManager.getBlock(e.getBlock()).getDigSound().play(e.getBlock().getLocation().clone().add(0.5, 0.5, 0.5));
+			ContentManager.getOverrided(e.getBlock()).getDigSound().play(e.getBlock().getLocation().clone().add(0.5, 0.5, 0.5));
+			cb = ContentManager.getOverrided(e.getBlock());
+			boolean cancel = false;
+			cb.onStartDig(e.getPlayer(), e.getBlock(), cancel);
+
+			if(cancel)
+			{
+				return;
+			}
+
+			Audible aa = cb.getDigSound();
+
+			if(aa != null)
+			{
+				aa.osc(0.35).play(e.getBlock().getLocation().clone().add(0.5, 0.5, 0.5));
+			}
+
+			if(e.getPlayer().getGameMode().equals(GameMode.CREATIVE))
+			{
+				return;
+			}
+
+			ItemStack is = e.getPlayer().getInventory().getItemInMainHand();
+			String type = ToolType.getType(is);
+			double speed = ToolLevel.getMiningSpeed(cb, is);
+
+			if(!type.equals(cb.getToolType()))
+			{
+				speed = ToolLevel.getMiningSpeed(cb, null);
+			}
+
+			digging.put(e.getBlock(), speed);
+			lastDug.put(e.getBlock(), e.getPlayer());
 		}
 	}
 
@@ -588,6 +621,11 @@ public class ContentHandler implements Listener
 	public void on(PlayerFinishedDiggingEvent e)
 	{
 		CustomBlock cb = ContentManager.getBlock(e.getBlock());
+
+		if(cb == null && ContentManager.isOverrided(e.getBlock()))
+		{
+			return;
+		}
 
 		if(cb != null)
 		{
@@ -599,6 +637,11 @@ public class ContentHandler implements Listener
 	public void on(PlayerCancelledDiggingEvent e)
 	{
 		CustomBlock cb = ContentManager.getBlock(e.getBlock());
+
+		if(cb == null && ContentManager.isOverrided(e.getBlock()))
+		{
+			cb = ContentManager.getOverrided(e.getBlock());
+		}
 
 		if(cb != null)
 		{
@@ -656,6 +699,32 @@ public class ContentHandler implements Listener
 				e.getItem().remove();
 			}
 
+			else if(ContentManager.isOverrided(e.getItem().getItemStack()))
+			{
+				boolean cancel = false;
+				ItemStack is = e.getItem().getItemStack().clone();
+				Audible picksound = ContentManager.getPickupSound();
+				CustomBlock cb = ContentManager.getOverrided(is);
+
+				if(cb != null)
+				{
+					cb.onPickedUp(p, e.getItem(), cancel);
+
+					if(cancel)
+					{
+						e.setCancelled(true);
+						return;
+					}
+
+					picksound = cb.getPickupSound();
+				}
+
+				float osc = (float) (0.15 * Math.sin(Math.random()));
+				Audio a = new Audio(picksound);
+				a.p(a.getPitch() + osc);
+				a.play(e.getItem().getLocation());
+			}
+
 			else
 			{
 				ContentManager.getPickupSound().play(e.getItem().getLocation());
@@ -701,7 +770,7 @@ public class ContentHandler implements Listener
 
 		else
 		{
-			ContentManager.getBlock(e.getBlock()).getPlaceSound().play(e.getBlock().getLocation().clone().add(0.5, 0.5, 0.5));
+			ContentManager.getOverrided(e.getBlock()).getPlaceSound().play(e.getBlock().getLocation().clone().add(0.5, 0.5, 0.5));
 		}
 	}
 
@@ -791,7 +860,16 @@ public class ContentHandler implements Listener
 
 		else
 		{
-			ContentManager.getBlock(e.getBlock()).getBreakSound().play(e.getBlock().getLocation().clone().add(0.5, 0.5, 0.5));
+			ContentManager.getOverrided(e.getBlock()).getBreakSound().play(e.getBlock().getLocation().clone().add(0.5, 0.5, 0.5));
+		}
+	}
+
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void on(BlockDamageEvent e)
+	{
+		if(ContentManager.isOverrided(e.getBlock()))
+		{
+			e.setCancelled(true);
 		}
 	}
 
