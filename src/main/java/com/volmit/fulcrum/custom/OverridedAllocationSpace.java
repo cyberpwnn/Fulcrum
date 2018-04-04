@@ -1,5 +1,6 @@
 package com.volmit.fulcrum.custom;
 
+import org.bukkit.DyeColor;
 import org.bukkit.Material;
 
 import com.volmit.dumpster.F;
@@ -123,5 +124,22 @@ public class OverridedAllocationSpace
 		f += "Block Alpha: " + F.f(getAlphaUse()) + " of " + F.f(getUnallocatedAlphas().size()) + " (" + F.pc((double) getAlphaUse() / (double) getUnallocatedAlphas().size(), 1) + " use)" + "";
 
 		return f;
+	}
+
+	@SuppressWarnings("deprecation")
+	public String adapt(BlockType b)
+	{
+		if(b.getMaterial().equals(Material.WOOL) || b.getMaterial().equals(Material.STAINED_CLAY) || b.getMaterial().equals(Material.CONCRETE) || b.getMaterial().equals(Material.CONCRETE_POWDER))
+		{
+			for(DyeColor i : DyeColor.values())
+			{
+				if(i.getWoolData() == b.getData())
+				{
+					return i.name().toLowerCase() + "_" + b.getMaterial().name().toLowerCase();
+				}
+			}
+		}
+
+		return b.getMaterial().name().toLowerCase();
 	}
 }

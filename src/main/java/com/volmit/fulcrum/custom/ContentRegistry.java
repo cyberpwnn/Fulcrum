@@ -477,21 +477,21 @@ public class ContentRegistry implements Listener
 		oass.sacrificeNormal(Material.CONCRETE, 15);
 		oass.sacrificeNormal(Material.CONCRETE_POWDER, 15);
 		oass.sacrificeNormal(Material.STAINED_CLAY, 15);
-		oass.sacrificeNormal(Material.BLACK_GLAZED_TERRACOTTA, 3);
-		oass.sacrificeNormal(Material.BLUE_GLAZED_TERRACOTTA, 3);
-		oass.sacrificeNormal(Material.BROWN_GLAZED_TERRACOTTA, 3);
-		oass.sacrificeNormal(Material.CYAN_GLAZED_TERRACOTTA, 3);
-		oass.sacrificeNormal(Material.GRAY_GLAZED_TERRACOTTA, 3);
-		oass.sacrificeNormal(Material.GREEN_GLAZED_TERRACOTTA, 3);
-		oass.sacrificeNormal(Material.LIGHT_BLUE_GLAZED_TERRACOTTA, 3);
-		oass.sacrificeNormal(Material.LIME_GLAZED_TERRACOTTA, 3);
-		oass.sacrificeNormal(Material.MAGENTA_GLAZED_TERRACOTTA, 3);
-		oass.sacrificeNormal(Material.ORANGE_GLAZED_TERRACOTTA, 3);
-		oass.sacrificeNormal(Material.PINK_GLAZED_TERRACOTTA, 3);
-		oass.sacrificeNormal(Material.PURPLE_GLAZED_TERRACOTTA, 3);
-		oass.sacrificeNormal(Material.RED_GLAZED_TERRACOTTA, 3);
-		oass.sacrificeNormal(Material.SILVER_GLAZED_TERRACOTTA, 3);
-		oass.sacrificeNormal(Material.WHITE_GLAZED_TERRACOTTA, 3);
+		oass.sacrificeNormal(new BlockType(Material.BLACK_GLAZED_TERRACOTTA));
+		oass.sacrificeNormal(new BlockType(Material.BLUE_GLAZED_TERRACOTTA));
+		oass.sacrificeNormal(new BlockType(Material.BROWN_GLAZED_TERRACOTTA));
+		oass.sacrificeNormal(new BlockType(Material.CYAN_GLAZED_TERRACOTTA));
+		oass.sacrificeNormal(new BlockType(Material.GRAY_GLAZED_TERRACOTTA));
+		oass.sacrificeNormal(new BlockType(Material.GREEN_GLAZED_TERRACOTTA));
+		oass.sacrificeNormal(new BlockType(Material.LIGHT_BLUE_GLAZED_TERRACOTTA));
+		oass.sacrificeNormal(new BlockType(Material.LIME_GLAZED_TERRACOTTA));
+		oass.sacrificeNormal(new BlockType(Material.MAGENTA_GLAZED_TERRACOTTA));
+		oass.sacrificeNormal(new BlockType(Material.ORANGE_GLAZED_TERRACOTTA));
+		oass.sacrificeNormal(new BlockType(Material.PINK_GLAZED_TERRACOTTA));
+		oass.sacrificeNormal(new BlockType(Material.PURPLE_GLAZED_TERRACOTTA));
+		oass.sacrificeNormal(new BlockType(Material.RED_GLAZED_TERRACOTTA));
+		oass.sacrificeNormal(new BlockType(Material.SILVER_GLAZED_TERRACOTTA));
+		oass.sacrificeNormal(new BlockType(Material.WHITE_GLAZED_TERRACOTTA));
 		oass.sacrificeAlpha(Material.STAINED_GLASS, 15);
 		sounds.removeDuplicates();
 		blocks.removeDuplicates();
@@ -698,39 +698,6 @@ public class ContentRegistry implements Listener
 
 		for(CustomBlock i : blocks)
 		{
-			ModelType rt = i.getRenderType();
-			String m = "/assets/models/block/" + i.getId() + ".json";
-			URL model = i.getClass().getResource(m);
-
-			for(String j : rt.getRequiredTextures())
-			{
-				String a = j.isEmpty() ? "" : ("_" + j);
-				String t = "/assets/textures/blocks/" + i.getId() + a + ".png";
-				URL texture = i.getClass().getResource(t);
-
-				if(texture != null)
-				{
-					pack.setResource("textures/blocks/" + i.getId() + a + ".png", texture);
-				}
-
-				else
-				{
-					pack.setResource("textures/blocks/" + i.getId() + a + ".png", missingTexture);
-					System.out.println("  WARNING: " + i.getId() + " MISSING TEXTURE: " + t);
-				}
-			}
-
-			if(model != null)
-			{
-				pack.setResource("models/block/" + i.getId() + ".json", model);
-			}
-
-			else
-			{
-				String newModel = rt.getModelContent().replaceAll("\\Q$id\\E", i.getId());
-				pack.setResource("models/block/" + i.getId() + ".json", new JSONObject(newModel).toString(idf()));
-			}
-
 			if(i.getBlockType().equals(BlockRegistryType.BUILDING_BLOCK))
 			{
 				BlockType overriding = null;
@@ -740,15 +707,63 @@ public class ContentRegistry implements Listener
 					continue;
 				}
 
+				String ds = oass.adapt(overriding);
+				String t = "/assets/textures/blocks/" + i.getId() + ".png";
+				URL texture = i.getClass().getResource(t);
+
+				if(texture != null)
+				{
+					pack.setResource("textures/blocks/" + ds + ".png", texture);
+				}
+
+				else
+				{
+					pack.setResource("textures/blocks/" + ds + ".png", missingTexture);
+					System.out.println("  WARNING: " + i.getId() + " MISSING TEXTURE: " + t);
+				}
+
 				i.setDurabilityLock((short) -1);
 				i.setType(overriding.getMaterial());
 				i.setSuperID(msid--);
 				i.setData(overriding.getData());
-				System.out.println("  Registered BUILDING Block " + i.getId() + " to " + i.getType() + ":" + i.getData());
+				System.out.println("  Registered BUILDING Block " + i.getId() + " to " + i.getType() + ":" + i.getData() + " wtx = " + ds);
 			}
 
 			else
 			{
+				ModelType rt = i.getRenderType();
+				String m = "/assets/models/block/" + i.getId() + ".json";
+				URL model = i.getClass().getResource(m);
+
+				for(String j : rt.getRequiredTextures())
+				{
+					String a = j.isEmpty() ? "" : ("_" + j);
+					String t = "/assets/textures/blocks/" + i.getId() + a + ".png";
+					URL texture = i.getClass().getResource(t);
+
+					if(texture != null)
+					{
+						pack.setResource("textures/blocks/" + i.getId() + a + ".png", texture);
+					}
+
+					else
+					{
+						pack.setResource("textures/blocks/" + i.getId() + a + ".png", missingTexture);
+						System.out.println("  WARNING: " + i.getId() + " MISSING TEXTURE: " + t);
+					}
+				}
+
+				if(model != null)
+				{
+					pack.setResource("models/block/" + i.getId() + ".json", model);
+				}
+
+				else
+				{
+					String newModel = rt.getModelContent().replaceAll("\\Q$id\\E", i.getId());
+					pack.setResource("models/block/" + i.getId() + ".json", new JSONObject(newModel).toString(idf()));
+				}
+
 				AllocatedNode idx = i.isShaded() ? ass.allocateShaded("block/" + i.getId()) : ass.allocateNormal("block/" + i.getId());
 				i.setDurabilityLock((short) idx.getId());
 				i.setType(idx.getMaterial());
