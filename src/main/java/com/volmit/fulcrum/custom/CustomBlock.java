@@ -16,7 +16,7 @@ import com.volmit.fulcrum.bukkit.BlockType;
 import com.volmit.fulcrum.sfx.Audible;
 import com.volmit.fulcrum.sfx.Audio;
 
-public abstract class CustomBlock implements ICustom
+public class CustomBlock implements ICustom
 {
 	private Audible breakSound;
 	private Audible placeSound;
@@ -68,17 +68,35 @@ public abstract class CustomBlock implements ICustom
 		}
 	}
 
-	public abstract void onViewTicked(Player player, Block block);
+	public void onViewTicked(Player player, Block block)
+	{
 
-	public abstract void onPickedUp(Player player, Item item, boolean cancel);
+	}
 
-	public abstract void onPlaced(Player player, Block block, Block against, BlockFace on, boolean cancel);
+	public void onPickedUp(Player player, Item item, boolean cancel)
+	{
 
-	public abstract void onBroke(Player player, Block block, boolean cancel);
+	}
 
-	public abstract void onStartDig(Player player, Block block, boolean cancel);
+	public void onPlaced(Player player, Block block, Block against, BlockFace on, boolean cancel)
+	{
 
-	public abstract void onCancelDig(Player player, Block block);
+	}
+
+	public void onBroke(Player player, Block block, boolean cancel)
+	{
+
+	}
+
+	public void onStartDig(Player player, Block block, boolean cancel)
+	{
+
+	}
+
+	public void onCancelDig(Player player, Block block)
+	{
+
+	}
 
 	public void setSound(MultiCustomSound s)
 	{

@@ -597,7 +597,9 @@ public class ContentManager
 			return false;
 		}
 
-		return r().getOass().getAllocated().containsKey(new BlockType(block.getType(), block.getData().getData()));
+		byte v = block.getData().getData() < 0 ? 0 : block.getData().getData();
+		BlockType vv = new BlockType(block.getType(), v);
+		return r().getOass().getAllocated().containsKey(vv);
 	}
 
 	/**
@@ -941,9 +943,11 @@ public class ContentManager
 	}
 
 	@SuppressWarnings("deprecation")
-	public static CustomBlock getOverrided(ItemStack is)
+	public static CustomBlock getOverrided(ItemStack block)
 	{
-		return r().getOass().getAllocated().get(new BlockType(is.getType(), is.getData().getData()));
+		byte v = block.getData().getData() < 0 ? 0 : block.getData().getData();
+		BlockType vv = new BlockType(block.getType(), v);
+		return r().getOass().getAllocated().get(vv);
 	}
 
 	/**

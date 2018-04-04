@@ -796,6 +796,16 @@ public class ContentHandler implements Listener
 
 		else
 		{
+			CustomBlock cb = ContentManager.getOverrided(e.getBlock());
+			boolean cancel = false;
+			cb.onPlaced(e.getPlayer(), e.getBlock(), e.getBlockAgainst(), e.getBlockAgainst().getFace(e.getBlock()), cancel);
+
+			if(cancel)
+			{
+				e.setCancelled(true);
+				return;
+			}
+
 			ContentManager.getOverrided(e.getBlock()).getPlaceSound().play(e.getBlock().getLocation().clone().add(0.5, 0.5, 0.5));
 		}
 	}
@@ -1030,8 +1040,10 @@ public class ContentHandler implements Listener
 				Fulcrum.callEvent(bp);
 				CustomBlockPlaceEvent ee = new CustomBlockPlaceEvent(target, cb, e.getPlayer());
 				Fulcrum.callEvent(ee);
+				boolean cancel = false;
+				cb.onPlaced(e.getPlayer(), target, target.getRelative(e.getBlockFace().getOppositeFace()), e.getBlockFace(), cancel);
 
-				if(ee.isCancelled() || bp.isCancelled())
+				if(ee.isCancelled() || bp.isCancelled() || cancel)
 				{
 					target.setType(state.getType(), false);
 					target.getState().setData(state.getData());

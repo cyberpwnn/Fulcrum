@@ -15,7 +15,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import com.volmit.fulcrum.sfx.Audible;
 import com.volmit.fulcrum.sfx.Audio;
 
-public abstract class CustomItem implements ICustom
+public class CustomItem implements ICustom
 {
 	private Material type;
 	private short durability;
@@ -46,9 +46,15 @@ public abstract class CustomItem implements ICustom
 		}
 	}
 
-	public abstract void onPickedUp(Player p, Item item, boolean cancelled);
+	public void onPickedUp(Player p, Item item, boolean cancelled)
+	{
 
-	public abstract void onUsed(Player p, EquipmentSlot hand, Action action, Block block, BlockFace face, boolean cancelled);
+	}
+
+	public void onUsed(Player p, EquipmentSlot hand, Action action, Block block, BlockFace face, boolean cancelled)
+	{
+
+	}
 
 	public Audible getPickupSound()
 	{
