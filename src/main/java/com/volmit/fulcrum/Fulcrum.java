@@ -303,7 +303,14 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 				{
 					try
 					{
-						contentRegistry.compileResources(CompilerFlag.PREDICATE_MINIFICATION, CompilerFlag.PREDICATE_CYCLING, CompilerFlag.JSON_MINIFICATION);
+						//@fuckboy:on
+						contentRegistry.compileResources(
+								CompilerFlag.PREDICATE_MINIFICATION,
+								CompilerFlag.PREDICATE_CYCLING,
+								CompilerFlag.VERBOSE,
+								CompilerFlag.OVERBOSE,
+								CompilerFlag.JSON_MINIFICATION);
+						//@fuckboy:off
 					}
 
 					catch(Exception e)

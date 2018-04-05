@@ -52,6 +52,11 @@ public class ToolLevel
 			return HAND;
 		}
 
+		if(ContentManager.isTool(is))
+		{
+			return ContentManager.getTool(is).getToolLevel();
+		}
+
 		if(ToolType.getType(is).equals(ToolType.HAND))
 		{
 			return HAND;

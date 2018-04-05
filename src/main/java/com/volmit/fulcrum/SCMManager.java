@@ -109,7 +109,7 @@ public class SCMManager implements Listener, CommandExecutor
 			else if(args[0].equalsIgnoreCase("wand"))
 			{
 				new Audio().s(Sound.BLOCK_END_PORTAL_FRAME_FILL).vp(1f, 0.5f).play((Player) sender);
-				ItemStack is = new ItemStack(Material.WOOD_HOE);
+				ItemStack is = new ItemStack(Material.IRON_AXE);
 				ItemMeta im = is.getItemMeta();
 				im.setDisplayName(C.YELLOW + "SCM Wand");
 				Location ll = ((Player) sender).getLocation();
@@ -445,7 +445,7 @@ public class SCMManager implements Listener, CommandExecutor
 			return;
 		}
 
-		if(e.getItem().getType().equals(Material.WOOD_HOE))
+		if(e.getItem().getType().equals(Material.IRON_AXE))
 		{
 			e.setCancelled(true);
 
@@ -493,7 +493,7 @@ public class SCMManager implements Listener, CommandExecutor
 			return null;
 		}
 
-		if(is.getType().equals(Material.WOOD_HOE))
+		if(is.getType().equals(Material.IRON_AXE))
 		{
 			ItemMeta im = is.getItemMeta();
 
@@ -514,7 +514,7 @@ public class SCMManager implements Listener, CommandExecutor
 	{
 		for(Player i : P.onlinePlayers())
 		{
-			if(i.getInventory().getItemInMainHand().getType().equals(Material.WOOD_HOE))
+			if(i.getInventory().getItemInMainHand().getType().equals(Material.IRON_AXE))
 			{
 				Location[] d = getSelection(i);
 

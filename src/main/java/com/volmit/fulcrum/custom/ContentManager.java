@@ -33,6 +33,26 @@ public class ContentManager
 		return isCustom(b) ? getBlock(b) : getOverrided(b);
 	}
 
+	public static boolean isTool(CustomItem it)
+	{
+		return it instanceof CustomTool;
+	}
+
+	public static boolean isTool(ItemStack is)
+	{
+		return isCustom(is) && isTool(getItem(is));
+	}
+
+	public static CustomTool getTool(CustomItem it)
+	{
+		return ((CustomTool) it);
+	}
+
+	public static CustomTool getTool(ItemStack is)
+	{
+		return isTool(is) ? getTool(getItem(is)) : null;
+	}
+
 	/**
 	 * Request the content manager reload itself and re-call registry events
 	 */

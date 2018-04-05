@@ -24,7 +24,7 @@ public class PredicateGenerator
 		this.minify = minify;
 		models = new GList<String>();
 		this.model = model;
-		max = type.getMaxDurability();
+		max = type.getMaxDurability() - 2;
 		overrides = new JSONArray();
 		parenter = new JSONObject();
 		parenter.put("parent", model);
@@ -132,7 +132,7 @@ public class PredicateGenerator
 
 			boolean put = !pending.isEmpty();
 			String m = pending.isEmpty() ? modelSuperName() : pending.pop();
-			double raw = (double) ((float) ((double) i / (double) max));
+			double raw = (double) i / (double) max;
 			raw = Double.valueOf(F.f(raw, 10));
 			JSONObject pred = new JSONObject();
 			JSONObject brx = new JSONObject();

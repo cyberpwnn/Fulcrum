@@ -19,6 +19,11 @@ public class ToolType
 			return HAND;
 		}
 
+		if(ContentManager.isTool(is))
+		{
+			return ContentManager.getTool(is).getToolType();
+		}
+
 		switch(is.getType())
 		{
 			case DIAMOND_SWORD:

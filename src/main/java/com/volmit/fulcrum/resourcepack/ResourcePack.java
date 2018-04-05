@@ -13,6 +13,8 @@ import java.util.regex.Matcher;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import org.bukkit.Bukkit;
+
 import com.googlecode.pngtastic.core.PngImage;
 import com.googlecode.pngtastic.core.PngOptimizer;
 import com.volmit.dumpster.F;
@@ -20,6 +22,9 @@ import com.volmit.dumpster.GList;
 import com.volmit.dumpster.GMap;
 import com.volmit.dumpster.M;
 import com.volmit.fulcrum.Fulcrum;
+import com.volmit.fulcrum.bukkit.S;
+import com.volmit.fulcrum.lang.C;
+import com.volmit.fulcrum.lang.TXT;
 
 public class ResourcePack
 {
@@ -30,6 +35,36 @@ public class ResourcePack
 	GList<String> oc = new GList<String>();
 	GList<String> ow = new GList<String>();
 	private boolean optimizePngs;
+	private boolean overbose = false;
+
+	public void o(String s)
+	{
+		if(!overbose)
+		{
+			return;
+		}
+
+		new S()
+		{
+			@Override
+			public void run()
+			{
+				Bukkit.getConsoleSender().sendMessage(TXT.makeTag(C.RED, C.WHITE, C.GRAY, "FU OVERBOSE") + s);
+			}
+		};
+	}
+
+	public void f(String s)
+	{
+		new S()
+		{
+			@Override
+			public void run()
+			{
+				Bukkit.getConsoleSender().sendMessage(TXT.makeTag(C.RED, C.WHITE, C.RED, "FU ERROR") + s);
+			}
+		};
+	}
 
 	public ResourcePack()
 	{
@@ -65,24 +100,26 @@ public class ResourcePack
 
 		if(path == null)
 		{
-			System.out.println("PATH IS NULL: " + url.toString());
+			f("PATH IS NULL: " + url.toString());
 			return;
 		}
 
 		if(url == null)
 		{
-			System.out.println("URL IS NULL: " + path);
+			f("URL IS NULL: " + path);
 			return;
 		}
 
 		oc.add(path);
 		copyResources.put(path, url);
+		o("Adding Resource: " + C.WHITE + path + C.GRAY + " from url " + C.WHITE + url.getFile().split("\\Q!\\E")[1]);
 	}
 
 	public void setResource(String path, String content)
 	{
 		ow.add(path);
 		writeResources.put(path, content);
+		o("Adding Resource: " + C.WHITE + path + C.GRAY + " from TEXT " + C.WHITE + (content.length() > 40 ? content.substring(0, 40) + "..." : content).replaceAll("\n", ""));
 	}
 
 	public PackMeta getMeta()
@@ -143,6 +180,7 @@ public class ResourcePack
 			String relative = new File(base).toURI().relativize(new File(path).toURI()).getPath();
 			ZipEntry ze = new ZipEntry(relative);
 			FileInputStream fin = new FileInputStream(file);
+			o("Zipping " + C.WHITE + file.getPath());
 			s.putNextEntry(ze);
 			byte[] buf = new byte[1024];
 			int read = 0;
@@ -178,19 +216,23 @@ public class ResourcePack
 			writePackContent(destination, writeResources.get(i));
 		}
 
-		System.out.println("Saved a total of " + F.ofSize(totalSaved, 1024, 2));
+		if(isOptimizedPngs())
+		{
+			o("Saved a total of " + F.ofSize(totalSaved, 1024, 2));
+		}
 	}
 
 	private void writeResourceToFile(URL url, File f) throws IOException
 	{
 		if(url == null)
 		{
-			System.out.println("WARNING! Resource is null: " + f.getAbsolutePath());
+			f("WARNING! Resource is null: " + f.getAbsolutePath());
 			return;
 		}
 
 		try
 		{
+			o("Writing " + C.WHITE + url.getFile().split("\\Q!\\E")[1] + C.GRAY + " to " + C.WHITE + f.getPath());
 			FileOutputStream fos = new FileOutputStream(f);
 			InputStream in = url.openStream();
 			byte[] buffer = new byte[1024];
@@ -224,15 +266,21 @@ public class ResourcePack
 		o.setCompressor("zopfli", 32);
 		o.optimize(img, f.getPath(), true, 9);
 		long sa = o.getTotalSavings();
-		System.out.println("Optimized " + f.getName() + " (saved " + F.fileSize(sa) + ")");
+		o("Optimized " + f.getName() + " (saved " + F.fileSize(sa) + ")");
 		totalSaved += sa;
 	}
 
 	private void writePackContent(File m, String content) throws IOException
 	{
+		o("Writing " + C.WHITE + (content.length() > 40 ? content.substring(0, 40) + "..." : content).replaceAll("\n", "") + C.GRAY + " to " + C.WHITE + m.getPath());
 		m.createNewFile();
 		PrintWriter pw = new PrintWriter(m);
 		pw.println(content);
 		pw.close();
+	}
+
+	public void setOverbose(boolean hasFlag)
+	{
+		overbose = hasFlag;
 	}
 }

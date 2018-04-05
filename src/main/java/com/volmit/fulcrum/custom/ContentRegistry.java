@@ -39,10 +39,13 @@ import com.volmit.fulcrum.Fulcrum;
 import com.volmit.fulcrum.bukkit.BlockType;
 import com.volmit.fulcrum.bukkit.P;
 import com.volmit.fulcrum.bukkit.R;
+import com.volmit.fulcrum.bukkit.S;
 import com.volmit.fulcrum.bukkit.TaskLater;
 import com.volmit.fulcrum.bukkit.Worlds;
 import com.volmit.fulcrum.event.ContentRecipeRegistryEvent;
 import com.volmit.fulcrum.event.ContentRegistryEvent;
+import com.volmit.fulcrum.lang.C;
+import com.volmit.fulcrum.lang.TXT;
 import com.volmit.fulcrum.resourcepack.ResourcePack;
 
 public class ContentRegistry implements Listener
@@ -74,6 +77,7 @@ public class ContentRegistry implements Listener
 	private GMap<Integer, CustomItem> superItems;
 	private GMap<Integer, CustomInventory> superInventories;
 	private GMap<ModelType, ModelSet> blockModels;
+	private GMap<String, GList<CustomTool>> customTools;
 	private AllocationSpace ass;
 	private OverridedAllocationSpace oass;
 	private String rid;
@@ -83,6 +87,7 @@ public class ContentRegistry implements Listener
 	public ContentRegistry()
 	{
 		msid = -10000;
+		customTools = new GMap<String, GList<CustomTool>>();
 		superBlocks = new GMap<Integer, CustomBlock>();
 		superItems = new GMap<Integer, CustomItem>();
 		superInventories = new GMap<Integer, CustomInventory>();
@@ -98,6 +103,72 @@ public class ContentRegistry implements Listener
 		Fulcrum.register(this);
 	}
 
+	public void v(String s)
+	{
+		if(hasFlag(CompilerFlag.VERBOSE))
+		{
+			new S()
+			{
+				@Override
+				public void run()
+				{
+					Bukkit.getConsoleSender().sendMessage(TXT.makeTag(C.RED, C.WHITE, C.GRAY, "FU VERBOSE") + s);
+				}
+			};
+		}
+	}
+
+	public void o(String s)
+	{
+		if(hasFlag(CompilerFlag.OVERBOSE))
+		{
+			new S()
+			{
+				@Override
+				public void run()
+				{
+					Bukkit.getConsoleSender().sendMessage(TXT.makeTag(C.RED, C.WHITE, C.GRAY, "FU OVERBOSE") + s);
+				}
+			};
+		}
+	}
+
+	public void i(String s)
+	{
+		new S()
+		{
+			@Override
+			public void run()
+			{
+				Bukkit.getConsoleSender().sendMessage(TXT.makeTag(C.RED, C.WHITE, C.GRAY, "FU INFO") + s);
+			}
+		};
+	}
+
+	public void w(String s)
+	{
+		new S()
+		{
+			@Override
+			public void run()
+			{
+				Bukkit.getConsoleSender().sendMessage(TXT.makeTag(C.RED, C.WHITE, C.YELLOW, "FU WARN") + s);
+			}
+		};
+	}
+
+	public void e(String s)
+	{
+		new S()
+		{
+			@Override
+			public void run()
+			{
+				Bukkit.getConsoleSender().sendMessage(TXT.makeTag(C.RED, C.WHITE, C.RED, "FU ERROR") + s);
+			}
+		};
+	}
+
 	public boolean hasFlag(CompilerFlag flag)
 	{
 		return flags.contains(flag);
@@ -105,7 +176,7 @@ public class ContentRegistry implements Listener
 
 	public void clean()
 	{
-		System.out.println("Cleaning " + Worlds.getWorlds().size() + " Worlds");
+		i("Cleaning " + Worlds.getWorlds().size() + " Worlds");
 
 		for(World i : Worlds.getWorlds())
 		{
@@ -115,7 +186,7 @@ public class ContentRegistry implements Listener
 
 	public void clean(World w)
 	{
-		System.out.println(" Cleaning " + w.getName());
+		v(" Cleaning " + w.getName());
 		File f = new File(w.getWorldFolder(), "data" + File.separator + "advancements" + File.separator + "fulcrum");
 		delete(f);
 	}
@@ -126,6 +197,8 @@ public class ContentRegistry implements Listener
 		{
 			return;
 		}
+
+		o("  Deleting " + f.getPath());
 
 		if(f.isDirectory())
 		{
@@ -140,6 +213,7 @@ public class ContentRegistry implements Listener
 
 	public void registerModelType(ModelSet set)
 	{
+		o("Pre Registered Model Type " + C.YELLOW + set.getType().toString());
 		blockModels.put(set.getType(), set);
 	}
 
@@ -150,31 +224,37 @@ public class ContentRegistry implements Listener
 
 	public void registerSoundReplacement(SoundReplacement s)
 	{
+		o("Pre Registered Sound Replacement " + C.BLUE + s.getNode() + " -> " + s.getNewSound().getNode());
 		soundReplacements.add(s);
 	}
 
 	public void registerSound(CustomSound s)
 	{
+		o("Pre Registered Sound " + C.GREEN + s.getNode());
 		sounds.add(s);
 	}
 
 	public void registerItem(CustomItem s)
 	{
+		o("Pre Registered Item " + C.LIGHT_PURPLE + s.getId());
 		items.add(s);
 	}
 
 	public void registerBlock(CustomBlock block)
 	{
+		o("Pre Registered Block " + C.RED + block.getId());
 		blocks.add(block);
 	}
 
 	public void registerAdvancement(CustomAdvancement adv)
 	{
+		o("Pre Registered Advancement " + C.DARK_GREEN + adv.getId());
 		advancements.add(adv);
 	}
 
 	public void registerInventory(CustomInventory i)
 	{
+		o("Pre Registered Inventory " + C.DARK_PURPLE + i.getId());
 		inventories.add(i);
 	}
 
@@ -185,18 +265,25 @@ public class ContentRegistry implements Listener
 		pr.begin();
 		Registrar rr = new Registrar();
 		ContentRegistryEvent e = new ContentRegistryEvent(rr);
+		o(C.BOLD + "" + C.UNDERLINE + C.AQUA + "BEGIN REGISTRY");
 		Fulcrum.callEvent(e);
 
 		if(!rr.connect(this))
 		{
+			o("No Resources to compile, not sending resource packs");
 			return;
 		}
 
-		registerDebug();
+		o("Compiling Resources...");
+
+		if(hasFlag(CompilerFlag.REGISTER_DEBUG_ITEMS))
+		{
+			registerDebug();
+		}
 
 		if(hasFlag(CompilerFlag.CONCURRENT_REGISTRY))
 		{
-			System.out.println("Warning: Using Concurrent Registry");
+			i("Warning: Using Concurrent Registry");
 			loadResources();
 
 			Thread tAdvancements = new Thread("Fulcrum Registry - Advancements")
@@ -281,12 +368,13 @@ public class ContentRegistry implements Listener
 		}
 
 		pr.end();
-		System.out.println("Items: " + F.f(items.size()));
-		System.out.println("Blocks: " + F.f(blocks.size()));
-		System.out.println("Sounds: " + F.f(sounds.size()));
-		System.out.println("Advancements: " + F.f(advancements.size()));
-		System.out.println("Inventories: " + F.f(inventories.size()));
-		System.out.println(F.f(pack.size()) + " Resources compiled in " + F.time(pr.getMilliseconds(), 2));
+		i("Items: " + F.f(items.size()));
+		i("Blocks: " + F.f(blocks.size()));
+		i("Sounds: " + F.f(sounds.size()));
+		i("Advancements: " + F.f(advancements.size()));
+		i("Inventories: " + F.f(inventories.size()));
+		i(F.f(pack.size()) + " Resources compiled in " + F.time(pr.getMilliseconds(), 2));
+		o(C.BOLD + "" + C.UNDERLINE + C.GREEN + "REGISTRY COMPLETE");
 	}
 
 	private void registerDebug()
@@ -296,12 +384,12 @@ public class ContentRegistry implements Listener
 
 	private void processAdvancements()
 	{
-		System.out.println("Registering " + advancements.size() + " Advancements");
+		i("Registering " + advancements.size() + " Advancements");
 
 		for(CustomAdvancement i : advancements)
 		{
 			i.load();
-			System.out.println("  Registered Advancement " + i.getKey().toString());
+			v("  Registered Advancement " + i.getKey().toString());
 		}
 	}
 
@@ -310,24 +398,24 @@ public class ContentRegistry implements Listener
 		rid = UUID.randomUUID().toString().replaceAll("-", "");
 		File fpack = new File(Fulcrum.server.getRoot(), rid + ".zip");
 		byte[] hash = pack.writeToArchive(fpack);
-		System.out.println("RESULTS:\n" + ass.toString() + "\n" + oass.toString());
+		i("RESULTS:\n" + ass.toString() + "\n" + oass.toString());
 		File hasf = new File(Fulcrum.server.getRoot(), "latest-hash.md5");
 		boolean needsToUpdate = true;
 
 		if(hasf.exists())
 		{
 			byte[] oldHash = Files.toByteArray(hasf);
-			System.out.println("New Hash: " + Hex.encodeHexString(hash));
-			System.out.println("Old Hash: " + Hex.encodeHexString(oldHash));
+			v("New Hash: " + Hex.encodeHexString(hash));
+			v("Old Hash: " + Hex.encodeHexString(oldHash));
 
 			if(Arrays.equals(hash, oldHash))
 			{
-				System.out.println("Last hash is identical to the current hash. Not sending to players.");
+				i("Last hash is identical to the current hash. Not sending to players.");
 				needsToUpdate = false;
 			}
 		}
 
-		System.out.println("Writing latest hash");
+		v("Writing latest hash");
 		Files.write(hash, hasf);
 
 		for(Player i : P.onlinePlayers())
@@ -400,7 +488,7 @@ public class ContentRegistry implements Listener
 			}
 		}
 
-		System.out.println("Registered " + getRecipes().size() + " recipes");
+		i("Registered " + getRecipes().size() + " recipes");
 	}
 
 	public String getRid()
@@ -434,6 +522,7 @@ public class ContentRegistry implements Listener
 	{
 		pack = new ResourcePack();
 		pack.setOptimizePngs(hasFlag(CompilerFlag.PNG_COMPRESSION));
+		pack.setOverbose(hasFlag(CompilerFlag.OVERBOSE));
 
 		for(ModelType i : ModelType.values())
 		{
@@ -456,13 +545,13 @@ public class ContentRegistry implements Listener
 		defaultInventoryContentBottom = read(defaultInventoryBottom);
 		defaultItemContent = read(defaultItem);
 
-		System.out.println("Compiling " + blockModels.size() + " Model Types");
+		i("Compiling " + blockModels.size() + " Model Types");
 
 		for(ModelType i : blockModels.k())
 		{
 			i.setMc(blockModels.get(i).getModel());
 			blockModels.get(i).export(pack, idf());
-			System.out.println("  Compiled Model Type " + i.name() + " as " + blockModels.get(i).getFulcrumModel().toString());
+			v("  Compiled Model Type " + i.name() + " as " + blockModels.get(i).getFulcrumModel().toString());
 		}
 
 		ass = new AllocationSpace(hasFlag(CompilerFlag.PREDICATE_MINIFICATION), hasFlag(CompilerFlag.PREDICATE_CYCLING));
@@ -477,7 +566,7 @@ public class ContentRegistry implements Listener
 		oass.sacrificeNormal(Material.CONCRETE_POWDER, 15);
 		oass.sacrificeNormal(Material.STAINED_CLAY, 15);
 		oass.sacrificeAlpha(Material.STAINED_GLASS, 15);
-		System.out.println("Disabling " + F.f(oass.getImpossibleRecipes().size()) + " recipes due to sacrificed blocks.");
+		i("Disabling " + F.f(oass.getImpossibleRecipes().size()) + " recipes due to sacrificed blocks.");
 		sounds.removeDuplicates();
 		blocks.removeDuplicates();
 		inventories.removeDuplicates();
@@ -527,8 +616,8 @@ public class ContentRegistry implements Listener
 		registerSoundReplacement(new SoundReplacement("ui.toast.challenge_complete", soundBell));
 		registerSoundReplacement(new SoundReplacement("ui.toast.in", soundIn));
 		registerSoundReplacement(new SoundReplacement("ui.toast.out", soundOut));
-		System.out.println("Reading " + F.f(desound.keySet().size()) + " default sound entries");
-		System.out.println("Processing " + F.f(soundReplacements.size()) + " sound replacements");
+		i("Reading " + F.f(desound.keySet().size()) + " default sound entries");
+		i("Processing " + F.f(soundReplacements.size()) + " sound replacements");
 		GSet<String> ffv = new GSet<String>(desound.keySet());
 		GList<Thread> tvm = new GList<Thread>();
 		for(String i : ffv)
@@ -583,11 +672,11 @@ public class ContentRegistry implements Listener
 			}
 		}
 
-		System.out.println("Registering " + F.f(sounds.size()) + " custom sounds");
+		i("Registering " + F.f(sounds.size()) + " custom sounds");
 
 		for(CustomSound i : sounds)
 		{
-			System.out.println("  Registering Sound: " + i.getNode());
+			v("  Registering Sound " + C.GREEN + i.getNode());
 			for(String j : i.getSoundPaths().k())
 			{
 				pack.setResource("sounds/" + j, i.getSoundPaths().get(j));
@@ -626,14 +715,16 @@ public class ContentRegistry implements Listener
 		mod.put("sounds", new JSONArray(d));
 		soundx.put(j.getReplacement(), old);
 		soundx.put(i, mod);
-		System.out.println("  Remapped Sound " + j.getNode() + " -> " + j.getReplacement());
+		v("  Remapped Sound " + j.getNode() + " -> " + j.getReplacement());
 	}
 
 	private void processInventories()
 	{
+		i("Registering " + inventories.size() + " Inventories");
+
 		for(CustomInventory i : inventories)
 		{
-			System.out.println("  Registering Inventory " + i.getId());
+			v("  Registering Inventory " + i.getId());
 			String ttop = "/assets/textures/inventories/" + i.getId() + "_top.png";
 			String tbottom = "/assets/textures/inventories/" + i.getId() + "_bottom.png";
 
@@ -642,7 +733,7 @@ public class ContentRegistry implements Listener
 
 			if(ut == null && ub == null)
 			{
-				System.out.println("   Unable to locate either inventory textures.");
+				w("   Unable to locate either inventory textures.");
 				continue;
 			}
 
@@ -661,6 +752,11 @@ public class ContentRegistry implements Listener
 				i.setSuperIDTop(idx.getSuperid());
 			}
 
+			else
+			{
+				w("    Unable to locate Inventory TOP texture for " + i.getId());
+			}
+
 			if(ub != null)
 			{
 				i.setBottom(true);
@@ -672,12 +768,17 @@ public class ContentRegistry implements Listener
 				i.setDurabilityBottom((short) idx.getId());
 				i.setSuperIDBottom(idx.getSuperid());
 			}
+
+			else
+			{
+				w("    Unable to locate Inventory BOTTOM texture for " + i.getId());
+			}
 		}
 	}
 
 	private void processBlocks()
 	{
-		System.out.println("Registering " + blocks.size() + " Blocks");
+		i("Registering " + blocks.size() + " Blocks");
 
 		for(CustomBlock i : blocks)
 		{
@@ -702,14 +803,14 @@ public class ContentRegistry implements Listener
 				else
 				{
 					pack.setResource("textures/blocks/" + ds + ".png", missingTexture);
-					System.out.println("  WARNING: " + i.getId() + " MISSING TEXTURE: " + t);
+					w("  WARNING: " + i.getId() + " MISSING TEXTURE: " + t);
 				}
 
 				i.setDurabilityLock((short) -1);
 				i.setType(overriding.getMaterial());
 				i.setSuperID(msid--);
 				i.setData(overriding.getData());
-				System.out.println("  Registered BUILDING Block " + i.getId() + " to " + i.getType() + ":" + i.getData() + " wtx = " + ds);
+				v("  Registered BUILDING Block " + C.RED + i.getId() + C.WHITE + " to " + i.getType() + ":" + i.getData() + " wtx = " + ds);
 			}
 
 			else
@@ -732,7 +833,7 @@ public class ContentRegistry implements Listener
 					else
 					{
 						pack.setResource("textures/blocks/" + i.getId() + a + ".png", missingTexture);
-						System.out.println("  WARNING: " + i.getId() + " MISSING TEXTURE: " + t);
+						w("  WARNING: " + i.getId() + " MISSING TEXTURE: " + t);
 					}
 				}
 
@@ -753,14 +854,14 @@ public class ContentRegistry implements Listener
 				superBlocks.put(idx.getSuperid(), i);
 				i.setSuperID(idx.getSuperid());
 				i.setMatt(ass.getNameForMaterial(i.getType()));
-				System.out.println("  Registered TILE Block " + i.getId() + " to " + i.getType() + ":" + i.getDurabilityLock());
+				v("  Registered TILE Block " + C.RED + i.getId() + C.WHITE + " to " + i.getType() + ":" + i.getDurabilityLock());
 			}
 		}
 	}
 
 	private void processItems()
 	{
-		System.out.println("Registering " + items.size() + " Items");
+		i("Registering " + items.size() + " Items");
 
 		for(CustomItem i : items)
 		{
@@ -778,7 +879,7 @@ public class ContentRegistry implements Listener
 
 				if(url == null)
 				{
-					System.out.println(" Unable to locate item texture " + i.getId() + "_" + j + ".png");
+					w(" Unable to locate item texture " + i.getId() + "_" + j + ".png");
 					url = missingTexture;
 				}
 
@@ -789,11 +890,27 @@ public class ContentRegistry implements Listener
 
 			pack.setResource("models/item/" + i.getId() + ".json", o.toString(idf()));
 			AllocatedNode node = ass.allocateNormal("item/" + i.getId());
-			System.out.println("  Registered Item " + i.getId() + " to " + node.getMaterial() + ":" + node.getId());
+			v("  Registered Item " + C.LIGHT_PURPLE + i.getId() + C.WHITE + " to " + node.getMaterial() + ":" + node.getId());
 			superItems.put(node.getSuperid(), i);
 			i.setType(node.getMaterial());
 			i.setDurability((short) node.getId());
 			i.setSuperID(node.getSuperid());
+		}
+
+		for(CustomItem i : items)
+		{
+			if(i instanceof CustomTool)
+			{
+				CustomTool c = (CustomTool) i;
+
+				if(!customTools.containsKey(c.getToolType()))
+				{
+					customTools.put(c.getToolType(), new GList<CustomTool>());
+				}
+
+				customTools.get(c.getToolType()).add(c);
+				v("    Assigned Item " + i.getId() + " as tool:" + c.getToolType() + " @lvl:" + c.getToolLevel());
+			}
 		}
 	}
 
