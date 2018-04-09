@@ -430,6 +430,8 @@ public class ContentRegistry implements Listener
 				i.sendMessage("Merged with New Hash: " + Hex.encodeHexString(hash));
 			}
 		}
+
+		Fulcrum.adapter.cacheBlockData(this);
 	}
 
 	@SuppressWarnings("unchecked")

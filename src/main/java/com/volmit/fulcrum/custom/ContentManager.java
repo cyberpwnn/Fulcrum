@@ -33,6 +33,50 @@ public class ContentManager
 		return isCustom(b) ? getBlock(b) : getOverrided(b);
 	}
 
+	public static boolean isOverrided(String id)
+	{
+		for(CustomBlock i : getBlocks())
+		{
+			if(i.getId().equals(id) && isOverrided(i))
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	public static CustomBlock getOverrided(String b)
+	{
+		for(CustomBlock i : getBlocks())
+		{
+			if(i.getId().equals(b) && isOverrided(i))
+			{
+				return i;
+			}
+		}
+
+		return null;
+	}
+
+	public static boolean isCustom(String id)
+	{
+		for(CustomBlock i : getBlocks())
+		{
+			if(i.getId().equals(id) && !isOverrided(i))
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	public static CustomBlock getAny(String id)
+	{
+		return isCustom(id) ? getBlock(id) : getOverrided(id);
+	}
+
 	public static boolean isTool(CustomItem it)
 	{
 		return it instanceof CustomTool;
@@ -40,6 +84,11 @@ public class ContentManager
 
 	public static boolean isTool(ItemStack is)
 	{
+		if(is == null)
+		{
+			return false;
+		}
+
 		return isCustom(is) && isTool(getItem(is));
 	}
 

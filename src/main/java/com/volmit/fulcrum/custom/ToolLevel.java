@@ -1,7 +1,10 @@
 package com.volmit.fulcrum.custom;
 
+import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
+
+import com.volmit.fulcrum.Fulcrum;
 
 public class ToolLevel
 {
@@ -19,6 +22,44 @@ public class ToolLevel
 		if(l > 0)
 		{
 			m = l * 2D;
+		}
+
+		return (1D / ((h * 1.5) / m)) / 20D;
+	}
+
+	public static double getMiningSpeed(Block block, ItemStack is)
+	{
+		double h = 1;
+
+		try
+		{
+			h = Fulcrum.adapter.getHardness(block);
+		}
+
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+
+		int l = ToolLevel.getToolLevel(is);
+		int el = 0;
+
+		if(is != null && is.containsEnchantment(Enchantment.DIG_SPEED))
+		{
+			el = (int) (Math.pow(is.getEnchantmentLevel(Enchantment.DIG_SPEED), 2D) + 1);
+		}
+
+		double m = 1;
+		double f = 2D;
+
+		if(l > 0)
+		{
+			if(l > ToolLevel.DIAMOND)
+			{
+				f = 1.59D;
+			}
+
+			m = (l * f) + el;
 		}
 
 		return (1D / ((h * 1.5) / m)) / 20D;

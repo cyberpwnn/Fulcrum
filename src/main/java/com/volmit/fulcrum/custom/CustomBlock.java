@@ -305,27 +305,47 @@ public class CustomBlock implements ICustom
 		return getItem(1);
 	}
 
+	@SuppressWarnings("deprecation")
 	public ItemStack getItem(int count)
 	{
-		ItemStack is = new ItemStack(getType());
-		is.setAmount(count);
-		is.setDurability(getDurabilityLock());
-		ItemMeta im = is.getItemMeta();
-		im.setUnbreakable(true);
-		im.setDisplayName(getName());
+		ItemStack is;
 
-		if(ee)
+		if(ContentManager.isOverrided(this))
 		{
-			im.addEnchant(Enchantment.PROTECTION_ENVIRONMENTAL, 0, true);
+			is = new ItemStack(getType(), count, (short) 0, getData());
+			ItemMeta im = is.getItemMeta();
+			im.setDisplayName(getName());
+			im.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+			im.addItemFlags(ItemFlag.HIDE_DESTROYS);
+			im.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+			im.addItemFlags(ItemFlag.HIDE_PLACED_ON);
+			im.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
+			im.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
+			is.setItemMeta(im);
 		}
 
-		im.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-		im.addItemFlags(ItemFlag.HIDE_DESTROYS);
-		im.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-		im.addItemFlags(ItemFlag.HIDE_PLACED_ON);
-		im.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
-		im.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
-		is.setItemMeta(im);
+		else
+		{
+			is = new ItemStack(getType());
+			is.setAmount(count);
+			ItemMeta im = is.getItemMeta();
+			im.setDisplayName(getName());
+			is.setDurability(getDurabilityLock());
+			im.setUnbreakable(true);
+
+			if(ee)
+			{
+				im.addEnchant(Enchantment.PROTECTION_ENVIRONMENTAL, 0, true);
+			}
+
+			im.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+			im.addItemFlags(ItemFlag.HIDE_DESTROYS);
+			im.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+			im.addItemFlags(ItemFlag.HIDE_PLACED_ON);
+			im.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
+			im.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
+			is.setItemMeta(im);
+		}
 
 		return is;
 	}

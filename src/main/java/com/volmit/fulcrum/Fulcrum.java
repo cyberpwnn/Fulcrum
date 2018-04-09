@@ -190,7 +190,7 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 
 				else if(args.length == 2 && args[0].equalsIgnoreCase("block"))
 				{
-					p.getInventory().addItem(ContentManager.getBlock(args[1]).getItem());
+					p.getInventory().addItem(ContentManager.getAny(args[1]).getItem());
 				}
 
 				else if(args.length == 2 && args[0].equalsIgnoreCase("sound"))

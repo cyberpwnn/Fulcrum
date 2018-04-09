@@ -661,6 +661,20 @@ public class ContentHandler implements Listener
 			{
 				ContentManager.getMetalHitSound().play(e.getBlock().getLocation().clone().add(0.5, 0.5, 0.5));
 			}
+
+			ItemStack is = e.getPlayer().getInventory().getItemInMainHand();
+
+			if(ContentManager.isTool(is))
+			{
+				String type = ToolType.getType(is);
+
+				if(Fulcrum.adapter.shouldDigFaster(e.getBlock(), type))
+				{
+					double speed = ToolLevel.getMiningSpeed(e.getBlock(), is);
+					digging.put(e.getBlock(), speed);
+					lastDug.put(e.getBlock(), e.getPlayer());
+				}
+			}
 		}
 
 		else
@@ -704,34 +718,13 @@ public class ContentHandler implements Listener
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void on(PlayerFinishedDiggingEvent e)
 	{
-		CustomBlock cb = ContentManager.getBlock(e.getBlock());
-
-		if(cb == null && ContentManager.isOverrided(e.getBlock()))
-		{
-			return;
-		}
-
-		if(cb != null)
-		{
-			stopped.add(e.getBlock());
-		}
+		stopped.add(e.getBlock());
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void on(PlayerCancelledDiggingEvent e)
 	{
-		CustomBlock cb = ContentManager.getBlock(e.getBlock());
-
-		if(cb == null && ContentManager.isOverrided(e.getBlock()))
-		{
-			cb = ContentManager.getOverrided(e.getBlock());
-		}
-
-		if(cb != null)
-		{
-			cb.onCancelDig(e.getPlayer(), e.getBlock());
-			stopped.add(e.getBlock());
-		}
+		stopped.add(e.getBlock());
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -926,9 +919,9 @@ public class ContentHandler implements Listener
 			stopped.add(e.getBlock());
 			ItemStack is = e.getPlayer().getInventory().getItemInMainHand();
 			double hardness = cb.getHardness();
+			double speed = ToolLevel.getMiningSpeed(cb, is);
 			String toolType = ToolType.getType(is);
 			int level = ToolLevel.getToolLevel(is);
-			double speed = ToolLevel.getMiningSpeed(cb, is);
 			boolean shouldDrop = !e.getPlayer().getGameMode().equals(GameMode.CREATIVE);
 			boolean instantBreak = false;
 			boolean toolsMatch = toolType.equals(cb.getToolType());
@@ -992,6 +985,42 @@ public class ContentHandler implements Listener
 			if(ContentManager.a().isGlass(e.getBlock().getType()))
 			{
 				ContentManager.getGlassBreakSound().play(e.getBlock().getLocation().clone().add(0.5, 0.5, 0.5));
+			}
+
+			if(ContentManager.isTool(e.getPlayer().getInventory().getItemInMainHand()))
+			{
+				ItemStack iv = e.getPlayer().getInventory().getItemInMainHand();
+				int level = ContentManager.getTool(e.getPlayer().getInventory().getItemInMainHand()).getToolLevel();
+
+				if(level >= ContentManager.a().getMinimumLevel(e.getBlock()))
+				{
+					e.getBlock().breakNaturally();
+				}
+
+				else
+				{
+					e.getBlock().breakNaturally(new ItemStack(Material.AIR));
+				}
+
+				double hardness = Fulcrum.adapter.getHardness(e.getBlock());
+				double speed = ToolLevel.getMiningSpeed(e.getBlock(), iv);
+				boolean instantBreak = false;
+				boolean toolsMatch = ToolType.getType(iv).equals(Fulcrum.adapter.getEffectiveTool(e.getBlock()));
+
+				if((speed / 20D) * 30D > hardness && toolsMatch)
+				{
+					instantBreak = true;
+				}
+
+				if(!instantBreak)
+				{
+					vdel.put(e.getPlayer(), 5);
+				}
+
+				else
+				{
+					vdel.put(e.getPlayer(), 1);
+				}
 			}
 		}
 

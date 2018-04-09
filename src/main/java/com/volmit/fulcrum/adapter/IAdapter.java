@@ -17,10 +17,23 @@ import org.bukkit.potion.PotionEffect;
 
 import com.volmit.dumpster.GList;
 import com.volmit.fulcrum.bukkit.BlockType;
+import com.volmit.fulcrum.custom.ContentRegistry;
 import com.volmit.fulcrum.resourcepack.ResourcePack;
 
 public interface IAdapter extends Listener
 {
+	public int cacheBlockData(ContentRegistry r);
+
+	public String getEffectiveTool(Block b);
+
+	public boolean shouldDigFaster(Block b, String tool);
+
+	public int getMinimumLevel(Block b);
+
+	public double getHardness(Material t);
+
+	public double getHardness(Block t);
+
 	public void forceSwing(Player p, Player ob);
 
 	public void stopDigging(Block block, Player p);
