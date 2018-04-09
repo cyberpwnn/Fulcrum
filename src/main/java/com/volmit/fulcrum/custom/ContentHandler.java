@@ -16,7 +16,13 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.block.BlockExplodeEvent;
+import org.bukkit.event.block.BlockFormEvent;
+import org.bukkit.event.block.BlockFromToEvent;
+import org.bukkit.event.block.BlockGrowEvent;
+import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.BlockSpreadEvent;
+import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.inventory.ClickType;
@@ -35,6 +41,7 @@ import com.volmit.dumpster.GList;
 import com.volmit.dumpster.GMap;
 import com.volmit.dumpster.M;
 import com.volmit.fulcrum.Fulcrum;
+import com.volmit.fulcrum.bukkit.BlockType;
 import com.volmit.fulcrum.bukkit.P;
 import com.volmit.fulcrum.bukkit.TICK;
 import com.volmit.fulcrum.bukkit.Task;
@@ -901,6 +908,72 @@ public class ContentHandler implements Listener
 		{
 			notify(e.getBlock());
 			update.add(e.getBlock());
+		}
+	}
+
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void on(EntityChangeBlockEvent e)
+	{
+		if(ContentManager.isOverrided(e.getBlock()))
+		{
+			e.setCancelled(true);
+		}
+	}
+
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void on(BlockFromToEvent e)
+	{
+		if(ContentManager.isOverrided(e.getBlock()))
+		{
+			e.setCancelled(true);
+		}
+	}
+
+	@SuppressWarnings("deprecation")
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void on(BlockFormEvent e)
+	{
+		if(e.getBlock().getType().equals(Material.CONCRETE_POWDER))
+		{
+			e.setCancelled(true);
+			return;
+		}
+
+		if(ContentManager.isOverrided(e.getBlock()))
+		{
+			e.setCancelled(true);
+		}
+
+		if(ContentManager.isOverrided(new BlockType(e.getNewState().getType(), e.getNewState().getData().getData())))
+		{
+			e.setCancelled(true);
+		}
+	}
+
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void on(BlockGrowEvent e)
+	{
+		if(ContentManager.isOverrided(e.getBlock()))
+		{
+			e.setCancelled(true);
+		}
+	}
+
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void on(BlockPhysicsEvent e)
+	{
+		if(ContentManager.isOverrided(e.getBlock()))
+		{
+			e.setCancelled(true);
+		}
+	}
+
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void on(BlockSpreadEvent e)
+	{
+		if(ContentManager.isOverrided(e.getBlock()))
+		{
+			e.setCancelled(true);
 		}
 	}
 

@@ -663,6 +663,16 @@ public class ContentManager
 		return r().getOass().getAllocated().containsKey(new BlockType(block));
 	}
 
+	public static boolean isOverrided(BlockType block)
+	{
+		if(block == null)
+		{
+			return false;
+		}
+
+		return r().getOass().getAllocated().containsKey(block);
+	}
+
 	@SuppressWarnings("deprecation")
 	public static boolean isOverrided(ItemStack block)
 	{

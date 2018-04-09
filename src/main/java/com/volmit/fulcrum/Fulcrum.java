@@ -309,6 +309,8 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 								CompilerFlag.PREDICATE_CYCLING,
 								CompilerFlag.VERBOSE,
 								CompilerFlag.OVERBOSE,
+								CompilerFlag.CONCURRENT_REGISTRY,
+								CompilerFlag.REGISTER_DEBUG_ITEMS,
 								CompilerFlag.JSON_MINIFICATION);
 						//@fuckboy:off
 					}
