@@ -12,6 +12,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import com.volmit.fulcrum.lang.C;
 import com.volmit.fulcrum.sfx.Audible;
 import com.volmit.fulcrum.sfx.Audio;
 
@@ -103,12 +104,21 @@ public class CustomItem implements ICustom
 
 	public ItemStack getItem(int count)
 	{
+		CustomItem ci = ContentManager.getItem(id);
+
+		if(ci != null)
+		{
+			setType(ci.getType());
+			setDurability(ci.getDurability());
+			setSuperID(ci.getSuperID());
+		}
+
 		ItemStack is = new ItemStack(getType());
 		is.setAmount(count);
 		is.setDurability(getDurability());
 		ItemMeta im = is.getItemMeta();
 		im.setUnbreakable(true);
-		im.setDisplayName(getName());
+		im.setDisplayName(C.RESET + getName());
 
 		if(enchanted)
 		{
@@ -117,7 +127,6 @@ public class CustomItem implements ICustom
 
 		im.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
 		im.addItemFlags(ItemFlag.HIDE_DESTROYS);
-		im.addItemFlags(ItemFlag.HIDE_ENCHANTS);
 		im.addItemFlags(ItemFlag.HIDE_PLACED_ON);
 		im.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
 		im.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);

@@ -26,7 +26,6 @@ import com.volmit.fulcrum.adapter.IAdapter;
 import com.volmit.fulcrum.bukkit.P;
 import com.volmit.fulcrum.bukkit.TICK;
 import com.volmit.fulcrum.bukkit.Task;
-import com.volmit.fulcrum.bukkit.TaskLater;
 import com.volmit.fulcrum.custom.CompilerFlag;
 import com.volmit.fulcrum.custom.ContentHandler;
 import com.volmit.fulcrum.custom.ContentManager;
@@ -59,6 +58,7 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 	public static ContentRegistry contentRegistry;
 	public static ContentHandler contentHandler;
 	public static NetworkManager net;
+	public static boolean registered = false;
 	private int icd = 10;
 
 	@Override
@@ -72,7 +72,7 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 		contentRegistry = new ContentRegistry();
 		contentHandler = new ContentHandler();
 		server = new ShittyWebserver(8193, new File(getDataFolder(), "web"));
-		icd = 10;
+		icd = 0;
 
 		try
 		{
@@ -92,21 +92,20 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 			@Override
 			public void run()
 			{
-				onTick();
+				try
+				{
+					onTick();
+				}
+
+				catch(Exception e)
+				{
+					e.printStackTrace();
+				}
 
 				if(icd > 0)
 				{
 					icd--;
 				}
-			}
-		};
-
-		new TaskLater()
-		{
-			@Override
-			public void run()
-			{
-				ContentManager.reloadContentManager();
 			}
 		};
 	}
@@ -285,7 +284,7 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 		HandlerList.unregisterAll(l);
 	}
 
-	public void onTick()
+	public void onTick() throws InterruptedException
 	{
 		TICK.tick++;
 		cache.tick();
@@ -295,33 +294,42 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 		{
 			ContentManager.reload = false;
 			icd = 10;
-
-			new Thread("Fulcrum Resource Compiler")
-			{
-				@Override
-				public void run()
-				{
-					try
-					{
-						//@fuckboy:on
-						contentRegistry.compileResources(
-								CompilerFlag.PREDICATE_MINIFICATION,
-								CompilerFlag.PREDICATE_CYCLING,
-								CompilerFlag.VERBOSE,
-								CompilerFlag.OVERBOSE,
-								CompilerFlag.CONCURRENT_REGISTRY,
-								CompilerFlag.REGISTER_DEBUG_ITEMS,
-								CompilerFlag.JSON_MINIFICATION);
-						//@fuckboy:off
-					}
-
-					catch(Exception e)
-					{
-						e.printStackTrace();
-					}
-				}
-			}.start();
+			registerNow();
 		}
+	}
+
+	private void registerNow() throws InterruptedException
+	{
+		registered = false;
+		Thread t = new Thread("Fulcrum Resource Compiler")
+		{
+			@Override
+			public void run()
+			{
+				try
+				{
+					//@fuckboy:on
+					contentRegistry.compileResources(
+							CompilerFlag.PREDICATE_MINIFICATION,
+							CompilerFlag.PREDICATE_CYCLING,
+							CompilerFlag.VERBOSE,
+							CompilerFlag.OVERBOSE,
+							CompilerFlag.CONCURRENT_REGISTRY,
+							CompilerFlag.REGISTER_DEBUG_ITEMS,
+							CompilerFlag.JSON_MINIFICATION);
+					//@fuckboy:off
+				}
+
+				catch(Throwable e)
+				{
+					e.printStackTrace();
+				}
+			}
+		};
+
+		t.start();
+		t.join();
+		registered = true;
 	}
 
 	public static void callEvent(Event e)

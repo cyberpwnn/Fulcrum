@@ -21,6 +21,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.inventory.FurnaceRecipe;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.ShapelessRecipe;
@@ -260,6 +261,14 @@ public class ContentRegistry implements Listener
 
 	public void compileResources(CompilerFlag... flagSet) throws IOException, NoSuchAlgorithmException, InterruptedException
 	{
+		blocks.clear();
+		items.clear();
+		inventories.clear();
+		sounds.clear();
+		soundReplacements.clear();
+		advancements.clear();
+		recipes.clear();
+
 		flags = new GList<CompilerFlag>(flagSet);
 		Profiler pr = new Profiler();
 		pr.begin();
@@ -487,6 +496,12 @@ public class ContentRegistry implements Listener
 				{
 					e1.printStackTrace();
 				}
+			}
+
+			if(i instanceof CustomSmeltingRecipe)
+			{
+				CustomSmeltingRecipe sr = (CustomSmeltingRecipe) i;
+				Bukkit.getServer().addRecipe(new FurnaceRecipe(sr.getResult(), Material.BURNING_FURNACE));
 			}
 		}
 

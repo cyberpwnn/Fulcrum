@@ -6,6 +6,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
+import org.bukkit.block.Furnace;
 import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -27,6 +28,7 @@ import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.CraftItemEvent;
+import org.bukkit.event.inventory.FurnaceSmeltEvent;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
@@ -99,6 +101,11 @@ public class ContentHandler implements Listener
 
 	public void tick()
 	{
+		if(!Fulcrum.registered)
+		{
+			return;
+		}
+
 		for(Player i : P.onlinePlayers())
 		{
 			if(!ground.containsKey(i))
@@ -249,6 +256,10 @@ public class ContentHandler implements Listener
 
 	private void processGravity(CustomBlock cb, Block b)
 	{
+		if(!Fulcrum.registered)
+		{
+			return;
+		}
 		Block below = b.getRelative(BlockFace.DOWN);
 
 		if(below.getType().equals(Material.AIR))
@@ -260,6 +271,10 @@ public class ContentHandler implements Listener
 
 	public void notify(Block b)
 	{
+		if(!Fulcrum.registered)
+		{
+			return;
+		}
 		for(Block i : W.blockFaces(b))
 		{
 			update.add(i);
@@ -268,6 +283,10 @@ public class ContentHandler implements Listener
 
 	public void doFall(CustomBlock cb, Block b)
 	{
+		if(!Fulcrum.registered)
+		{
+			return;
+		}
 		b.setType(Material.AIR);
 		@SuppressWarnings("deprecation")
 		FallingBlock fb = b.getWorld().spawnFallingBlock(b.getLocation().clone().add(0.5, 0, 0.5), cb.getType(), cb.getData());
@@ -282,6 +301,10 @@ public class ContentHandler implements Listener
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void on(CraftItemEvent e)
 	{
+		if(!Fulcrum.registered)
+		{
+			return;
+		}
 		ItemStack is = e.getCurrentItem().clone();
 
 		if(e.getClick().equals(ClickType.SHIFT_LEFT))
@@ -303,6 +326,10 @@ public class ContentHandler implements Listener
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void on(InventoryDragEvent e)
 	{
+		if(!Fulcrum.registered)
+		{
+			return;
+		}
 		ItemStack is = e.getOldCursor();
 
 		if(is != null && ContentManager.isCustom(is))
@@ -360,6 +387,10 @@ public class ContentHandler implements Listener
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void on(InventoryClickEvent e)
 	{
+		if(!Fulcrum.registered)
+		{
+			return;
+		}
 		if(e.getCurrentItem() == null)
 		{
 			return;
@@ -534,6 +565,10 @@ public class ContentHandler implements Listener
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void on(PrepareItemCraftEvent e)
 	{
+		if(!Fulcrum.registered)
+		{
+			return;
+		}
 		if(ContentManager.r().getOass().getImpossibleRecipes().contains(e.getRecipe()))
 		{
 			e.getInventory().setResult(new ItemStack(Material.AIR));
@@ -554,6 +589,10 @@ public class ContentHandler implements Listener
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void on(PlayerMoveEvent e)
 	{
+		if(!Fulcrum.registered)
+		{
+			return;
+		}
 		if(e.getPlayer().isOnGround() && (e.getFrom().getX() != e.getTo().getX() || e.getFrom().getZ() != e.getTo().getZ()))
 		{
 			int factor = e.getPlayer().isSneaking() ? 20 : e.getPlayer().isSprinting() ? 5 : 7;
@@ -605,6 +644,10 @@ public class ContentHandler implements Listener
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void on(PlayerStartDiggingEvent e)
 	{
+		if(!Fulcrum.registered)
+		{
+			return;
+		}
 		CustomBlock cb = ContentManager.getBlock(e.getBlock());
 
 		if(cb != null)
@@ -725,18 +768,30 @@ public class ContentHandler implements Listener
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void on(PlayerFinishedDiggingEvent e)
 	{
+		if(!Fulcrum.registered)
+		{
+			return;
+		}
 		stopped.add(e.getBlock());
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void on(PlayerCancelledDiggingEvent e)
 	{
+		if(!Fulcrum.registered)
+		{
+			return;
+		}
 		stopped.add(e.getBlock());
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void on(BlockBurnEvent e)
 	{
+		if(!Fulcrum.registered)
+		{
+			return;
+		}
 		if(ContentManager.isOverrided(e.getBlock()))
 		{
 			e.setCancelled(true);
@@ -746,6 +801,10 @@ public class ContentHandler implements Listener
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void on(BlockExplodeEvent e)
 	{
+		if(!Fulcrum.registered)
+		{
+			return;
+		}
 		for(Block i : new GList<Block>(e.blockList()))
 		{
 			if((ContentManager.isOverrided(i) && ContentManager.getOverrided(i).hasFlag(BlockFlag.BLAST_RESISTANT)) || ContentManager.isCustom(i) && ContentManager.getBlock(i).hasFlag(BlockFlag.BLAST_RESISTANT))
@@ -760,6 +819,10 @@ public class ContentHandler implements Listener
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void on(EntityExplodeEvent e)
 	{
+		if(!Fulcrum.registered)
+		{
+			return;
+		}
 		for(Block i : new GList<Block>(e.blockList()))
 		{
 			if((ContentManager.isOverrided(i) && ContentManager.getOverrided(i).hasFlag(BlockFlag.BLAST_RESISTANT)) || ContentManager.isCustom(i) && ContentManager.getBlock(i).hasFlag(BlockFlag.BLAST_RESISTANT))
@@ -774,6 +837,10 @@ public class ContentHandler implements Listener
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void on(EntityPickupItemEvent e)
 	{
+		if(!Fulcrum.registered)
+		{
+			return;
+		}
 		if(e.getEntity() instanceof Player)
 		{
 			Player p = (Player) e.getEntity();
@@ -856,6 +923,10 @@ public class ContentHandler implements Listener
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void on(BlockPlaceEvent e)
 	{
+		if(!Fulcrum.registered)
+		{
+			return;
+		}
 		if(e.isCancelled())
 		{
 			return;
@@ -914,6 +985,10 @@ public class ContentHandler implements Listener
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void on(EntityChangeBlockEvent e)
 	{
+		if(!Fulcrum.registered)
+		{
+			return;
+		}
 		if(ContentManager.isOverrided(e.getBlock()))
 		{
 			e.setCancelled(true);
@@ -923,6 +998,10 @@ public class ContentHandler implements Listener
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void on(BlockFromToEvent e)
 	{
+		if(!Fulcrum.registered)
+		{
+			return;
+		}
 		if(ContentManager.isOverrided(e.getBlock()))
 		{
 			e.setCancelled(true);
@@ -933,6 +1012,10 @@ public class ContentHandler implements Listener
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void on(BlockFormEvent e)
 	{
+		if(!Fulcrum.registered)
+		{
+			return;
+		}
 		if(e.getBlock().getType().equals(Material.CONCRETE_POWDER))
 		{
 			e.setCancelled(true);
@@ -953,6 +1036,11 @@ public class ContentHandler implements Listener
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void on(BlockGrowEvent e)
 	{
+		if(!Fulcrum.registered)
+		{
+			return;
+		}
+
 		if(ContentManager.isOverrided(e.getBlock()))
 		{
 			e.setCancelled(true);
@@ -962,6 +1050,10 @@ public class ContentHandler implements Listener
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void on(BlockPhysicsEvent e)
 	{
+		if(!Fulcrum.registered)
+		{
+			return;
+		}
 		if(ContentManager.isOverrided(e.getBlock()))
 		{
 			e.setCancelled(true);
@@ -971,15 +1063,58 @@ public class ContentHandler implements Listener
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void on(BlockSpreadEvent e)
 	{
+		if(!Fulcrum.registered)
+		{
+			return;
+		}
+
 		if(ContentManager.isOverrided(e.getBlock()))
 		{
 			e.setCancelled(true);
 		}
 	}
 
+	@SuppressWarnings("deprecation")
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void on(FurnaceSmeltEvent e)
+	{
+		if(!Fulcrum.registered)
+		{
+			return;
+		}
+
+		for(ICustomRecipe i : Fulcrum.contentRegistry.getRecipes())
+		{
+			if(i instanceof CustomSmeltingRecipe)
+			{
+				CustomSmeltingRecipe c = (CustomSmeltingRecipe) i;
+
+				if(c.getIngredient().getType().equals(e.getSource().getType()))
+				{
+					if(c.getIngredient().getData().getData() == e.getSource().getData().getData())
+					{
+						if(c.getIngredient().getDurability() == e.getSource().getDurability())
+						{
+							e.setCancelled(true);
+							ItemStack iv = c.getResult().clone();
+							iv.setAmount(e.getSource().getAmount());
+							Furnace f = (Furnace) e.getBlock().getState();
+							f.getInventory().setResult(iv);
+							f.getInventory().setSmelting(null);
+						}
+					}
+				}
+			}
+		}
+	}
+
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void on(BlockBreakEvent e)
 	{
+		if(!Fulcrum.registered)
+		{
+			return;
+		}
 		if(e.isCancelled())
 		{
 			return;
@@ -1021,6 +1156,11 @@ public class ContentHandler implements Listener
 			if((speed / 20D) * 30D > hardness && toolsMatch)
 			{
 				instantBreak = true;
+			}
+
+			if(shouldDrop && !e.isDropItems())
+			{
+				shouldDrop = false;
 			}
 
 			ContentManager.breakBlock(e.getBlock(), shouldDrop);
@@ -1065,7 +1205,7 @@ public class ContentHandler implements Listener
 				ItemStack iv = e.getPlayer().getInventory().getItemInMainHand();
 				int level = ContentManager.getTool(e.getPlayer().getInventory().getItemInMainHand()).getToolLevel();
 
-				if(level >= ContentManager.a().getMinimumLevel(e.getBlock()))
+				if(level >= ContentManager.a().getMinimumLevel(e.getBlock()) && e.isDropItems())
 				{
 					e.getBlock().breakNaturally();
 				}
@@ -1140,6 +1280,11 @@ public class ContentHandler implements Listener
 				instantBreak = true;
 			}
 
+			if(shouldDrop && !e.isDropItems())
+			{
+				shouldDrop = false;
+			}
+
 			ContentManager.breakBlock(e.getBlock(), shouldDrop);
 			e.setDropItems(false);
 			e.setExpToDrop(0);
@@ -1164,6 +1309,11 @@ public class ContentHandler implements Listener
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false)
 	public void on(BlockDamageEvent e)
 	{
+		if(!Fulcrum.registered)
+		{
+			return;
+		}
+
 		if(ContentManager.isOverrided(e.getBlock()))
 		{
 			lastDug.put(e.getBlock(), e.getPlayer());
@@ -1178,6 +1328,10 @@ public class ContentHandler implements Listener
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void on(PlayerInteractEvent e)
 	{
+		if(!Fulcrum.registered)
+		{
+			return;
+		}
 		if(e.isCancelled())
 		{
 			return;

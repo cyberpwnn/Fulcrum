@@ -14,6 +14,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import com.volmit.dumpster.GSet;
 import com.volmit.fulcrum.Fulcrum;
 import com.volmit.fulcrum.bukkit.BlockType;
+import com.volmit.fulcrum.lang.C;
 import com.volmit.fulcrum.sfx.Audible;
 import com.volmit.fulcrum.sfx.Audio;
 
@@ -314,10 +315,9 @@ public class CustomBlock implements ICustom
 		{
 			is = new ItemStack(getType(), count, (short) 0, getData());
 			ItemMeta im = is.getItemMeta();
-			im.setDisplayName(getName());
+			im.setDisplayName(C.RESET + getName());
 			im.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
 			im.addItemFlags(ItemFlag.HIDE_DESTROYS);
-			im.addItemFlags(ItemFlag.HIDE_ENCHANTS);
 			im.addItemFlags(ItemFlag.HIDE_PLACED_ON);
 			im.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
 			im.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
@@ -350,12 +350,30 @@ public class CustomBlock implements ICustom
 		return is;
 	}
 
-	@SuppressWarnings("deprecation")
 	public void set(Location location)
 	{
+		set(location, true);
+	}
+
+	@SuppressWarnings("deprecation")
+	public void set(Location location, boolean ph)
+	{
+		if(getType() == null)
+		{
+			CustomBlock ci = ContentManager.getBlock(id);
+
+			if(ci != null)
+			{
+				setType(ci.getType());
+				setDurabilityLock(ci.getDurabilityLock());
+				setSuperID(ci.getSuperID());
+				setData(ci.getData());
+			}
+		}
+
 		if(blockRegistryType.equals(BlockRegistryType.BUILDING_BLOCK))
 		{
-			location.getBlock().setTypeIdAndData(getType().getId(), getData(), true);
+			location.getBlock().setTypeIdAndData(getType().getId(), getData(), ph);
 		}
 
 		else

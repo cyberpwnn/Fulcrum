@@ -828,9 +828,14 @@ public class ContentManager
 	 */
 	public static void setBlock(Block block, CustomBlock c)
 	{
+		setBlock(block, c, true);
+	}
+
+	public static void setBlock(Block block, CustomBlock c, boolean ph)
+	{
 		if(isOverrided(c))
 		{
-			c.set(block.getLocation());
+			c.set(block.getLocation(), ph);
 		}
 
 		else
