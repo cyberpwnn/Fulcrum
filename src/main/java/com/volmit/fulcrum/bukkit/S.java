@@ -10,6 +10,14 @@ public abstract class S implements Runnable
 
 	public S()
 	{
-		Bukkit.getScheduler().scheduleSyncDelayedTask(Fulcrum.instance, this);
+		if(Bukkit.isPrimaryThread())
+		{
+			run();
+		}
+
+		else
+		{
+			Bukkit.getScheduler().scheduleSyncDelayedTask(Fulcrum.instance, this);
+		}
 	}
 }
