@@ -1,4 +1,4 @@
 # Fulcrum
 The old neglected engine out back.
 
-Go to the wiki
+DOCUMENTATION: https://brains.volmit.com/fulcrum/
