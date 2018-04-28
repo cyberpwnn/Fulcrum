@@ -151,7 +151,6 @@ public final class Adapter12 implements IAdapter
 					return;
 				}
 
-				System.out.println("Processed " + F.f(processed) + " block changes");
 				processed = 0;
 			}
 		};
@@ -1965,7 +1964,6 @@ public final class Adapter12 implements IAdapter
 
 						blockMinimums.put(i, level);
 						blockEffectives.put(i, type);
-						r.o("Identified " + i.name() + " HARDNESS: " + blockHardness.get(i) + " EFFECTIVE: " + blockEffectives.get(i) + " MINLEVEL: " + blockMinimums.get(i));
 					}
 
 					catch(Throwable e)
@@ -2009,5 +2007,12 @@ public final class Adapter12 implements IAdapter
 	public boolean shouldDigFaster(Block b, String tool)
 	{
 		return getEffectiveTool(b).equals(tool);
+	}
+
+	@Override
+	public String getEffectiveTool(Material b)
+	{
+		String v = blockEffectives.get(b);
+		return v == null ? ToolType.HAND : v;
 	}
 }

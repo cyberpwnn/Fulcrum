@@ -5,6 +5,7 @@ import java.net.URL;
 import com.volmit.dumpster.GMap;
 import com.volmit.dumpster.JSONArray;
 import com.volmit.dumpster.JSONObject;
+import com.volmit.fulcrum.Fulcrum;
 import com.volmit.fulcrum.bukkit.R;
 
 public class CustomSound implements ICustom
@@ -32,7 +33,28 @@ public class CustomSound implements ICustom
 
 		for(int i = 0; i < max; i++)
 		{
-			URL url = c.getResource(urlx.replace("$", (i + 1) + ""));
+			ContentRegistry cr = Fulcrum.contentRegistry;
+
+			String v = urlx.replace("$", (i + 1) + "");
+
+			if(v.startsWith("/"))
+			{
+				v = v.substring(1);
+			}
+
+			URL url = cr.access(v);
+
+			if(url == null)
+			{
+				c.getResource("/" + v);
+			}
+
+			if(url == null)
+			{
+				cr.e("Unable to locate sound file " + v);
+				continue;
+			}
+
 			soundPaths.put(bases.replace("$", (i + 1) + ""), url);
 		}
 

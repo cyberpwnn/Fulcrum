@@ -3,11 +3,10 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.volmit</groupId>
 	<artifactId>Fulcrum</artifactId>
-	<version>E19</version>
+	<version>E22</version>
 	<name>Fulcrum</name>
 	<properties>
 		<project.author>cyberpwn</project.author>
-		<project.webdesign>Aeternum</project.webdesign>
 		<project.source>The Internet</project.source>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>

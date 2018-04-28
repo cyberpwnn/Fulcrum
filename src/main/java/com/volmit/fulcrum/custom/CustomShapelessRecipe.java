@@ -18,6 +18,13 @@ public class CustomShapelessRecipe implements ICustomRecipe
 		ingredients = new GList<ItemStack>();
 	}
 
+	public CustomShapelessRecipe(ItemStack result, int c)
+	{
+		this.result = result.clone();
+		result.setAmount(c);
+		ingredients = new GList<ItemStack>();
+	}
+
 	public CustomShapelessRecipe(CustomItem result, int count)
 	{
 		this(result.getItem(count));
@@ -62,6 +69,13 @@ public class CustomShapelessRecipe implements ICustomRecipe
 		}
 
 		return addIngredient(is);
+	}
+
+	public CustomShapelessRecipe addIngredient(ItemStack is, int c)
+	{
+		ItemStack iv = is.clone();
+		iv.setAmount(c);
+		return addIngredient(iv);
 	}
 
 	public CustomShapelessRecipe addIngredient(ItemStack is)

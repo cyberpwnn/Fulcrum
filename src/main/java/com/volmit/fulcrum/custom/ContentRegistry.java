@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -83,11 +84,13 @@ public class ContentRegistry implements Listener
 	private OverridedAllocationSpace oass;
 	private String rid;
 	private ResourcePack pack;
+	private GList<IMediaAccessor> mediaAccessors;
 	private int msid;
 
 	public ContentRegistry()
 	{
 		msid = -10000;
+		mediaAccessors = new GList<IMediaAccessor>();
 		customTools = new GMap<String, GList<CustomTool>>();
 		superBlocks = new GMap<Integer, CustomBlock>();
 		superItems = new GMap<Integer, CustomItem>();
@@ -102,6 +105,26 @@ public class ContentRegistry implements Listener
 		blockModels = new GMap<ModelType, ModelSet>();
 		flags = new GList<CompilerFlag>();
 		Fulcrum.register(this);
+	}
+
+	public URL access(String path)
+	{
+		for(IMediaAccessor i : mediaAccessors)
+		{
+			URL l = i.access(path);
+
+			if(l != null)
+			{
+				return l;
+			}
+		}
+
+		return null;
+	}
+
+	public void addAccessor(IMediaAccessor a)
+	{
+		mediaAccessors.add(a);
 	}
 
 	public void v(String s)
@@ -261,14 +284,7 @@ public class ContentRegistry implements Listener
 
 	public void compileResources(CompilerFlag... flagSet) throws IOException, NoSuchAlgorithmException, InterruptedException
 	{
-		blocks.clear();
-		items.clear();
-		inventories.clear();
-		sounds.clear();
-		soundReplacements.clear();
-		advancements.clear();
-		recipes.clear();
-
+		cleanup();
 		flags = new GList<CompilerFlag>(flagSet);
 		Profiler pr = new Profiler();
 		pr.begin();
@@ -283,6 +299,7 @@ public class ContentRegistry implements Listener
 			return;
 		}
 
+		registerAccessorFS();
 		o("Compiling Resources...");
 
 		if(hasFlag(CompilerFlag.REGISTER_DEBUG_ITEMS))
@@ -384,6 +401,47 @@ public class ContentRegistry implements Listener
 		i("Inventories: " + F.f(inventories.size()));
 		i(F.f(pack.size()) + " Resources compiled in " + F.time(pr.getMilliseconds(), 2));
 		o(C.BOLD + "" + C.UNDERLINE + C.GREEN + "REGISTRY COMPLETE");
+	}
+
+	private void registerAccessorFS()
+	{
+		mediaAccessors.add(new IMediaAccessor()
+		{
+			@SuppressWarnings("deprecation")
+			@Override
+			public URL access(String path)
+			{
+				File f = new File("content");
+				File m = new File(f, path.startsWith("/") ? path.substring(1) : path);
+
+				if(m.exists() && m.isFile())
+				{
+					try
+					{
+						w("Using cached copy of " + path);
+						return m.toURL();
+					}
+
+					catch(MalformedURLException e)
+					{
+						e.printStackTrace();
+					}
+				}
+
+				return null;
+			}
+		});
+	}
+
+	private void cleanup()
+	{
+		blocks.clear();
+		items.clear();
+		inventories.clear();
+		sounds.clear();
+		soundReplacements.clear();
+		advancements.clear();
+		recipes.clear();
 	}
 
 	private void registerDebug()
@@ -745,8 +803,18 @@ public class ContentRegistry implements Listener
 			String ttop = "/assets/textures/inventories/" + i.getId() + "_top.png";
 			String tbottom = "/assets/textures/inventories/" + i.getId() + "_bottom.png";
 
-			URL ut = i.getClass().getResource(ttop);
-			URL ub = i.getClass().getResource(tbottom);
+			URL ut = access("assets/textures/inventories/" + i.getId() + "_top.png");
+			URL ub = access("assets/textures/inventories/" + i.getId() + "_bottom.png");
+
+			if(ut == null)
+			{
+				ut = i.getClass().getResource(ttop);
+			}
+
+			if(ub == null)
+			{
+				ub = i.getClass().getResource(tbottom);
+			}
 
 			if(ut == null && ub == null)
 			{
@@ -810,7 +878,12 @@ public class ContentRegistry implements Listener
 
 				String ds = oass.adapt(overriding);
 				String t = "/assets/textures/blocks/" + i.getId() + ".png";
-				URL texture = i.getClass().getResource(t);
+				URL texture = access("assets/textures/blocks/" + i.getId() + ".png");
+
+				if(texture == null)
+				{
+					texture = i.getClass().getResource(t);
+				}
 
 				if(texture != null)
 				{
@@ -840,7 +913,12 @@ public class ContentRegistry implements Listener
 				{
 					String a = j.isEmpty() ? "" : ("_" + j);
 					String t = "/assets/textures/blocks/" + i.getId() + a + ".png";
-					URL texture = i.getClass().getResource(t);
+					URL texture = access("assets/textures/blocks/" + i.getId() + ".png");
+
+					if(texture == null)
+					{
+						texture = i.getClass().getResource(t);
+					}
 
 					if(texture != null)
 					{
@@ -887,17 +965,33 @@ public class ContentRegistry implements Listener
 
 			for(int j = 0; j < i.getLayers(); j++)
 			{
-				URL url = i.getClass().getResource("/assets/textures/items/" + i.getId() + "_" + j + ".png");
+				URL url = null;
+				URL ua = access("assets/textures/items/" + i.getId() + "_" + j + ".png");
 
-				if(url == null && j == 0)
+				if(ua == null && j == 0)
 				{
-					url = i.getClass().getResource("/assets/textures/items/" + i.getId() + ".png");
+					ua = access("assets/textures/items/" + i.getId() + ".png");
 				}
 
-				if(url == null)
+				if(ua == null)
 				{
-					w(" Unable to locate item texture " + i.getId() + "_" + j + ".png");
-					url = missingTexture;
+					url = i.getClass().getResource("/assets/textures/items/" + i.getId() + "_" + j + ".png");
+
+					if(url == null && j == 0)
+					{
+						url = i.getClass().getResource("/assets/textures/items/" + i.getId() + ".png");
+					}
+
+					if(url == null)
+					{
+						w(" Unable to locate item texture " + i.getId() + "_" + j + ".png");
+						url = missingTexture;
+					}
+				}
+
+				else
+				{
+					url = ua;
 				}
 
 				pack.setResource("textures/items/" + i.getId() + "_" + j + ".png", url);

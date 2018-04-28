@@ -26,6 +26,8 @@ public interface IAdapter extends Listener
 
 	public String getEffectiveTool(Block b);
 
+	public String getEffectiveTool(Material b);
+
 	public boolean shouldDigFaster(Block b, String tool);
 
 	public int getMinimumLevel(Block b);

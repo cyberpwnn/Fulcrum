@@ -12,6 +12,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import com.volmit.fulcrum.Fulcrum;
 import com.volmit.fulcrum.lang.C;
 import com.volmit.fulcrum.sfx.Audible;
 import com.volmit.fulcrum.sfx.Audio;
@@ -111,6 +112,11 @@ public class CustomItem implements ICustom
 			setType(ci.getType());
 			setDurability(ci.getDurability());
 			setSuperID(ci.getSuperID());
+		}
+
+		else
+		{
+			Fulcrum.contentRegistry.e("UNABLE TO PULL INFORMATION ON " + id + " too early in registry?");
 		}
 
 		ItemStack is = new ItemStack(getType());

@@ -1,5 +1,14 @@
 package com.volmit.fulcrum.custom;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Enumeration;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
+import java.util.zip.ZipFile;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -10,12 +19,15 @@ import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
 
+import com.volmit.dumpster.F;
 import com.volmit.dumpster.GList;
 import com.volmit.fulcrum.Fulcrum;
 import com.volmit.fulcrum.adapter.IAdapter;
 import com.volmit.fulcrum.bukkit.BlockType;
 import com.volmit.fulcrum.bukkit.W;
+import com.volmit.fulcrum.images.PluginUtil;
 import com.volmit.fulcrum.sfx.Audible;
 import com.volmit.fulcrum.sfx.Audio;
 
@@ -1132,5 +1144,42 @@ public class ContentManager
 		ItemStack is = clickedInventory.getItem(clickedSlot).clone();
 		addToInventory(move, is);
 		clickedInventory.setItem(clickedSlot, new ItemStack(Material.AIR));
+	}
+
+	public static void cacheResources(Plugin pl) throws ZipException, IOException
+	{
+		Fulcrum.contentRegistry.w("Caching Resources for " + pl.getName());
+		File jar = new File(new File("plugins"), PluginUtil.getPluginFileName(pl.getName()));
+		ZipFile z = new ZipFile(jar);
+		Enumeration<? extends ZipEntry> en = z.entries();
+		int k = 0;
+
+		while(en.hasMoreElements())
+		{
+			ZipEntry e = en.nextElement();
+
+			if(!e.isDirectory() && e.getName().startsWith("assets/") || e.getName().startsWith("/assets/"))
+			{
+				k++;
+				File preparedLocation = new File(new File("content"), e.getName());
+				preparedLocation.getParentFile().mkdirs();
+				preparedLocation.createNewFile();
+				InputStream in = z.getInputStream(e);
+				FileOutputStream fos = new FileOutputStream(preparedLocation);
+				byte[] buf = new byte[1024];
+				int read = 0;
+
+				while((read = in.read(buf, 0, buf.length)) != -1)
+				{
+					fos.write(buf, 0, read);
+				}
+
+				fos.close();
+				Fulcrum.contentRegistry.i("Caching " + e.getName() + " in " + pl.getName());
+			}
+		}
+
+		z.close();
+		Fulcrum.contentRegistry.i("Cached " + F.f(k) + " resources in " + pl.getName());
 	}
 }

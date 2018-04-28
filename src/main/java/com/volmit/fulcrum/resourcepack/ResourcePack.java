@@ -112,13 +112,23 @@ public class ResourcePack
 
 		oc.add(path);
 		copyResources.put(path, url);
-		o("Adding Resource: " + C.WHITE + path + C.GRAY + " from url " + C.WHITE + url.getFile().split("\\Q!\\E")[1]);
+
+		try
+		{
+			o("Adding Resource: " + C.WHITE + path + C.GRAY + " from url " + C.WHITE + url.getFile().split("\\Q!\\E")[1]);
+		}
+
+		catch(Exception e)
+		{
+			o("Adding Resource: " + C.WHITE + path + C.GRAY + " from url " + C.WHITE + url.getFile());
+		}
 	}
 
 	public void setResource(String path, String content)
 	{
 		ow.add(path);
 		writeResources.put(path, content);
+
 		o("Adding Resource: " + C.WHITE + path + C.GRAY + " from TEXT " + C.WHITE + (content.length() > 40 ? content.substring(0, 40) + "..." : content).replaceAll("\n", ""));
 	}
 
@@ -232,7 +242,16 @@ public class ResourcePack
 
 		try
 		{
-			o("Writing " + C.WHITE + url.getFile().split("\\Q!\\E")[1] + C.GRAY + " to " + C.WHITE + f.getPath());
+			try
+			{
+				o("Writing " + C.WHITE + url.getFile().split("\\Q!\\E")[1] + C.GRAY + " to " + C.WHITE + f.getPath());
+			}
+
+			catch(Exception e)
+			{
+				o("Writing " + C.WHITE + url.getFile() + C.GRAY + " to " + C.WHITE + f.getPath());
+			}
+
 			FileOutputStream fos = new FileOutputStream(f);
 			InputStream in = url.openStream();
 			byte[] buffer = new byte[1024];

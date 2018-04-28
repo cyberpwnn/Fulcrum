@@ -72,6 +72,22 @@ public class CustomBlock implements ICustom
 		}
 	}
 
+	public void setHardnessLike(Material m)
+	{
+		setHardness(BlockHardness.getHardness(m));
+	}
+
+	public void setEffectiveToolLike(Material m)
+	{
+		setToolType(BlockHardness.getEffectiveTool(m));
+	}
+
+	public void setPropertiesLike(Material m)
+	{
+		setHardnessLike(m);
+		setEffectiveToolLike(m);
+	}
+
 	public void flag(BlockFlag... flags)
 	{
 		for(BlockFlag i : flags)

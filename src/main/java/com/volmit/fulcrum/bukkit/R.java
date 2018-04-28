@@ -13,7 +13,14 @@ public class R
 
 	public static URL getURL(Class<?> c, String file)
 	{
-		return c.getResource(file);
+		URL v = Fulcrum.contentRegistry.access(file.startsWith("/") ? file.substring(1) : file);
+
+		if(v == null)
+		{
+			v = c.getResource(file);
+		}
+
+		return v;
 	}
 
 	public static boolean exists(String file)
@@ -23,6 +30,6 @@ public class R
 
 	public static URL getURL(String file)
 	{
-		return Fulcrum.class.getResource(file);
+		return getURL(Fulcrum.class, file);
 	}
 }
