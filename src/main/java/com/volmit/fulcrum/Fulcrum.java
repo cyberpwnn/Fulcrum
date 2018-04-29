@@ -20,6 +20,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.volmit.dumpster.GList;
+import com.volmit.dumpster.GSet;
 import com.volmit.dumpster.M;
 import com.volmit.fulcrum.adapter.Adapter12;
 import com.volmit.fulcrum.adapter.IAdapter;
@@ -59,7 +60,8 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 	public static ContentHandler contentHandler;
 	public static NetworkManager net;
 	public static boolean registered = false;
-	private int icd = 10;
+	private int icd = 1;
+	private static GSet<CompilerFlag> flags;
 
 	@Override
 	public void onEnable()
@@ -71,6 +73,15 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 		scmmgr = new SCMManager();
 		contentRegistry = new ContentRegistry();
 		contentHandler = new ContentHandler();
+		flags = new GSet<CompilerFlag>();
+		flags.add(CompilerFlag.PREDICATE_MINIFICATION);
+		flags.add(CompilerFlag.PREDICATE_CYCLING);
+		flags.add(CompilerFlag.VERBOSE);
+		flags.add(CompilerFlag.OVERBOSE);
+		flags.add(CompilerFlag.CONCURRENT_REGISTRY);
+		flags.add(CompilerFlag.REGISTER_DEBUG_ITEMS);
+		flags.add(CompilerFlag.JSON_MINIFICATION);
+
 		server = new ShittyWebserver(8193, new File(getDataFolder(), "web"));
 		icd = 0;
 
@@ -108,6 +119,11 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 				}
 			}
 		};
+	}
+
+	public void setAsChildServer()
+	{
+		flags.add(CompilerFlag.DONT_SEND_PACK);
 	}
 
 	@EventHandler
@@ -293,7 +309,7 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 		if(ContentManager.reload && icd <= 0)
 		{
 			ContentManager.reload = false;
-			icd = 10;
+			icd = 1;
 			registerNow();
 		}
 	}
@@ -308,16 +324,7 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 			{
 				try
 				{
-					//@fuckboy:on
-					contentRegistry.compileResources(
-							CompilerFlag.PREDICATE_MINIFICATION,
-							CompilerFlag.PREDICATE_CYCLING,
-							CompilerFlag.VERBOSE,
-							CompilerFlag.OVERBOSE,
-							CompilerFlag.CONCURRENT_REGISTRY,
-							CompilerFlag.REGISTER_DEBUG_ITEMS,
-							CompilerFlag.JSON_MINIFICATION);
-					//@fuckboy:off
+					contentRegistry.compileResources(flags.toArray(new CompilerFlag[flags.size()]));
 				}
 
 				catch(Throwable e)

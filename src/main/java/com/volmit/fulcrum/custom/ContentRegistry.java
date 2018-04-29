@@ -485,16 +485,14 @@ public class ContentRegistry implements Listener
 		v("Writing latest hash");
 		Files.write(hash, hasf);
 
-		for(Player i : P.onlinePlayers())
+		if(!flags.contains(CompilerFlag.DONT_SEND_PACK))
 		{
-			if(needsToUpdate)
+			for(Player i : P.onlinePlayers())
 			{
-				Fulcrum.adapter.sendResourcePackWeb(i, rid + ".zip");
-			}
-
-			else
-			{
-				i.sendMessage("Merged with New Hash: " + Hex.encodeHexString(hash));
+				if(needsToUpdate)
+				{
+					Fulcrum.adapter.sendResourcePackWeb(i, rid + ".zip");
+				}
 			}
 		}
 
@@ -1033,7 +1031,10 @@ public class ContentRegistry implements Listener
 			@Override
 			public void run()
 			{
-				Fulcrum.adapter.sendResourcePackWeb(e.getPlayer(), rid + ".zip");
+				if(!flags.contains(CompilerFlag.DONT_SEND_PACK))
+				{
+					Fulcrum.adapter.sendResourcePackWeb(e.getPlayer(), rid + ".zip");
+				}
 			}
 		};
 	}
