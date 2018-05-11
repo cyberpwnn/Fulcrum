@@ -24,12 +24,18 @@ import org.bukkit.craftbukkit.v1_12_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_12_R1.block.CraftBlock;
 import org.bukkit.craftbukkit.v1_12_R1.block.CraftBlockState;
 import org.bukkit.craftbukkit.v1_12_R1.block.CraftCreatureSpawner;
+import org.bukkit.craftbukkit.v1_12_R1.entity.CraftCreature;
 import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_12_R1.util.CraftMagicNumbers;
+import org.bukkit.entity.Animals;
+import org.bukkit.entity.Creature;
+import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Zombie;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -56,6 +62,7 @@ import org.bukkit.util.Vector;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.volmit.dumpster.F;
+import com.volmit.dumpster.FinalInteger;
 import com.volmit.dumpster.GList;
 import com.volmit.dumpster.GMap;
 import com.volmit.dumpster.GSet;
@@ -63,6 +70,7 @@ import com.volmit.dumpster.M;
 import com.volmit.dumpster.Profiler;
 import com.volmit.fulcrum.Fulcrum;
 import com.volmit.fulcrum.bukkit.A;
+import com.volmit.fulcrum.bukkit.Area;
 import com.volmit.fulcrum.bukkit.Base64;
 import com.volmit.fulcrum.bukkit.BlockType;
 import com.volmit.fulcrum.bukkit.P;
@@ -70,6 +78,7 @@ import com.volmit.fulcrum.bukkit.PE;
 import com.volmit.fulcrum.bukkit.S;
 import com.volmit.fulcrum.bukkit.Task;
 import com.volmit.fulcrum.bukkit.TaskLater;
+import com.volmit.fulcrum.bukkit.VectorMath;
 import com.volmit.fulcrum.custom.AdvancementHolder;
 import com.volmit.fulcrum.custom.AdvancementHolder.FrameType;
 import com.volmit.fulcrum.custom.ContentManager;
@@ -87,11 +96,14 @@ import net.minecraft.server.v1_12_R1.ChatComponentText;
 import net.minecraft.server.v1_12_R1.ChatMessageType;
 import net.minecraft.server.v1_12_R1.ChunkCoordIntPair;
 import net.minecraft.server.v1_12_R1.ChunkSection;
+import net.minecraft.server.v1_12_R1.EntityAnimal;
+import net.minecraft.server.v1_12_R1.EntityInsentient;
 import net.minecraft.server.v1_12_R1.IBlockData;
 import net.minecraft.server.v1_12_R1.MojangsonParseException;
 import net.minecraft.server.v1_12_R1.MojangsonParser;
 import net.minecraft.server.v1_12_R1.NBTTagCompound;
 import net.minecraft.server.v1_12_R1.NBTTagList;
+import net.minecraft.server.v1_12_R1.NavigationAbstract;
 import net.minecraft.server.v1_12_R1.Packet;
 import net.minecraft.server.v1_12_R1.PacketPlayOutAnimation;
 import net.minecraft.server.v1_12_R1.PacketPlayOutBlockBreakAnimation;
@@ -103,6 +115,7 @@ import net.minecraft.server.v1_12_R1.PacketPlayOutMultiBlockChange;
 import net.minecraft.server.v1_12_R1.PacketPlayOutPlayerListHeaderFooter;
 import net.minecraft.server.v1_12_R1.PacketPlayOutTileEntityData;
 import net.minecraft.server.v1_12_R1.PacketPlayOutUnloadChunk;
+import net.minecraft.server.v1_12_R1.PathEntity;
 import net.minecraft.server.v1_12_R1.SoundEffectType;
 import net.minecraft.server.v1_12_R1.TileEntity;
 import net.minecraft.server.v1_12_R1.TileEntityMobSpawner;
@@ -2014,5 +2027,166 @@ public final class Adapter12 implements IAdapter
 	{
 		String v = blockEffectives.get(b);
 		return v == null ? ToolType.HAND : v;
+	}
+
+	@Override
+	public void pathfindToLocation(Creature e, Location l, boolean sprint, double speed)
+	{
+		EntityInsentient le = ((CraftCreature) e).getHandle();
+		NavigationAbstract na = le.getNavigation();
+		PathEntity pe = na.b(new BlockPosition(l.getX(), l.getY(), l.getZ()));
+		na.a(pe, speed);
+
+		if(le instanceof EntityAnimal)
+		{
+			EntityAnimal a = (EntityAnimal) le;
+			a.lastDamager = null;
+			a.lastDamage = 0;
+		}
+
+		le.setSprinting(sprint);
+		FinalInteger fe = new FinalInteger(100);
+
+		new Task(0)
+		{
+			@Override
+			public void run()
+			{
+				try
+				{
+					fe.sub(1);
+
+					if(fe.get() < 0)
+					{
+						le.setSprinting(false);
+						cancel();
+						return;
+					}
+
+					if(e.isDead())
+					{
+						cancel();
+						return;
+					}
+
+					if(pe.b())
+					{
+						cancel();
+						System.out.println("Path finished");
+						if(sprint)
+						{
+							le.setSprinting(false);
+						}
+					}
+				}
+
+				catch(Exception e)
+				{
+					le.setSprinting(false);
+					cancel();
+				}
+			}
+		};
+	}
+
+	@Override
+	public void fleeFrom(Creature e, Location l, int vticks)
+	{
+		Location at = e.getLocation();
+		Location aw = l.clone();
+		Vector vr = VectorMath.direction(aw, at);
+		vr.setY(0);
+		vr.add(Vector.getRandom().subtract(Vector.getRandom()).setY(0).multiply(0.6));
+		Location fleeTo = at.clone().add(vr.clone().multiply(3 + (Math.random() * 3)));
+		pathfindToLocation(e, fleeTo, true, 1.9);
+		FinalInteger fe = new FinalInteger(vticks);
+		new Task(0)
+		{
+			@Override
+			public void run()
+			{
+				fe.sub(1);
+
+				if(fe.get() < 0)
+				{
+					cancel();
+					return;
+				}
+
+				if(M.r(0.15))
+				{
+					Location at = e.getLocation();
+					Location aw = l.clone();
+					Vector vr = VectorMath.direction(aw, at);
+					vr.add(Vector.getRandom().subtract(Vector.getRandom()).multiply(0.33));
+					Location fleeTo = at.clone().add(vr.clone().multiply(3 + (Math.random() * 5)));
+					pathfindToLocation(e, fleeTo, true, 2.4 * ((double) fe.get() / (double) vticks));
+				}
+			}
+		};
+	}
+
+	@Override
+	public void lungeTo(Creature e, Location l, int vticks)
+	{
+		Location at = e.getLocation();
+		Location aw = l.clone();
+		Vector vr = VectorMath.direction(at, aw);
+		vr.add(Vector.getRandom().subtract(Vector.getRandom()).setY(0).multiply(0.6));
+		Location fleeTo = at.clone().add(vr.clone().multiply(3 + (Math.random() * 3)));
+		pathfindToLocation(e, fleeTo, true, 1);
+		FinalInteger fe = new FinalInteger(vticks);
+		new Task(0)
+		{
+			@Override
+			public void run()
+			{
+				fe.sub(1);
+
+				if(fe.get() < 0)
+				{
+					cancel();
+					return;
+				}
+
+				if(M.r(0.15))
+				{
+					Location at = e.getLocation();
+					Location aw = l.clone();
+					Vector vr = VectorMath.direction(at, aw);
+					vr.add(Vector.getRandom().subtract(Vector.getRandom()).multiply(0.33));
+					Location fleeTo = at.clone().add(vr.clone().multiply(3 + (Math.random() * 5)));
+					pathfindToLocation(e, fleeTo, true, 1 * ((double) fe.get() / (double) vticks));
+				}
+			}
+		};
+	}
+
+	@Override
+	public void causeNoise(Location l, double loudness)
+	{
+		double f = loudness * 1.1;
+		Area a = new Area(l, f);
+
+		for(Entity i : a.getNearbyEntities())
+		{
+			if(i instanceof Animals)
+			{
+				Animals an = (Animals) i;
+				double v = Math.random() * (f / 2D);
+				fleeFrom(an, l, (int) (7D * (v + (f / 2D))));
+			}
+
+			if(i instanceof Monster)
+			{
+				Creature c = (Creature) i;
+
+				if(i instanceof Zombie || i instanceof Creeper)
+				{
+					double v = Math.random() * (f / 2D);
+					lungeTo(c, l, (int) (7D * (v + (f / 2D))));
+				}
+			}
+		}
 	}
 }

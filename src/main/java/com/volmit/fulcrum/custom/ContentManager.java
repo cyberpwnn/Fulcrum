@@ -1175,7 +1175,6 @@ public class ContentManager
 				}
 
 				fos.close();
-				Fulcrum.contentRegistry.i("Caching " + e.getName() + " in " + pl.getName());
 			}
 		}
 

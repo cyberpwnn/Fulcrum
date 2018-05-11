@@ -9,6 +9,7 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Creature;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
@@ -23,6 +24,14 @@ import com.volmit.fulcrum.resourcepack.ResourcePack;
 public interface IAdapter extends Listener
 {
 	public int cacheBlockData(ContentRegistry r);
+
+	public void fleeFrom(Creature e, Location l, int ticks);
+
+	public void lungeTo(Creature e, Location l, int vticks);
+
+	public void causeNoise(Location l, double loudness);
+
+	public void pathfindToLocation(Creature e, Location l, boolean sprint, double speed);
 
 	public String getEffectiveTool(Block b);
 
