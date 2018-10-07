@@ -1,81 +1,61 @@
 package com.volmit.fulcrum.resourcepack;
 
-import java.net.URL;
-
-import com.volmit.dumpster.JSONObject;
-import com.volmit.fulcrum.Fulcrum;
+import com.volmit.volume.lang.json.JSONObject;
 
 public class PackMeta
 {
-	private String packDescription;
-	private int packFormat;
-	private URL packIcon;
+	private int format;
+	private String description;
 
-	public PackMeta(String packDescription, int packFormat, URL packIcon)
+	public PackMeta(int format, String description)
 	{
-		this.packDescription = packDescription;
-		this.packFormat = packFormat;
-		this.packIcon = packIcon;
+		this.format = format;
+		this.description = description;
 	}
 
-	public PackMeta(String packDescription, int packFormat)
+	public PackMeta(String description)
 	{
-		this(packDescription, packFormat, Fulcrum.class.getResource("/assets/textures/blocks/unknown.png"));
-	}
-
-	public PackMeta(String packDescription)
-	{
-		this(packDescription, 3);
-	}
-
-	public PackMeta(int packFormat)
-	{
-		this("No Description", packFormat);
+		this(4, description);
 	}
 
 	public PackMeta()
 	{
-		this(3);
-	}
-
-	public String getPackDescription()
-	{
-		return packDescription;
-	}
-
-	public void setPackDescription(String packDescription)
-	{
-		this.packDescription = packDescription;
-	}
-
-	public int getPackFormat()
-	{
-		return packFormat;
-	}
-
-	public void setPackFormat(int packFormat)
-	{
-		this.packFormat = packFormat;
-	}
-
-	public URL getPackIcon()
-	{
-		return packIcon;
-	}
-
-	public void setPackIcon(URL packIcon)
-	{
-		this.packIcon = packIcon;
+		this("¯\\_(ツ)_/¯");
 	}
 
 	@Override
 	public String toString()
 	{
-		JSONObject j = new JSONObject();
+		return toString(4);
+	}
+
+	public String toString(int indentation)
+	{
+		JSONObject ja = new JSONObject();
 		JSONObject pack = new JSONObject();
-		pack.put("pack_format", getPackFormat());
-		pack.put("description", getPackDescription());
-		j.put("pack", pack);
-		return j.toString();
+		pack.put("pack_format", getFormat());
+		pack.put("description", getDescription());
+		ja.put("pack", pack);
+		return ja.toString(indentation);
+	}
+
+	public int getFormat()
+	{
+		return format;
+	}
+
+	public void setFormat(int format)
+	{
+		this.format = format;
+	}
+
+	public String getDescription()
+	{
+		return description;
+	}
+
+	public void setDescription(String description)
+	{
+		this.description = description;
 	}
 }

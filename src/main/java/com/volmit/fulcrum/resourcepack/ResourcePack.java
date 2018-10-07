@@ -1,305 +1,100 @@
 package com.volmit.fulcrum.resourcepack;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.net.URL;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.regex.Matcher;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
-import org.bukkit.Bukkit;
+import org.zeroturnaround.zip.ZipUtil;
 
-import com.googlecode.pngtastic.core.PngImage;
-import com.googlecode.pngtastic.core.PngOptimizer;
-import com.volmit.dumpster.F;
-import com.volmit.dumpster.GList;
-import com.volmit.dumpster.GMap;
-import com.volmit.dumpster.M;
-import com.volmit.fulcrum.Fulcrum;
-import com.volmit.fulcrum.bukkit.S;
-import com.volmit.fulcrum.lang.C;
-import com.volmit.fulcrum.lang.TXT;
+import com.volmit.volume.lang.io.VIO;
 
-public class ResourcePack
+public class ResourcePack extends Package
 {
-	private long totalSaved = 0;
-	private final PackMeta meta;
-	private GMap<String, URL> copyResources;
-	private GMap<String, String> writeResources;
-	GList<String> oc = new GList<String>();
-	GList<String> ow = new GList<String>();
-	private boolean optimizePngs;
-	private boolean overbose = false;
-
-	public void o(String s)
-	{
-		if(!overbose)
-		{
-			return;
-		}
-
-		new S()
-		{
-			@Override
-			public void run()
-			{
-				Bukkit.getConsoleSender().sendMessage(TXT.makeTag(C.RED, C.WHITE, C.GRAY, "FU OVERBOSE") + s);
-			}
-		};
-	}
-
-	public void f(String s)
-	{
-		new S()
-		{
-			@Override
-			public void run()
-			{
-				Bukkit.getConsoleSender().sendMessage(TXT.makeTag(C.RED, C.WHITE, C.RED, "FU ERROR") + s);
-			}
-		};
-	}
-
 	public ResourcePack()
 	{
-		optimizePngs = false;
-		meta = new PackMeta();
-		copyResources = new GMap<String, URL>();
-		writeResources = new GMap<String, String>();
-		oc = new GList<String>();
-		ow = new GList<String>();
+		super();
 	}
 
-	public boolean isOptimizedPngs()
+	public void write(File location, CompressionMode mode) throws IOException
 	{
-		return optimizePngs;
-	}
-
-	public void setOptimizePngs(boolean optimize)
-	{
-		this.optimizePngs = optimize;
-	}
-
-	public int size()
-	{
-		return copyResources.size() + writeResources.size() + 3;
-	}
-
-	public void setResource(String path, URL url)
-	{
-		if(path == null && url == null)
+		switch(mode)
 		{
-			return;
-		}
-
-		if(path == null)
-		{
-			f("PATH IS NULL: " + url.toString());
-			return;
-		}
-
-		if(url == null)
-		{
-			f("URL IS NULL: " + path);
-			return;
-		}
-
-		oc.add(path);
-		copyResources.put(path, url);
-
-		try
-		{
-			o("Adding Resource: " + C.WHITE + path + C.GRAY + " from url " + C.WHITE + url.getFile().split("\\Q!\\E")[1]);
-		}
-
-		catch(Exception e)
-		{
-			o("Adding Resource: " + C.WHITE + path + C.GRAY + " from url " + C.WHITE + url.getFile());
+			case COMPRESS:
+				write(location, true, false, false, 1);
+				break;
+			case EDGY:
+				write(location, true, true, true, 9);
+				break;
+			case MINIFIED_RAW:
+				write(location, false, true, false, -1);
+				break;
+			case PRODUCTION:
+				write(location, true, true, false, 4);
+				break;
+			case RAW:
+				write(location, false, false, false, -1);
+				break;
+			default:
+				break;
 		}
 	}
 
-	public void setResource(String path, String content)
+	public void write(File location, boolean compress, boolean minify, boolean optimizeImages, int level) throws IOException
 	{
-		ow.add(path);
-		writeResources.put(path, content);
-
-		o("Adding Resource: " + C.WHITE + path + C.GRAY + " from TEXT " + C.WHITE + (content.length() > 40 ? content.substring(0, 40) + "..." : content).replaceAll("\n", ""));
-	}
-
-	public PackMeta getMeta()
-	{
-		return meta;
-	}
-
-	public byte[] writeToArchive(File f) throws IOException, NoSuchAlgorithmException
-	{
-		File fx = new File(Fulcrum.instance.getDataFolder(), "temp");
-		fx.mkdirs();
-		writeToFolder(fx);
-		f.createNewFile();
-
-		MessageDigest d = MessageDigest.getInstance("MD5");
-		FileOutputStream fos = new FileOutputStream(f);
-		ZipOutputStream zos = new ZipOutputStream(fos);
-
-		for(File i : fx.listFiles())
+		if(location.exists())
 		{
-			addToZip(d, i, fx, zos);
-		}
-
-		zos.close();
-		delete(fx);
-		f.setLastModified(M.ms());
-
-		return d.digest();
-	}
-
-	private void delete(File fx)
-	{
-		if(fx.isDirectory())
-		{
-			for(File i : fx.listFiles())
+			if(location.isFile() && !compress)
 			{
-				delete(i);
+				throw new UnsupportedOperationException("Cannot write a folder to an existing file!");
+			}
+
+			if(location.isDirectory() && compress)
+			{
+				throw new UnsupportedOperationException("Cannot write a file to an existing folder!");
 			}
 		}
 
-		fx.delete();
-	}
-
-	private void addToZip(MessageDigest d, File file, File root, ZipOutputStream s) throws IOException
-	{
-		if(file.isDirectory())
+		if(compress)
 		{
-			for(File i : file.listFiles())
-			{
-				addToZip(d, i, root, s);
-			}
+			File dir = new File(location.getParentFile(), "tmp-" + location.getName());
+			write(dir, false, minify, optimizeImages, -1);
+			ZipUtil.pack(dir, location, level);
 		}
 
 		else
 		{
-			String path = file.getAbsolutePath();
-			String base = root.getAbsolutePath();
-			String relative = new File(base).toURI().relativize(new File(path).toURI()).getPath();
-			ZipEntry ze = new ZipEntry(relative);
-			FileInputStream fin = new FileInputStream(file);
-			o("Zipping " + C.WHITE + file.getPath());
-			s.putNextEntry(ze);
-			byte[] buf = new byte[1024];
-			int read = 0;
-
-			while((read = fin.read(buf)) != -1)
+			for(String i : getResourcePaths())
 			{
-				d.update(buf, 0, read);
-				s.write(buf, 0, read);
+				File f = new File(location, i);
+				write(f, getResource(i));
 			}
 
-			s.closeEntry();
-			fin.close();
+			writeJSON(new File(location, "pack.mcmeta"), getMeta().toString(minify ? 0 : 4));
 		}
 	}
 
-	public void writeToFolder(File f) throws IOException
+	private void writeJSON(File path, String json) throws IOException
 	{
-		totalSaved = 0;
-		writePackContent(new File(f, "pack.mcmeta"), getMeta().toString());
-		writeResourceToFile(getMeta().getPackIcon(), new File(f, "pack.png"));
-
-		for(String i : oc.copy())
-		{
-			File destination = new File(f, "assets" + File.separator + "minecraft" + File.separator + i.replaceAll("/", Matcher.quoteReplacement(File.separator)));
-			destination.getParentFile().mkdirs();
-			writeResourceToFile(copyResources.get(i), destination);
-		}
-
-		for(String i : ow.copy())
-		{
-			File destination = new File(f, "assets" + File.separator + "minecraft" + File.separator + i.replaceAll("/", Matcher.quoteReplacement(File.separator)));
-			destination.getParentFile().mkdirs();
-			writePackContent(destination, writeResources.get(i));
-		}
-
-		if(isOptimizedPngs())
-		{
-			o("Saved a total of " + F.ofSize(totalSaved, 1024, 2));
-		}
-	}
-
-	private void writeResourceToFile(URL url, File f) throws IOException
-	{
-		if(url == null)
-		{
-			f("WARNING! Resource is null: " + f.getAbsolutePath());
-			return;
-		}
-
-		try
-		{
-			try
-			{
-				o("Writing " + C.WHITE + url.getFile().split("\\Q!\\E")[1] + C.GRAY + " to " + C.WHITE + f.getPath());
-			}
-
-			catch(Exception e)
-			{
-				o("Writing " + C.WHITE + url.getFile() + C.GRAY + " to " + C.WHITE + f.getPath());
-			}
-
-			FileOutputStream fos = new FileOutputStream(f);
-			InputStream in = url.openStream();
-			byte[] buffer = new byte[1024];
-			int read = 0;
-
-			while((read = in.read(buffer)) != -1)
-			{
-				fos.write(buffer, 0, read);
-			}
-
-			fos.close();
-			in.close();
-
-			if(f.getName().endsWith(".png") && isOptimizedPngs())
-			{
-				optimizePNG(f);
-			}
-		}
-
-		catch(Exception e)
-		{
-			e.printStackTrace();
-			System.out.println("FAILED TO PACK RESOURCE: " + e.getMessage());
-		}
-	}
-
-	private void optimizePNG(File f) throws IOException
-	{
-		PngOptimizer o = new PngOptimizer();
-		PngImage img = new PngImage(f.getPath(), "NONE");
-		o.setCompressor("zopfli", 32);
-		o.optimize(img, f.getPath(), true, 9);
-		long sa = o.getTotalSavings();
-		o("Optimized " + f.getName() + " (saved " + F.fileSize(sa) + ")");
-		totalSaved += sa;
-	}
-
-	private void writePackContent(File m, String content) throws IOException
-	{
-		o("Writing " + C.WHITE + (content.length() > 40 ? content.substring(0, 40) + "..." : content).replaceAll("\n", "") + C.GRAY + " to " + C.WHITE + m.getPath());
-		m.createNewFile();
-		PrintWriter pw = new PrintWriter(m);
-		pw.println(content);
+		PrintWriter pw = new PrintWriter(new FileWriter(path));
+		pw.println(json);
 		pw.close();
 	}
 
-	public void setOverbose(boolean hasFlag)
+	private void write(File f, PackResource r) throws IOException
 	{
-		overbose = hasFlag;
+		f.getParentFile().mkdirs();
+		FileOutputStream fos = new FileOutputStream(f);
+		InputStream in = r.getInputStream();
+		VIO.fullTransfer(in, fos, 8192);
+		fos.close();
+		in.close();
+	}
+
+	public void setResouce(KnownPath path, PackResource r)
+	{
+		setResouce(path.toString(), r);
 	}
 }
