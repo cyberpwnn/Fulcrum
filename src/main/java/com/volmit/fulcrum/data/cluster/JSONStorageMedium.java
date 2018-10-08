@@ -1,7 +1,7 @@
 package com.volmit.fulcrum.data.cluster;
 
-import com.volmit.dumpster.GList;
-import com.volmit.dumpster.JSONObject;
+import com.volmit.volume.lang.collections.GList;
+import com.volmit.volume.lang.json.JSONObject;
 
 public class JSONStorageMedium implements IStorageMethod<JSONObject>
 {

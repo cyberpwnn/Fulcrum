@@ -15,8 +15,8 @@ import org.bukkit.inventory.InventoryView;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.util.Vector;
 
-import com.volmit.dumpster.GList;
-import com.volmit.dumpster.GListAdapter;
+import com.volmit.volume.lang.collections.GList;
+import com.volmit.volume.lang.collections.GListAdapter;
 
 /**
  * Player utils

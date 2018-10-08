@@ -2,7 +2,7 @@ package com.volmit.fulcrum.data.cluster;
 
 import java.util.List;
 
-import com.volmit.dumpster.GList;
+import com.volmit.volume.lang.collections.GList;
 
 public class ClusterStringList extends Cluster
 {

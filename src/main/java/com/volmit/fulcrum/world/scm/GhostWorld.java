@@ -4,8 +4,8 @@ import org.bukkit.Chunk;
 import org.bukkit.ChunkSnapshot;
 import org.bukkit.Location;
 
-import com.volmit.dumpster.GMap;
 import com.volmit.fulcrum.bukkit.BlockType;
+import com.volmit.volume.lang.collections.GMap;
 
 public class GhostWorld
 {

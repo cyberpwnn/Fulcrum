@@ -3,8 +3,8 @@ package com.volmit.fulcrum.bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 
-import com.volmit.dumpster.GList;
 import com.volmit.fulcrum.bukkit.Cuboid.CuboidDirection;
+import com.volmit.volume.lang.collections.GList;
 
 public class BlockFinder
 {

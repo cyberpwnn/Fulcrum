@@ -11,12 +11,12 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import com.volmit.dumpster.GSet;
 import com.volmit.fulcrum.Fulcrum;
 import com.volmit.fulcrum.bukkit.BlockType;
 import com.volmit.fulcrum.lang.C;
 import com.volmit.fulcrum.sfx.Audible;
 import com.volmit.fulcrum.sfx.Audio;
+import com.volmit.volume.lang.collections.GSet;
 
 public class CustomBlock implements ICustom
 {

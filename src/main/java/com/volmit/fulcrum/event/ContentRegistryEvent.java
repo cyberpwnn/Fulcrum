@@ -1,8 +1,8 @@
 package com.volmit.fulcrum.event;
 
-import com.volmit.dumpster.GList;
 import com.volmit.fulcrum.custom.ICustom;
 import com.volmit.fulcrum.custom.Registrar;
+import com.volmit.volume.lang.collections.GList;
 
 public class ContentRegistryEvent extends FulcrumEvent
 {

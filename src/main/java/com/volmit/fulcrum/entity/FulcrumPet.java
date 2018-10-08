@@ -22,7 +22,6 @@ import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
-import com.volmit.dumpster.M;
 import com.volmit.fulcrum.Fulcrum;
 import com.volmit.fulcrum.bukkit.BlockType;
 import com.volmit.fulcrum.bukkit.PE;
@@ -32,6 +31,7 @@ import com.volmit.fulcrum.bukkit.VectorMath;
 import com.volmit.fulcrum.sfx.Audio;
 import com.volmit.fulcrum.vfx.particle.ParticleCloud;
 import com.volmit.fulcrum.vfx.particle.ParticleTexture;
+import com.volmit.volume.math.M;
 
 public abstract class FulcrumPet implements Listener, Pet
 {

@@ -20,8 +20,8 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
-import com.volmit.dumpster.GList;
 import com.volmit.fulcrum.lang.MaterialBlock;
+import com.volmit.volume.lang.collections.GList;
 
 /**
  * World utils

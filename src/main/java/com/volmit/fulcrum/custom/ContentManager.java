@@ -21,8 +21,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
-import com.volmit.dumpster.F;
-import com.volmit.dumpster.GList;
 import com.volmit.fulcrum.Fulcrum;
 import com.volmit.fulcrum.adapter.IAdapter;
 import com.volmit.fulcrum.bukkit.BlockType;
@@ -30,6 +28,8 @@ import com.volmit.fulcrum.bukkit.W;
 import com.volmit.fulcrum.images.PluginUtil;
 import com.volmit.fulcrum.sfx.Audible;
 import com.volmit.fulcrum.sfx.Audio;
+import com.volmit.volume.lang.collections.GList;
+import com.volmit.volume.lang.format.F;
 
 /**
  * The content manager assists with interacting with registered content

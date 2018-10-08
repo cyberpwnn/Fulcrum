@@ -9,8 +9,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 
-import com.volmit.dumpster.GSet;
 import com.volmit.fulcrum.Fulcrum;
+import com.volmit.volume.lang.collections.GSet;
 
 public class ManagedInventory implements Listener
 {

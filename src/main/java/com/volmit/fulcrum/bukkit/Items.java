@@ -7,9 +7,9 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import com.volmit.dumpster.GList;
 import com.volmit.fulcrum.Fulcrum;
 import com.volmit.fulcrum.lang.MaterialBlock;
+import com.volmit.volume.lang.collections.GList;
 
 /**
  * Itemstack utilities

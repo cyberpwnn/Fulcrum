@@ -9,8 +9,8 @@ import org.bukkit.map.MapCanvas;
 import org.bukkit.map.MapRenderer;
 import org.bukkit.map.MapView;
 
-import com.volmit.dumpster.GList;
 import com.volmit.fulcrum.bukkit.A;
+import com.volmit.volume.lang.collections.GList;
 
 public class Papyrus extends MapRenderer implements IPapyrus
 {

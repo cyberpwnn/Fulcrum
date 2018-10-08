@@ -3,7 +3,7 @@ package com.volmit.fulcrum.bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.World;
 
-import com.volmit.dumpster.GList;
+import com.volmit.volume.lang.collections.GList;
 
 /**
  * Chunk utils

@@ -2,11 +2,11 @@ package com.volmit.fulcrum.custom;
 
 import org.bukkit.Material;
 
-import com.volmit.dumpster.F;
-import com.volmit.dumpster.GList;
-import com.volmit.dumpster.GMap;
-import com.volmit.dumpster.JSONArray;
-import com.volmit.dumpster.JSONObject;
+import com.volmit.volume.lang.collections.GList;
+import com.volmit.volume.lang.collections.GMap;
+import com.volmit.volume.lang.format.F;
+import com.volmit.volume.lang.json.JSONArray;
+import com.volmit.volume.lang.json.JSONObject;
 
 public class PredicateGenerator
 {

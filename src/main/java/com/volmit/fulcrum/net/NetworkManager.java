@@ -6,7 +6,6 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 
-import com.volmit.dumpster.GMap;
 import com.volmit.fulcrum.Fulcrum;
 import com.volmit.fulcrum.bukkit.S;
 import com.volmit.fulcrum.custom.TinyProtocol;
@@ -14,6 +13,7 @@ import com.volmit.fulcrum.event.PlayerBlockEvent;
 import com.volmit.fulcrum.event.PlayerCancelledDiggingEvent;
 import com.volmit.fulcrum.event.PlayerFinishedDiggingEvent;
 import com.volmit.fulcrum.event.PlayerStartDiggingEvent;
+import com.volmit.volume.lang.collections.GMap;
 
 import net.minecraft.server.v1_12_R1.PacketPlayInBlockDig;
 

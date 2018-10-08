@@ -7,10 +7,10 @@ import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.entity.Player;
 
-import com.volmit.dumpster.M;
 import com.volmit.fulcrum.sfx.Audible;
 import com.volmit.fulcrum.sfx.Audio;
 import com.volmit.fulcrum.vfx.particle.ParticleSpellMob;
+import com.volmit.volume.math.M;
 
 public class EffectCauldronAcceptItem implements Effect
 {

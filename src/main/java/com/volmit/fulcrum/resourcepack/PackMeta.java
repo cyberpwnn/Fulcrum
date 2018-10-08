@@ -2,8 +2,8 @@ package com.volmit.fulcrum.resourcepack;
 
 import java.net.URL;
 
-import com.volmit.dumpster.JSONObject;
 import com.volmit.fulcrum.Fulcrum;
+import com.volmit.volume.lang.json.JSONObject;
 
 public class PackMeta
 {

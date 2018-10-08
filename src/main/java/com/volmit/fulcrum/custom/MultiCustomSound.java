@@ -1,6 +1,6 @@
 package com.volmit.fulcrum.custom;
 
-import com.volmit.dumpster.GMap;
+import com.volmit.volume.lang.collections.GMap;
 
 public class MultiCustomSound implements ICustom
 {

@@ -21,14 +21,14 @@ import org.bukkit.entity.ItemFrame;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.map.MapRenderer;
 
-import com.volmit.dumpster.F;
-import com.volmit.dumpster.GList;
-import com.volmit.dumpster.GMap;
-import com.volmit.dumpster.GSet;
-import com.volmit.dumpster.M;
 import com.volmit.fulcrum.map.BakedImageRenderer;
 import com.volmit.fulcrum.map.Papyrus;
 import com.volmit.fulcrum.vfx.particle.ParticleSuspended;
+import com.volmit.volume.lang.collections.GList;
+import com.volmit.volume.lang.collections.GMap;
+import com.volmit.volume.lang.collections.GSet;
+import com.volmit.volume.lang.format.F;
+import com.volmit.volume.math.M;
 
 public class ImageBakery
 {

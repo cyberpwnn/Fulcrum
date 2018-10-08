@@ -3,7 +3,7 @@ package com.volmit.fulcrum.world.scm;
 import org.bukkit.Location;
 import org.bukkit.util.Vector;
 
-import com.volmit.dumpster.GMap;
+import com.volmit.volume.lang.collections.GMap;
 
 public interface IMappedVolume
 {

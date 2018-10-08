@@ -6,10 +6,10 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.util.Vector;
 
-import com.volmit.dumpster.CDou;
-import com.volmit.dumpster.F;
-import com.volmit.dumpster.GList;
-import com.volmit.dumpster.GListAdapter;
+import com.volmit.volume.lang.collections.GList;
+import com.volmit.volume.lang.collections.GListAdapter;
+import com.volmit.volume.lang.format.F;
+import com.volmit.volume.math.CDou;
 
 /**
  * Vector utilities

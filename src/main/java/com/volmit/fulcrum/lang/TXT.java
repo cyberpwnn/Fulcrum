@@ -2,8 +2,8 @@ package com.volmit.fulcrum.lang;
 
 import org.apache.commons.lang.WordUtils;
 
-import com.volmit.dumpster.F;
-import com.volmit.dumpster.GList;
+import com.volmit.volume.lang.collections.GList;
+import com.volmit.volume.lang.format.F;
 
 /**
  * Textual Utilities

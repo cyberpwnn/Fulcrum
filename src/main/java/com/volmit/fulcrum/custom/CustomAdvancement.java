@@ -10,8 +10,8 @@ import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import com.volmit.dumpster.JSONObject;
 import com.volmit.fulcrum.Fulcrum;
+import com.volmit.volume.lang.json.JSONObject;
 
 import net.minecraft.server.v1_12_R1.Item;
 import net.minecraft.server.v1_12_R1.MinecraftKey;

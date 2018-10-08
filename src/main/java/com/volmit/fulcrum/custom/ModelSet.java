@@ -5,10 +5,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 
-import com.volmit.dumpster.JSONException;
-import com.volmit.dumpster.JSONObject;
 import com.volmit.fulcrum.bukkit.R;
 import com.volmit.fulcrum.resourcepack.ResourcePack;
+import com.volmit.volume.lang.json.JSONException;
+import com.volmit.volume.lang.json.JSONObject;
 
 public class ModelSet
 {

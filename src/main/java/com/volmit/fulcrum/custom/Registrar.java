@@ -6,8 +6,8 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 
-import com.volmit.dumpster.GList;
 import com.volmit.fulcrum.bukkit.R;
+import com.volmit.volume.lang.collections.GList;
 
 public class Registrar
 {

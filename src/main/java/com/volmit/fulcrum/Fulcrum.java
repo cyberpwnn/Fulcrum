@@ -11,6 +11,7 @@ import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.craftbukkit.v1_12_R1.command.ColouredConsoleSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
@@ -19,9 +20,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.volmit.dumpster.GList;
-import com.volmit.dumpster.GSet;
-import com.volmit.dumpster.M;
 import com.volmit.fulcrum.adapter.Adapter12;
 import com.volmit.fulcrum.adapter.IAdapter;
 import com.volmit.fulcrum.bukkit.P;
@@ -47,6 +45,9 @@ import com.volmit.fulcrum.world.FastChunk12;
 import com.volmit.fulcrum.world.FastWorld;
 import com.volmit.fulcrum.world.FastWorld12;
 import com.volmit.fulcrum.world.MCACache;
+import com.volmit.volume.lang.collections.GList;
+import com.volmit.volume.lang.collections.GSet;
+import com.volmit.volume.math.M;
 
 public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 {
@@ -189,6 +190,12 @@ public class Fulcrum extends JavaPlugin implements CommandExecutor, Listener
 	{
 		if(command.getName().equalsIgnoreCase("fulcrum"))
 		{
+			if(sender instanceof ColouredConsoleSender)
+			{
+				sender.sendMessage("You are a simple minded console.");
+				return true;
+			}
+
 			Player p = (Player) sender;
 
 			if(args.length > 0)

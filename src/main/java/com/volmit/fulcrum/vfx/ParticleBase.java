@@ -3,7 +3,7 @@ package com.volmit.fulcrum.vfx;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-import com.volmit.dumpster.GList;
+import com.volmit.volume.lang.collections.GList;
 
 public abstract class ParticleBase implements VisualEffect
 {

@@ -6,11 +6,11 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.util.Vector;
 
-import com.volmit.dumpster.GList;
 import com.volmit.fulcrum.bukkit.BlockType;
 import com.volmit.fulcrum.bukkit.Cuboid;
 import com.volmit.fulcrum.bukkit.Dimension;
 import com.volmit.fulcrum.bukkit.Direction;
+import com.volmit.volume.lang.collections.GList;
 
 /**
  * Schematics that vary

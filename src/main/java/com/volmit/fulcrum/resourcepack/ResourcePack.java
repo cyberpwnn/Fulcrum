@@ -17,14 +17,14 @@ import org.bukkit.Bukkit;
 
 import com.googlecode.pngtastic.core.PngImage;
 import com.googlecode.pngtastic.core.PngOptimizer;
-import com.volmit.dumpster.F;
-import com.volmit.dumpster.GList;
-import com.volmit.dumpster.GMap;
-import com.volmit.dumpster.M;
 import com.volmit.fulcrum.Fulcrum;
 import com.volmit.fulcrum.bukkit.S;
 import com.volmit.fulcrum.lang.C;
 import com.volmit.fulcrum.lang.TXT;
+import com.volmit.volume.lang.collections.GList;
+import com.volmit.volume.lang.collections.GMap;
+import com.volmit.volume.lang.format.F;
+import com.volmit.volume.math.M;
 
 public class ResourcePack
 {

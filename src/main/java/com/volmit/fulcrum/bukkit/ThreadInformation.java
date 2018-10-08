@@ -1,6 +1,6 @@
 package com.volmit.fulcrum.bukkit;
 
-import com.volmit.dumpster.Average;
+import com.volmit.volume.math.Average;
 
 public class ThreadInformation
 {

@@ -16,10 +16,10 @@ import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 
-import com.volmit.dumpster.GList;
 import com.volmit.fulcrum.bukkit.BlockType;
 import com.volmit.fulcrum.custom.ContentRegistry;
 import com.volmit.fulcrum.resourcepack.ResourcePack;
+import com.volmit.volume.lang.collections.GList;
 
 public interface IAdapter extends Listener
 {

@@ -8,7 +8,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.ParseException;
 
-import com.volmit.dumpster.JSONObject;
+import com.volmit.volume.lang.json.JSONObject;
 
 /**
  * Paste to the web

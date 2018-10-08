@@ -9,7 +9,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
-import com.volmit.dumpster.M;
 import com.volmit.fulcrum.bukkit.Items;
 import com.volmit.fulcrum.entity.FulcrumPet;
 import com.volmit.fulcrum.entity.Pet;
@@ -18,6 +17,7 @@ import com.volmit.fulcrum.vfx.particle.ParticleHeart;
 import com.volmit.fulcrum.vfx.particle.ParticleNote;
 import com.volmit.fulcrum.vfx.particle.ParticleSnowShovel;
 import com.volmit.fulcrum.vfx.particle.ParticleVillagerEmote;
+import com.volmit.volume.math.M;
 
 public class PetMoobark extends FulcrumPet
 {

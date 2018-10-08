@@ -4,8 +4,8 @@ import java.util.ConcurrentModificationException;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import com.volmit.dumpster.GList;
-import com.volmit.dumpster.M;
+import com.volmit.volume.lang.collections.GList;
+import com.volmit.volume.math.M;
 
 public abstract class ParallelPoolManager
 {
