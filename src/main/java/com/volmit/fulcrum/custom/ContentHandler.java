@@ -856,10 +856,9 @@ public class ContentHandler implements Listener
 
 				if(ci != null)
 				{
-					ci.onPickedUp(p, e.getItem(), cancel);
-
-					if(cancel)
+					if(ci.onPickedUp(p, e.getItem()))
 					{
+						e.setCancelled(true);
 						return;
 					}
 

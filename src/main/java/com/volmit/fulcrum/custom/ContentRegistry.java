@@ -770,7 +770,7 @@ public class ContentRegistry implements Listener
 		CNum c = new CNum(keys.size() - 1);
 		int vv = 5000;
 
-		if(c.getMax() == 0)
+		if(keys.size() - 1 == 0)
 		{
 			d += F.repeat("\"" + keys.get(0).replace(".ogg", "") + "\",", vv);
 		}

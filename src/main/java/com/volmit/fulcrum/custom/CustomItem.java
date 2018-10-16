@@ -48,9 +48,9 @@ public class CustomItem implements ICustom
 		}
 	}
 
-	public void onPickedUp(Player p, Item item, boolean cancelled)
+	public boolean onPickedUp(Player p, Item item)
 	{
-
+		return false;
 	}
 
 	public void onUsed(Player p, EquipmentSlot hand, Action action, Block block, BlockFace face, boolean cancelled)
