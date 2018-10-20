@@ -1,0 +1,31 @@
+package com.volmit.fulcrum.registry;
+
+public class RegistryException extends Exception
+{
+	private static final long serialVersionUID = 2851266691769583967L;
+
+	public RegistryException()
+	{
+		super();
+	}
+
+	public RegistryException(String arg0, Throwable arg1, boolean arg2, boolean arg3)
+	{
+		super(arg0, arg1, arg2, arg3);
+	}
+
+	public RegistryException(String arg0, Throwable arg1)
+	{
+		super(arg0, arg1);
+	}
+
+	public RegistryException(String arg0)
+	{
+		super(arg0);
+	}
+
+	public RegistryException(Throwable arg0)
+	{
+		super(arg0);
+	}
+}
