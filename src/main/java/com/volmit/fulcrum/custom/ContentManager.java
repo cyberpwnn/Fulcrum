@@ -1015,7 +1015,7 @@ public class ContentManager
 	 */
 	public static GList<CustomItem> getItems()
 	{
-		return r().getItems().copy();
+		return new GList<CustomItem>(r().getItems());
 	}
 
 	/**
@@ -1025,7 +1025,7 @@ public class ContentManager
 	 */
 	public static GList<CustomBlock> getBlocks()
 	{
-		return r().getBlocks().copy();
+		return new GList<CustomBlock>(r().getBlocks());
 	}
 
 	/**
@@ -1035,7 +1035,7 @@ public class ContentManager
 	 */
 	public static GList<CustomInventory> getInventories()
 	{
-		return r().getInventories().copy();
+		return new GList<CustomInventory>(r().getInventories());
 	}
 
 	public static CustomBlock getOverrided(Block b)

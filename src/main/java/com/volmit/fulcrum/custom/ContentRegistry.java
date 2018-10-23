@@ -1055,27 +1055,27 @@ public class ContentRegistry implements Listener
 		return content;
 	}
 
-	public GList<CustomBlock> getBlocks()
+	public List<CustomBlock> getBlocks()
 	{
 		return blocks;
 	}
 
-	public GList<CustomInventory> getInventories()
+	public List<CustomInventory> getInventories()
 	{
 		return inventories;
 	}
 
-	public GList<CustomSound> getSounds()
+	public List<CustomSound> getSounds()
 	{
 		return sounds;
 	}
 
-	public GList<CustomItem> getItems()
+	public List<CustomItem> getItems()
 	{
 		return items;
 	}
 
-	public GList<ICustomRecipe> getRecipes()
+	public List<ICustomRecipe> getRecipes()
 	{
 		return recipes;
 	}

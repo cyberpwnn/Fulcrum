@@ -1,7 +1,5 @@
 package com.volmit.fulcrum.command;
 
-import org.bukkit.entity.Player;
-
 import com.volmit.fulcrum.Fulcrum;
 import com.volmit.volume.bukkit.command.PawnCommand;
 import com.volmit.volume.bukkit.command.VolumeSender;
@@ -28,20 +26,20 @@ public class CommandFlash extends PawnCommand
 			{
 				String rid = Fulcrum.contentRegistry.getRid();
 				sender.sendMessage("Merging via " + rid);
-				Fulcrum.adapter.sendResourcePackWeb((Player) sender, rid + ".zip");
+				Fulcrum.adapter.sendResourcePackWeb(sender.player(), rid + ".zip");
 			}
 
 			else if(args[0].startsWith("v4:"))
 			{
 				String u = "http://192.168.1." + args[0].split("\\Q:\\E") + ":" + Fulcrum.server.getPort() + "/" + Fulcrum.contentRegistry.getRid() + ".zip";
 				sender.sendMessage("Merging via " + u);
-				Fulcrum.adapter.sendResourcePack((Player) sender, u);
+				Fulcrum.adapter.sendResourcePack(sender.player(), u);
 			}
 
 			else
 			{
 				sender.sendMessage("Sending pack " + args[0]);
-				Fulcrum.adapter.sendResourcePack((Player) sender, args[1]);
+				Fulcrum.adapter.sendResourcePack(sender.player(), args[1]);
 			}
 		}
 

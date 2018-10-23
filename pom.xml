@@ -65,12 +65,6 @@
 						<configuration>
 							<finalName>${project.name}</finalName>
 							<minimizeJar>true</minimizeJar>
-							<relocations>
-								<relocation>
-									<pattern>com.volmit.volume</pattern>
-									<shadedPattern>com.volmit.fulcrum.volume</shadedPattern>
-								</relocation>
-							</relocations>
 						</configuration>
 					</execution>
 				</executions>
